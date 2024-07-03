@@ -1,5 +1,9 @@
-pragma solidity >= 0.4.0 < 0.9.0;
-contract Greeter {
+pragma solidity >= 0.4.0 < 0.7.0;
+
+import "openzeppelin-solidity/contracts/access/Ownable.sol";
+
+contract Greeter is Ownable { //ex contract Greeter {
+
     string private _greeting;
     address private _owner;
     constructor() public {
@@ -18,12 +22,12 @@ contract Greeter {
         _greeting = greeting;
     }
 
-    function owner() public view returns(address) {
+    function owner() override public view returns(address) {
         return _owner;
     }
 
-    modifier onlyOwner() {
-        require(msg.sender == _owner,"Ownable: caller is not the owner");
-        _;
-    }
+    //modifier onlyOwner() override virtual {
+    //    require(msg.sender == _owner,"Ownable: caller is not the owner");
+    //    _;
+    //}
 }

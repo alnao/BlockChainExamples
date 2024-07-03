@@ -60,9 +60,24 @@ Ispirato al capitolo 4 del libro "Hands-On Smart Contract Development with Solid
     ```
 	Contract: Greeter
    	✔ has been deployed successfully
-   	1 passing (19ms)
+   	6 passing (19ms)
     ```
 
+- Configure Ownable
+	```
+	npm install openzeppelin-solidity
+	```
+	e modificata la classe 
+	```
+	contract Greeter is Ownable { 
+	```
+	e rimosso l'ultimo metodo
+- Compile
+	nel ```truggle-config.js``` impostata la versione ```"0.6.2"```
+	```
+	truffle compile
+	```
+- 
 
 
 # AlNao.it
