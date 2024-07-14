@@ -47,6 +47,8 @@
 // const HDWalletProvider = require('@truffle/hdwallet-provider');
 
 module.exports = {
+  contracts_build_directory: "./client/src/contracts",
+  
   /**
    * Networks define how you connect to your ethereum client and let you set the
    * defaults web3 uses to send transactions. If you don't specify one truffle
@@ -58,6 +60,25 @@ module.exports = {
    */
 
   networks: {
+    ropsten: {
+      provider: function() {
+        //HDWalletProvider(mnemonic, `https://ropsten.infura.io/${infuraKey}`),
+        HDWalletProvider = require("truffle-hdwallet-provider");
+        mnemonic = "lol wtf no";
+        return new HDWalletProvider(mnemonic, "https://ropsten.infura.io/${infuraKey}");
+      },
+      network_id: '3',
+     // gas: 5000000
+     //gas: 0 //4700000
+    },
+    development: {
+      host: "127.0.0.1",
+      port: 7545,
+      network_id: "*"
+    }
+
+    
+
     // Useful for testing. The `development` name is special - truffle uses it by default
     // if it's defined here and no other network is specified at the command line.
     // You should run a client (like ganache, geth, or parity) in a separate terminal
