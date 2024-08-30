@@ -107,7 +107,7 @@ Ispirato al capitolo 4 del libro "Hands-On Smart Contract Development with Solid
 	```
 	$ npm install @truffle/hdwallet-provider
 	```
-	added in ```struffle-config.js```
+	added in ```truffle-config.js```
 	```
   	networks: {
 		ropsten: {
@@ -117,7 +117,7 @@ Ispirato al capitolo 4 del libro "Hands-On Smart Contract Development with Solid
 			mnemonic = "lol wtf no";
 			return new HDWalletProvider(mnemonic, "https://ropsten.infura.io/${infuraKey}");
 		},
-		network_id: '3',
+		network_id: '5777',
 		// gas: 5000000
 		//gas: 0 //4700000
 		},
@@ -129,12 +129,42 @@ Ispirato al capitolo 4 del libro "Hands-On Smart Contract Development with Solid
 	}
 	```
 - Run ganache and add struffle-config.js location *it works*
-- Run smart
+	/mnt/Dati/Workspace/BlockChainExamples/SoliditySmartContract01/truffle-config.js
+- Run prepare
 	```
 	$ truffle migrate --network development
 	```
 - Run client
-	* error* 
+	``` 
+	npm run start
+	```
+	*error* 
+- Parity install
+	```
+	$ snap install parity
+	$ parity --chain=goerli
+	$ npm install truffle-hdwallet-provider --save-dev
+	$ export MNEMONIC="_YOUR MNEMONIC PHRASE GOES HERE_"
+	```
+- Parity	added in ```truffle-config.js```
+	```
+	const HDWalletProvider = require("truffle-hdwallet-provider");
+	... network:
+	,goerli: {
+		provider: () => {
+		const mnemonic = process.env["MNEMONIC"]
+			return new HDWalletProvider(mnemonic, "http://127.0.0.1:8545");
+		},
+		network_id: "*",
+	}
+	...
+	```
+- Run smart
+	```
+	truffle migrate --network goerli
+	```
+	*error*
+	
 
 # AlNao.it
 Nessun contenuto in questo repository è stato creato con IA o automaticamente, tutto il codice è stato scritto con molta pazienza da Alberto Nao. Se il codice è stato preso da altri siti/progetti è sempre indicata la fonte. Per maggior informazioni visitare il sito [alnao.it](https://www.alnao.it/).

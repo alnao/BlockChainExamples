@@ -45,6 +45,7 @@
 // const { MNEMONIC, PROJECT_ID } = process.env;
 
 // const HDWalletProvider = require('@truffle/hdwallet-provider');
+const HDWalletProvider = require("truffle-hdwallet-provider");
 
 module.exports = {
   contracts_build_directory: "./client/src/contracts",
@@ -64,20 +65,36 @@ module.exports = {
       provider: function() {
         //HDWalletProvider(mnemonic, `https://ropsten.infura.io/${infuraKey}`),
         HDWalletProvider = require("truffle-hdwallet-provider");
-        mnemonic = "lol wtf no";
+        mnemonic = process.env["MNEMONIC"];
         return new HDWalletProvider(mnemonic, "https://ropsten.infura.io/${infuraKey}");
       },
       network_id: '3',
-     // gas: 5000000
-     //gas: 0 //4700000
+      gas: 4600000,
+      //gasPrice: web3.toWei("50", "gwei"),
     },
     development: {
       host: "127.0.0.1",
       port: 7545,
       network_id: "*"
     }
-
-    
+    ,goerli: {
+      provider: () => {
+        const mnemonic = process.env["MNEMONIC"];
+//        console.log(mnemonic);
+        return new HDWalletProvider(mnemonic, "http://127.0.0.1:8545");
+      },
+      network_id: "*",
+      gas: 4600000,
+      //gasPrice: web3.toWei("50", "gwei"),
+    }
+    , advanced: { //tested it's not working!
+    //   port: 8777,             // Custom port
+    //   network_id: 1342,       // Custom network
+       gas: 8500000,           // Gas sent with each transaction (default: ~6700000)
+       gasPrice: 111,  // 20 gwei (in wei) (default: 100 gwei)
+    //   from: <address>,        // Account to send transactions from (default: accounts[0])
+    //   websocket: true         // Enable EventEmitter interface for web3 (default: false)
+     },
 
     // Useful for testing. The `development` name is special - truffle uses it by default
     // if it's defined here and no other network is specified at the command line.
