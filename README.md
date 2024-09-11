@@ -1,10 +1,12 @@
 # BlockChainExamples
 
-Esempi:
+## Esempi:
 - **PythonBlockChain**: esempi di BlockChain in python (mono-node e multi-node), basato su algoritmo del *proof-of-work*
-- **SoliditySmartContract01**: esempio di primo smartcontract, ispirato al capitolo 4 del libro "Hands-On Smart Contract Development with Solidity and Ethereum - 2020 - O'Reilly"
+- **SoliditySmartContract01**: esempio di primo smartcontract, ispirato al capitolo 4 del libro "Hands-On Smart Contract Development with Solidity and Ethereum - 2020 - O'Reilly", non funzionante
+- **SoliditySmartContract02**: Ispirato alla guida https://www.freecodecamp.org/italian/news/la-guida-completa-allo-sviluppo-completo-di-ethereum/, non funzionante
+- **SoliditySmartContract03**: creato con Claude, non funzionante
 
-Esempi in fase di revisione
+## Esempi in fase di revisione
 - SolidityBrowserExample1
 - Web3ProjectsExample1
 
