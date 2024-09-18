@@ -1,6 +1,6 @@
 const SimpleToken = artifacts.require("SimpleToken");
 
    module.exports = function (deployer) {
-     deployer.deploy(SimpleToken, "NaoToken", "Nao", 18, "1000000000000000000000000");
+     deployer.deploy(SimpleToken); //SimpleToken, "NaoToken", "Nao", 18, 999999999);
    };
    

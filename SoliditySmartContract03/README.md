@@ -152,47 +152,55 @@
 * lanciando il comando "truffle migrate" mi da l'errore "Something went wrong while attempting to connect to the network at http://127.0.0.1:8545. Check your network configuration." perchè?
     nel file `truffle-config.js` cambiato porta da 8454 a 7545 e lanciato comando  `truffle migrate --network development`
     ```
-    Deploying 'SimpleToken'
-    -----------------------
-    > transaction hash:    0x29703a8956e30105cedf804073bd67776a5efa57d504be28fd5a6052b63dae90
-    > Blocks: 0            Seconds: 0
-    > contract address:    0x2f6F6d2757EE1A3fbF92aC3c77753295CED1c569
-    > block number:        3
-    > block timestamp:     1726064551
-    > account:             0xeeaBE73Ab3D3360991905C4E1a48d52176781e58
-    > balance:             99.994944315329072244
-    > gas used:            946828 (0xe728c)
-    > gas price:           3.187147555 gwei
-    > value sent:          0 ETH
-    > total cost:          0.00301768054520554 ETH
+        Replacing 'SimpleToken'
+        -----------------------
+        > transaction hash:    0xee19b9661389ce913e22aa834063f7dc4456b650069a4fa5563a014e362f996a
+        > Blocks: 0            Seconds: 0
+        > contract address:    0xFC0FF428a9FECE18fc0578225a9C690770bb1c09
+        > block number:        11
+        > block timestamp:     1726683642
+        > account:             0xeeaBE73Ab3D3360991905C4E1a48d52176781e58
+        > balance:             99.978191308301785273
+        > gas used:            936037 (0xe4865)
+        > gas price:           2.800245454 gwei
+        > value sent:          0 ETH
+        > total cost:          0.002621133354025798 ETH
 
-    > Saving artifacts
-    -------------------------------------
-    > Total cost:     0.00301768054520554 ETH
+        > Saving artifacts
+        -------------------------------------
+        > Total cost:     0.002621133354025798 ETH
 
-    Summary
-    =======
-    > Total deployments:   1
-    > Final cost:          0.00301768054520554 ETH
+        Summary
+        =======
+        > Total deployments:   1
+        > Final cost:          0.002621133354025798 ETH
     ```
     fatto partire tutto e funziona
-* ora la applicazione react mi dice "Web3ContractError: Contract address not specified"
-    aggiunti console.log e visto che carica la mainnet e non la localhost
-    e rimosso per prova il pezzo dal SimpleToken
-    ```
-    "1337": {
-      "events": {},
-      "links": {},
-      "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-      "transactionHash": "0xfe67f6700c1ca2799fafe08d7267d8f6a471609fd2c9311d09e6fb28d6fba983"
-    },
-    ```
-* modifica il react in modo tale da pertmettere di cambiare network su metamask
-*  ora aggiungi un bottone per fare switch tra le network se su metamask ci sono più reti e fai in modo che le networks siano caricate da metamask
-* ho l'errore "The method "wallet_getChainInfo" does not exist / is not available. "
 * nemmeno questa funziona, torna alla prima versione 
     modificato a mano App.js mettendo `account` la chiave pubblica dell'indirizzo che ha ricevuto i crediti e `network` come indicato nel file `SimpleToken.json`
-
 * AbiError: Parameter decoding error: Returned values aren't valid, did it run Out of Gas? You might also see this error if you are not using the correct ABI for the contract you are retrieving data from, requesting data from a block number that does not exist, or querying a node which is not fully synced.
+* la applicazione react mi dice "Web3ContractError: Contract address not specified" modificato il contratto con il costruttore
+    ```
+    //constructor(string memory _name, string memory _symbol, uint8 _decimals, uint256 _totalSupply) {
+    constructor() {
+        name = "NAOtoken";
+        symbol = "NAO";
+        decimals = 18;
+        totalSupply = 999999999999;
+        balanceOf[msg.sender] = 999999999999;
+    }
+    ```
+    e modificata il file di migrazione
+    ```
+    module.exports = function (deployer) {
+        deployer.deploy(SimpleToken); //SimpleToken, "NaoToken", "Nao", 18, 999999999);
+    };
+    ```
+    ricompilato e rilasciato con il comando
+    ```
+    truffle migrate --networkId development
+    ```
 
-Errore : "Parameter decoding error: Returned values aren't valid, did it run Out of Gas? You might also see this error if you are not using the correct ABI for the contract you are retrieving data from, requesting data from a block number that does not exist, or querying a node which is not fully synced."
+* ora la applicazione mi dice "Contract not deployed on this network. Please switch to a supported network."
+
+

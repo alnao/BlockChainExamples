@@ -12,12 +12,13 @@ contract SimpleToken {
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(address indexed owner, address indexed spender, uint256 value);
 
-    constructor(string memory _name, string memory _symbol, uint8 _decimals, uint256 _totalSupply) {
-        name = _name;
-        symbol = _symbol;
-        decimals = _decimals;
-        totalSupply = _totalSupply;
-        balanceOf[msg.sender] = _totalSupply;
+    //constructor(string memory _name, string memory _symbol, uint8 _decimals, uint256 _totalSupply) {
+    constructor() {
+        name = "NAOtoken";
+        symbol = "NAO";
+        decimals = 18;
+        totalSupply = 999999999999;
+        balanceOf[msg.sender] = 999999999999;
     }
 
     function transfer(address _to, uint256 _value) public returns (bool success) {
