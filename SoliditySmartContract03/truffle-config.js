@@ -67,7 +67,11 @@ module.exports = {
      development: {
       host: "127.0.0.1",     // Localhost (default: none)
       port: 7545,            // Standard Ethereum port (default: none)
-      network_id: "*",       // Any network (default: none)
+      network_id: 1337, //ex 5777 , //"*",       // Any network (default: none)
+      websockets: true,
+      gas: 6721975,           // Limit di gas alto
+      gasPrice: 20000000000,  // 20 gwei
+      networkCheckTimeout: 10000, // Timeout più lungo
      },
     //
     // An additional network, but with some advanced options…
@@ -116,6 +120,12 @@ module.exports = {
       //  },
       //  evmVersion: "byzantium"
       // }
+      settings: {
+        optimizer: {
+          enabled: true,
+          runs: 200
+        }
+      }
     }
   },
 

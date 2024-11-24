@@ -1,3 +1,6 @@
+# Storia del progetto, usando claude.ai il più possibile
+Il progetto è creato con un contratto (nella cartella contracts), script di creazione (nella cartella migrations), una interfaccia web (nella cartella simple-token-interface) e il file `truffle-config.js` per la configurazione di truffle. Indispensabile usare il programma **Ganache** per l'avvio della blockchain. 
+
 * come posso procedere per creare uno smart contract ?
     Per creare uno smart contract, ecco i passaggi principali da seguire:
     - Scegli una blockchain: Ethereum è la più popolare per gli smart contract, ma esistono alternative come Binance Smart Chain o Solana.
@@ -73,7 +76,8 @@
     Usare la console Truffle è un ottimo modo per interagire direttamente con il tuo contratto deployato. Ecco come procedere:
     1) Assicurati di aver deployato il tuo contratto su una rete (locale o di test) usando truffle migrate.
     2) Avvia la console Truffle con il comando: `truffle console`
-        Se stai usando una rete specifica, puoi specificarla così: `truffle console --network <nome_rete>`
+        Se stai usando una rete specifica, puoi specificarla così: `truffle console --network <nome_rete>` 
+        per esempio `truffle console --network development` 
     4) Una volta nella console, puoi interagire con il tuo contratto. 
     Ecco alcuni esempi di come farlo:
     - Ottieni l'istanza del contratto deployato:
@@ -152,28 +156,47 @@
 * lanciando il comando "truffle migrate" mi da l'errore "Something went wrong while attempting to connect to the network at http://127.0.0.1:8545. Check your network configuration." perchè?
     nel file `truffle-config.js` cambiato porta da 8454 a 7545 e lanciato comando  `truffle migrate --network development`
     ```
+        Truffle Develop started at http://127.0.0.1:9545/
+
+
+        Compiling your contracts...
+        ===========================
+        > Everything is up to date, there is nothing to compile.
+
+
+        Starting migrations...
+        ======================
+        > Network name:    'develop'
+        > Network id:      5777
+        > Block gas limit: 6721975 (0x6691b7)
+
+
+        2_deploy_simple_token.js
+        ========================
+
         Replacing 'SimpleToken'
         -----------------------
-        > transaction hash:    0xee19b9661389ce913e22aa834063f7dc4456b650069a4fa5563a014e362f996a
+        > transaction hash:    0x738a650c592c2a285e7479f84613b48a580696d9cc763e010d6ae59a1c378f04
         > Blocks: 0            Seconds: 0
-        > contract address:    0xFC0FF428a9FECE18fc0578225a9C690770bb1c09
-        > block number:        11
-        > block timestamp:     1726683642
-        > account:             0xeeaBE73Ab3D3360991905C4E1a48d52176781e58
-        > balance:             99.978191308301785273
-        > gas used:            936037 (0xe4865)
-        > gas price:           2.800245454 gwei
+        > contract address:    0xf6Ee92c3E56AE21710a6235f19E12Ec15035F75D
+        > block number:        1
+        > block timestamp:     1729068116
+        > account:             0xca0AC7bC6C34Fff8a80f0eC0a510bE2CE4FaEDD9
+        > balance:             99.996839997625
+        > gas used:            936297 (0xe4969)
+        > gas price:           3.375 gwei
         > value sent:          0 ETH
-        > total cost:          0.002621133354025798 ETH
+        > total cost:          0.003160002375 ETH
 
         > Saving artifacts
         -------------------------------------
-        > Total cost:     0.002621133354025798 ETH
+        > Total cost:      0.003160002375 ETH
 
         Summary
         =======
         > Total deployments:   1
-        > Final cost:          0.002621133354025798 ETH
+        > Final cost:          0.003160002375 ETH
+
     ```
     fatto partire tutto e funziona
 * nemmeno questa funziona, torna alla prima versione 
@@ -200,7 +223,92 @@
     ```
     truffle migrate --networkId development
     ```
-
 * ora la applicazione mi dice "Contract not deployed on this network. Please switch to a supported network."
+* --------------------------------------------- dal 24/11/2024
+* se da ganache si vede che il contratto non è deployato eseguire il comando
+    ```
+    truffle migrate --network development
+    ```
+* chiesto a claude e ho fatto
+    - modificato truffle-config mettendo 1337
+    - server su Ganache impostato su 1337
+* diversi errori e modifiche al file truffle-config e modificato molto il react, tutte le modifiche fatte da claude.
+    - Contratto non deployato sulla rete 137. Per favore cambia rete.
+    - L'endpoint ha restituito un chain ID diverso: 1337
+    - Contratto non trovato sulla rete 137.
+    - "Passa a ganace" mi dice "Account: Non connesso"
+    - You do not have enough ETH in your account to pay for transaction fees on Localhost 8545 network. Deposit ETH from another account.
+    - test ETH: ResponseError: Returned error: Internal JSON-RPC error.
+    - App.js:344 Connection test failed: TypeError: web3.eth.net.getNetworkType is not a function at testConnection (App.js:331:1)
+    - App.js:444 Verifica Ganache fallita: Error: Network ID errato: 1337. Dovresti essere su 1337 (Ganache)"
+    - App.js:238 Errore durante il trasferimento: ContractExecutionError: Error happened while trying to execute a function inside a smart contract
+    - Web3ValidatorError: Web3 validator found 1 error[s]: value "" at "/1" must pass "address" validation
+    - App.js:335 Errore dettagliato: TypeError: web3.utils.BN is not a constructor at handleTransfer (App.js:289:1)
+    - App.js:334 Errore dettagliato: TypeError: Cannot convert a BigInt value to a number
+    - src/App.js Line 308:11:  'BigInt' is not defined  no-undef
+    - App.js:357 Errore dettagliato: TypeError: web3.utils.toBN is not a function
+* Errore dettagliato: Error: Balance insufficiente. Hai 0.000000999999999999 token
+    - modificato lo smart contract per i decimali
+    - ricompilato 
+        ```
+        truffle migrate --reset
+        ```
+    - modificato anche il frontend per visualizzare i decimali
+    - non va ancora perchè non ho abbastanza NAO nel wallet configurato
+* lanciando il comando "truffle migrate --network development" non mi da gli account e le chiavi private che hanno i token, come faccio a recuperarli?
+    - Dall'interfaccia grafica di Ganache -> Apri l'app Ganache -> Nella scheda "ACCOUNTS" vedrai la lista di tutti gli account -> Clicca sull'icona della chiave 🔑 -> Il primo account (index 0) è quello che ha ricevuto i token durante il deploy
+    - Creare check_balances.js e poi lanciato il comando
+        ```
+        truffle exec check_balances.js --network development
+        ```
+        che ritorna
+        ```
+        Indirizzo contratto: 0x051C8381664DD2Eb9B1EAdBd7BCdF23C24A825B0
+        Nome: NAOtoken
+        Simbolo: NAO
+        Decimali: 18
+        Total Supply: 999999999999
+        ```
+* ricompilato e riavviato tutto
+* **FUNZIONA**, inseriti dati
+    - destinatario = preso secondo indirizzo su Ganache
+    - importo = 0.000000002000001
+    - gas price (gwei) = 1
+    - gas limit = 1000000
+    - **MA** ho fatto una transazione ma inviato ad un indirizzo i token non arrivano e arrivano sull'indirizzo indicato nel file json del progetto web
+* modifiche
+    - modifica `2_deploy_token.js` come indicato
+    - metodo checkContractDetails
+    - comando
+        ```
+        truffle migrate --reset --network development
+        ```
+    - 
+* **FUNZIONA** usando il bottone verifica account si vedono i token 
+    ```
+    Balance di 0xeea...: 0.000000995999998999 tokens
+    Balance di 0x30c...: 0.000000002000001 tokens
+    Balance di 0x854...: 0.000000002 tokens
+    Balance di 0xe43...: 0. tokens
+    Balance di 0x6Ac...: 0. tokens
+    Balance di 0xD0c...: 0. tokens
+    Balance di 0x16b...: 0. tokens
+    Balance di 0xe08...: 0. tokens
+    Balance di 0x423...: 0. tokens
+    Balance di 0x22C...: 0. tokens
+    ```
 
 
+* TODO fare tabella con i saldi di token e ETH, fare transazioni in token?
+
+
+
+
+* TODO
+    see https://www.youtube.com/watch?v=QWL4UHTsxKg&list=PLbbtODcOYIoHJQ9sTs0e8kn7YV39W9Vcp
+    How to setup a Dapp project with React & Truffle?
+        https://www.youtube.com/watch?v=nU0uqk0jLdw
+    How to use Drizzle with React Hooks in your Ethereum Dapp?
+        https://www.youtube.com/watch?v=hzd9L5shk6w
+
+    React https://www.youtube.com/watch?v=-ubPPwlUlVk

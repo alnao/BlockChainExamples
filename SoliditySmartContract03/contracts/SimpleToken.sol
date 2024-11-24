@@ -16,9 +16,10 @@ contract SimpleToken {
     constructor() {
         name = "NAOtoken";
         symbol = "NAO";
-        decimals = 18;
-        totalSupply = 999999999999;
-        balanceOf[msg.sender] = 999999999999;
+        decimals = 18;  // Standard ERC20 decimals
+        // Modificare il totalSupply per includere i decimali
+        totalSupply = 999999999999 * 10**decimals;  // Moltiplica per 10^18
+        balanceOf[msg.sender] = totalSupply;
     }
 
     function transfer(address _to, uint256 _value) public returns (bool success) {
