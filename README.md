@@ -1,15 +1,14 @@
 # BlockChainExamples
 
-## Esempi:
+- **FundraiserApplication**: esempio **funzionante** di smart contract che simula una raccolta fondi con metodi per donare e eventi, comprende anche una piccola applicazione React per eseguire le donazioni e gestire i fondi, preso spunto dal capitolo 6 del libro "Hands-On Smart Contract Development with Solidity and Ethereum - 2020 - O'Reilly"
 - **PythonBlockChain**: esempi di BlockChain in python (mono-node e multi-node), basato su algoritmo del *proof-of-work*
-- **SoliditySmartContract01**: esempio di primo smartcontract, ispirato al capitolo 4 del libro "Hands-On Smart Contract Development with Solidity and Ethereum - 2020 - O'Reilly", non funzionante
-- **SoliditySmartContract02**: Ispirato alla guida https://www.freecodecamp.org/italian/news/la-guida-completa-allo-sviluppo-completo-di-ethereum/, non funzionante
-- **SoliditySmartContract03**: creato con Claude, non funzionante
+- **SoliditySmartContract01**: esempio di primo smartcontract, ispirato al capitolo 4 del libro "Hands-On Smart Contract Development with Solidity and Ethereum - 2020 - O'Reilly", **non funzionante**
+- **SoliditySmartContract02**: progetto creato prendendo spunto dalla guida https://www.freecodecamp.org/italian/news/la-guida-completa-allo-sviluppo-completo-di-ethereum/, **non funzionante**
+- **SoliditySmartContract03**: progetto funzionante creato con l'aiuto di Claude partendo dai due punti precedenti, **funzionante**
 
 ## Esempi in fase di revisione
 - SolidityBrowserExample1
 - Web3ProjectsExample1
-
 
 
 # AlNao.it
