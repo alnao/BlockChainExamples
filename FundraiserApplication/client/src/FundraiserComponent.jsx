@@ -153,6 +153,10 @@ const FundraiserComponent = () => {
     }
   };
 
+  const handleAdmin = async () => {
+    setIsOwner(!isOwner);
+  }
+
   const handleSetBeneficiary = async () => {
     if (!contract || !isOwner || !web3 || !web3.utils.isAddress(newBeneficiary)) return;
     
@@ -188,7 +192,7 @@ const FundraiserComponent = () => {
             <img 
               src={fundraiserData.imageURL} 
               alt={fundraiserData.name}
-              className="w-full h-48 object-cover rounded-lg mb-4"
+              className="object-cover rounded-lg mb-4" width={100}
             />
             <p className="text-lg mb-2">{fundraiserData.description}</p>
             <a 
@@ -228,7 +232,7 @@ const FundraiserComponent = () => {
               />
               <button
                 onClick={handleDonate}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                className="bg-info text-dark px-4 py-2 rounded hover:bg-blue-700"
               >
                 Dona
               </button>
@@ -267,7 +271,7 @@ const FundraiserComponent = () => {
                     />
                     <button
                       onClick={handleSetBeneficiary}
-                      className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                      className="bg-info text-dark px-4 py-2 rounded hover:bg-green-700"
                     >
                       Aggiorna
                     </button>
@@ -276,13 +280,21 @@ const FundraiserComponent = () => {
                 <div>
                   <button
                     onClick={handleWithdraw}
-                    className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700"
+                    className="bg-info text-dark px-4 py-2 rounded hover:bg-yellow-700"
                   >
                     Preleva Fondi
                   </button>
                 </div>
               </div>
             </div>
+          )}
+          {!isOwner && (
+              <p><button
+                onClick={handleAdmin}
+                className="bg-info text-dark px-4 py-2 mb-5 rounded hover:bg-blue-700"
+              >
+                Passa a sezione amministratore
+              </button></p>
           )}
         </div>
       </div>

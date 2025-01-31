@@ -4,12 +4,15 @@ import Setup from "./components/Setup";
 import Demo from "./components/Demo";
 import Footer from "./components/Footer";
 import FundraiserComponent from "./FundraiserComponent";
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
   return (
-    <div className="App">
-      <FundraiserComponent />
-    </div>
+    <EthProvider>
+      <div className="App">
+        <FundraiserComponent />
+      </div>
+    </EthProvider>
   );
   /*
   return (

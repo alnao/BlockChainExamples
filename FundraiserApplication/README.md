@@ -36,6 +36,7 @@ This box includes a sample contract, SimpleStorage.sol, along with the migration
 - creato in automatico dal comando iniziale ma non usati i componenti base
 - chiesto a Claude: `ho questo smartcontract che funziona, vorrei fare una interfaccia web in react per iteragire con lo smart contract, mi scrivi il componente unico?`
 - comando `npm install web3`
+- comando `npm install bootstrap` e aggiunto `import 'bootstrap/dist/css/bootstrap.min.css';`
 - copiato react e modificato App.jsx
 - truffle-config.js, aggiungi questa configurazione networks
   ```
@@ -51,9 +52,15 @@ This box includes a sample contract, SimpleStorage.sol, along with the migration
 - scritto migrations/2_deploy_fundraiser.js
 - dalla cartella truffle con ganache attivo lanciare il comando `truffle migrate --network development` che ritorna info base
 - fatto partire tutto Ganache e npm start
-- **FUNZIONA**
+- **FUNZIONA**, vedere le note sotto
 
-
+## Test
+Per testare il client:
+- nella cartella truffle eseguire il comando `truffle migrate --reset`
+- avviare metamask su una tab e deve rimanere aperto per tutto il tempo
+- avviare ganache impostando la rete con il contratto configurato correttamente
+- nella cartella client avviare `npm start`
+- Loopback `http://localhost:8081/`
 
 # Original React Truffle Box
 
