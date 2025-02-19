@@ -1,6 +1,7 @@
 # BlockChainExamples
 
-- **FundraiserApplication**: esempio **funzionante** di smart contract che simula una raccolta fondi con metodi per donare e eventi, comprende anche una piccola applicazione React per eseguire le donazioni e gestire i fondi, preso spunto dal capitolo 6 del libro "Hands-On Smart Contract Development with Solidity and Ethereum - 2020 - O'Reilly"
+- **FundraiserApplication**: esempio *funzionante* di smart contract che simula una raccolta fondi con metodi per donare e eventi, comprende anche una piccola applicazione React per eseguire le donazioni e gestire i fondi. Esempio preso dal capitolo 6 del libro "Hands-On Smart Contract Development with Solidity and Ethereum - 2020 - O'Reilly"
+- **FundraiserFactory**: esempio *funzionante* di smart contract, partendo dal FundraiserApplication vengono aggiunti i componenti per gestire più progetti con limiti. Esempio preso dal capitolo 7 del libro "Hands-On Smart Contract Development with Solidity and Ethereum - 2020 - O'Reilly"
 - **PythonBlockChain**: esempi di BlockChain in python (mono-node e multi-node), basato su algoritmo del *proof-of-work*
 - **SoliditySmartContract01**: esempio di primo smartcontract, ispirato al capitolo 4 del libro "Hands-On Smart Contract Development with Solidity and Ethereum - 2020 - O'Reilly", **non funzionante**
 - **SoliditySmartContract02**: progetto creato prendendo spunto dalla guida https://www.freecodecamp.org/italian/news/la-guida-completa-allo-sviluppo-completo-di-ethereum/, **non funzionante**
