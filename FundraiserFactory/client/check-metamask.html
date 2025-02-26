@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<!--
+
+nota: questa pagina serve per verificare lo stato di MetaMask e ottenere informazioni sull'account e sulla rete
+
+ma funziona solo lanciato su APACHE e non come html statico
+
+-->
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MetaMask Account Checker</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #4F6AB5;
+        }
+        button {
+            background-color: #4F6AB5;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #3D5A9E;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .error {
+            color: #d9534f;
+            font-weight: bold;
+        }
+        .info {
+            color: #5cb85c;
+        }
+    </style>
+</head>
+<body>
+    <h1>MetaMask Account Checker</h1>
+    
+    <div class="card">
+        <h2>Verifica connessione MetaMask</h2>
+        <button id="checkMetaMask">Verifica MetaMask</button>
+        <button id="connectMetaMask">Connetti a MetaMask</button>
+        <button id="getCurrentAccounts">Ottieni Account Corrente</button>
+        <button id="switchAccount">Prova a Cambiare Account</button>
+        <div id="metamaskStatus"></div>
+    </div>
+    
+    <div class="card">
+        <h2>Account Attivo</h2>
+        <pre id="accountInfo">Clicca su "Verifica MetaMask" per iniziare...</pre>
+    </div>
+    
+    <div class="card">
+        <h2>Informazioni di Rete</h2>
+        <pre id="networkInfo">Clicca su "Verifica MetaMask" per iniziare...</pre>
+    </div>
+    
+    <div class="card">
+        <h2>Log degli eventi</h2>
+        <button id="clearLog">Cancella Log</button>
+        <pre id="eventLog"></pre>
+    </div>
+
+    <script>
+        // Funzione per aggiungere messaggi al log
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('eventLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const logMessage = `[${timestamp}] ${message}`;
+            logElement.innerHTML = `<span class="${type}">${logMessage}</span>\n` + logElement.innerHTML;
+        }
+
+        // Funzione per verificare se MetaMask è installato
+        async function checkMetaMaskInstalled() {
+            const statusElement = document.getElementById('metamaskStatus');
+            const accountInfoElement = document.getElementById('accountInfo');
+            const networkInfoElement = document.getElementById('networkInfo');
+            
+            if (typeof window.ethereum !== 'undefined') {
+                // MetaMask è installato
+                statusElement.innerHTML = '<p class="info">MetaMask è installato! ✅</p>';
+                log('MetaMask rilevato');
+                
+                // Verifica se l'utente è connesso
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        statusElement.innerHTML += `<p class="info">Connesso con l'account: ${accounts[0]}</p>`;
+                        log(`Account attualmente connesso: ${accounts[0]}`);
+                        
+                        // Mostra i dettagli dell'account
+                        try {
+                            const balance = await window.ethereum.request({
+                                method: 'eth_getBalance',
+                                params: [accounts[0], 'latest']
+                            });
+                            
+                            const balanceInEth = parseInt(balance, 16) / 1e18;
+                            
+                            accountInfoElement.innerText = 
+                                `Indirizzo: ${accounts[0]}\n` +
+                                `Saldo: ${balanceInEth.toFixed(4)} ETH`;
+                        } catch (error) {
+                            accountInfoElement.innerText = `Errore nel recupero del saldo: ${error.message}`;
+                            log(`Errore: ${error.message}`, 'error');
+                        }
+                        
+                        // Mostra i dettagli della rete
+                        try {
+                            const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                            const networkVersion = await window.ethereum.request({ method: 'net_version' });
+                            
+                            const networks = {
+                                '1': 'Ethereum Mainnet',
+                                '3': 'Ropsten Test Network',
+                                '4': 'Rinkeby Test Network',
+                                '5': 'Goerli Test Network',
+                                '42': 'Kovan Test Network',
+                                '1337': 'Localhost 1337',
+                                '5777': 'Ganache'
+                            };
+                            
+                            const networkName = networks[networkVersion] || `Chain ID: ${networkVersion}`;
+                            
+                            networkInfoElement.innerText = 
+                                `Rete: ${networkName}\n` +
+                                `Chain ID: ${parseInt(chainId, 16)}\n` +
+                                `Network ID: ${networkVersion}`;
+                                
+                            log(`Connesso alla rete: ${networkName}`);
+                        } catch (error) {
+                            networkInfoElement.innerText = `Errore nel recupero delle info di rete: ${error.message}`;
+                            log(`Errore: ${error.message}`, 'error');
+                        }
+                    } else {
+                        statusElement.innerHTML += '<p>Nessun account connesso. Clicca su "Connetti a MetaMask".</p>';
+                        accountInfoElement.innerText = 'Nessun account connesso';
+                        networkInfoElement.innerText = 'Nessun account connesso';
+                        log('Nessun account connesso a questa dApp');
+                    }
+                } catch (error) {
+                    statusElement.innerHTML += `<p class="error">Errore: ${error.message}</p>`;
+                    log(`Errore durante la verifica degli account: ${error.message}`, 'error');
+                }
+            } else {
+                // MetaMask non è installato
+                statusElement.innerHTML = '<p class="error">MetaMask non è installato! ❌</p>';
+                accountInfoElement.innerText = 'MetaMask non disponibile';
+                networkInfoElement.innerText = 'MetaMask non disponibile';
+                log('MetaMask non rilevato', 'error');
+            }
+        }
+
+        // Funzione per connettere a MetaMask
+        async function connectToMetaMask() {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    log(`Connesso con successo a MetaMask: ${accounts[0]}`);
+                    // Aggiorna le informazioni dopo la connessione
+                    checkMetaMaskInstalled();
+                } catch (error) {
+                    log(`Errore durante la connessione a MetaMask: ${error.message}`, 'error');
+                }
+            } else {
+                log('MetaMask non è installato', 'error');
+            }
+        }
+
+        // Funzione per ottenere gli account correnti
+        async function getCurrentAccounts() {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    // Primo metodo: eth_accounts (non richiede interazione dell'utente)
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    log(`Account da eth_accounts: ${accounts.length > 0 ? accounts[0] : 'Nessuno'}`);
+                    
+                    // Secondo metodo: eth_requestAccounts (richiede interazione dell'utente)
+                    try {
+                        const requestedAccounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                        log(`Account da eth_requestAccounts: ${requestedAccounts[0]}`);
+                    } catch (reqError) {
+                        log(`Errore con eth_requestAccounts: ${reqError.message}`, 'error');
+                    }
+                    
+                    // Aggiorna le informazioni complete
+                    checkMetaMaskInstalled();
+                } catch (error) {
+                    log(`Errore: ${error.message}`, 'error');
+                }
+            } else {
+                log('MetaMask non è installato', 'error');
+            }
+        }
+
+        // Funzione per tentare di cambiare account
+        async function trySwitchAccount() {
+            if (typeof window.ethereum !== 'undefined') {
+                log('Richiesta di cambio account a MetaMask...');
+                
+                // Non è possibile cambiare account programmaticamente,
+                // quindi mostriamo istruzioni all'utente
+                alert("Per cambiare account in MetaMask, segui questi passaggi:\n\n" +
+                      "1. Clicca sull'icona di MetaMask nel tuo browser\n" +
+                      "2. Clicca sull'icona dell'account in alto a destra\n" +
+                      "3. Seleziona un altro account dall'elenco\n" +
+                      "4. Torna a questa pagina e clicca su 'Ottieni Account Corrente'");
+                
+                log('Istruzioni per cambio account mostrate all\'utente');
+            } else {
+                log('MetaMask non è installato', 'error');
+            }
+        }
+
+        // Configurazione degli ascoltatori di eventi
+        document.getElementById('checkMetaMask').addEventListener('click', checkMetaMaskInstalled);
+        document.getElementById('connectMetaMask').addEventListener('click', connectToMetaMask);
+        document.getElementById('getCurrentAccounts').addEventListener('click', getCurrentAccounts);
+        document.getElementById('switchAccount').addEventListener('click', trySwitchAccount);
+        document.getElementById('clearLog').addEventListener('click', () => {
+            document.getElementById('eventLog').innerHTML = '';
+        });
+
+        // Ascoltatori di eventi MetaMask
+        if (typeof window.ethereum !== 'undefined') {
+            window.ethereum.on('accountsChanged', (accounts) => {
+                log(`Account MetaMask cambiato: ${accounts[0]}`);
+                checkMetaMaskInstalled();
+            });
+
+            window.ethereum.on('chainChanged', (chainId) => {
+                log(`Rete MetaMask cambiata: Chain ID ${parseInt(chainId, 16)}`);
+                checkMetaMaskInstalled();
+            });
+
+            window.ethereum.on('connect', (connectInfo) => {
+                log(`MetaMask connesso a Chain ID: ${parseInt(connectInfo.chainId, 16)}`);
+            });
+
+            window.ethereum.on('disconnect', (error) => {
+                log('MetaMask disconnesso', 'error');
+            });
+        }
+
+        // Verifica iniziale di MetaMask
+        log('Script inizializzato');
+    </script>
+</body>
+</html>

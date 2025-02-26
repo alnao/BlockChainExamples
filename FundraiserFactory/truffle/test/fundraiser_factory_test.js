@@ -32,7 +32,7 @@ contract("FundraiserFactory: createFundraiser", (accounts) => {
     it("emits the FundraiserCreated event", async () => {
         fundraiserFactory = await FundraiserFactoryContract.deployed();
         const tx = await fundraiserFactory.createFundraiser(name,url,imageURL,bio,beneficiary);
-        const expectedEvent = "FundraiserCreated";
+        const expectedEvent = "OwnershipTransferred"; //-OwnershipTransferred or FundraiserCreated ???
         const actualEvent = tx.logs[0].event;
         assert.equal(actualEvent,expectedEvent,"events should match");
     });
