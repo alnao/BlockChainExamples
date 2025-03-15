@@ -9,7 +9,7 @@
 - **SoliditySmartContract01**: esempio di primo smartcontract, ispirato al capitolo 4 del libro "Hands-On Smart Contract Development with Solidity and Ethereum - 2020 - O'Reilly", **non funzionante**
 - **SoliditySmartContract02**: progetto creato prendendo spunto dalla guida https://www.freecodecamp.org/italian/news/la-guida-completa-allo-sviluppo-completo-di-ethereum/, **non funzionante**
 - **SoliditySmartContract03**: progetto funzionante creato con l'aiuto di Claude partendo dai due punti precedenti, **funzionante**
-
+- **SoliditySmartContract04NFT**: progetto di smartcontract NFT molto semplice con la possibliti di creare/mintare NFT e di trasferirli, **funzionante** con script di esempio
 ## Esempi in fase di revisione
 - SolidityBrowserExample1
 - Web3ProjectsExample1
