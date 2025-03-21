@@ -32,7 +32,7 @@ Esempio misto creato con l'aiuto di Claude.ia
     - `transfer-nft.js`: per trasferire NFT esistenti
     - `list-nfts.js`: per elencare tutti gli NFT posseduti da un indirizzo
 - Esecuzione script di utilità, se si eseguotno con ganache in localhost bisogna usare gli indirizzi/account indicati dentro ganache altrimenti le transazioni non vengono autorizzate
-    - `truffle exec scripts/mint-nft.js [indirizzo destinatario]`
+    - `truffle exec client/mint-nft.js [indirizzo destinatario]`
         ```
         Utilizzando l'account: 0x64473f5b8D5e54ac6a7301b0407B9034C7cC47c0
         Contratto NFT trovato all'indirizzo: 0xe3e3f8F55142C8eA905d38839400a3DBd839208E
@@ -40,7 +40,7 @@ Esempio misto creato con l'aiuto di Claude.ia
         NFT coniato con successo! Token ID: 0
         Transazione: 0x897e7117692415fb5051edb4ec4ded396b1efa1dcd79ac0449e583aa348b615f
         ```
-    - `truffle exec scripts/transfer-nft.js <tokenId> <indirizzo destinatario>`
+    - `truffle exec client/transfer-nft.js <tokenId> <indirizzo destinatario>`
         ```
         Using network 'development'.
 
@@ -48,7 +48,7 @@ Esempio misto creato con l'aiuto di Claude.ia
         NFT trasferito con successo!
         Transazione: 0x6d5b23494f6a20f4bbce92f01feeeee2d126736ddb248d0de84d87cccfdb8c3d
         ```
-    - `truffle exec scripts/list-nfts.js [indirizzo]`
+    - `truffle exec client/list-nfts.js [indirizzo]`
         ```
         Using network 'development'.
 

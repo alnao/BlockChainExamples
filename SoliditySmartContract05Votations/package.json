@@ -1,0 +1,48 @@
+{
+    "name": "simple-voting",
+    "version": "1.0.0",
+    "description": "Sistema di votazione decentralizzato su Ethereum",
+    "main": "truffle-config.js",
+    "scripts": {
+        "test": "truffle test",
+        "compile": "truffle compile",
+        "migrate": "truffle migrate",
+        "migrate:reset": "truffle migrate --reset",
+        "deploy:ganache": "truffle migrate --network ganache",
+        "deploy:goerli": "truffle migrate --network goerli",
+        "deploy:sepolia": "truffle migrate --network sepolia",
+        "deploy:mainnet": "truffle migrate --network mainnet",
+        "verify:goerli": "truffle run verify SimpleVoting --network goerli",
+        "verify:sepolia": "truffle run verify SimpleVoting --network sepolia",
+        "verify:mainnet": "truffle run verify SimpleVoting --network mainnet",
+        "registra-elettori": "truffle exec scripts/registra-elettori.js",
+        "aggiungi-proposte": "truffle exec scripts/aggiungi-proposte.js",
+        "vota": "truffle exec scripts/vota.js",
+        "elettori": "truffle exec scripts/elenco-elettori.js",
+        "stato": "truffle exec scripts/stato-votazioni.js",
+        "delega": "truffle exec scripts/delega-voto.js",
+        "esegui": "truffle exec scripts/esegui-proposta.js",
+        "concludi": "truffle exec scripts/concludi-votazioni.js",
+        "cambia-presidente": "truffle exec scripts/cambia-presidente.js"
+    },
+    "keywords": [
+        "ethereum",
+        "solidity",
+        "truffle",
+        "blockchain",
+        "smart-contract",
+        "voting"
+    ],
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "@openzeppelin/contracts": "^4.8.0",
+        "@truffle/hdwallet-provider": "^2.1.15",
+        "dotenv": "^16.4.7",
+        "react-scripts": "^5.0.1"
+    },
+    "devDependencies": {
+        "@openzeppelin/test-helpers": "^0.5.16",
+        "truffle-plugin-verify": "^0.6.1"
+    }
+}
