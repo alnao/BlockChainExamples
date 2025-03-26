@@ -1,0 +1,139 @@
+/* Header.css */
+.app-header {
+    background-color: #2c3e50;
+    color: white;
+    padding: 15px 20px;
+  }
+  
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  
+  .logo-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .logo-container h1 {
+    font-size: 22px;
+    font-weight: 600;
+  }
+  
+  .voting-state {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  
+  .account-info {
+    display: flex;
+    align-items: center;
+  }
+  
+  .connected-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .address-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .address {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-family: monospace;
+  }
+  
+  .admin-badge {
+    background-color: #f39c12;
+    color: white;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  
+  .network-info {
+    font-size: 13px;
+    opacity: 0.8;
+  }
+  
+  .refresh-button {
+    background-color: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    transition: background-color 0.3s;
+  }
+  
+  .refresh-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .connect-prompt {
+    font-size: 14px;
+    opacity: 0.8;
+  }
+  
+  .contract-info {
+    font-size: 12px;
+    opacity: 0.6;
+    text-align: center;
+    padding-top: 10px;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  
+  @media (max-width: 768px) {
+    .header-content {
+      flex-direction: column;
+      gap: 15px;
+      align-items: flex-start;
+    }
+    
+    .account-info {
+      width: 100%;
+    }
+    
+    .connected-info {
+      width: 100%;
+      justify-content: space-between;
+    }
+    
+    .logo-container {
+      width: 100%;
+      justify-content: space-between;
+    }
+    
+    .logo-container h1 {
+      font-size: 18px;
+    }
+    
+    .contract-info {
+      text-align: left;
+      padding-left: 0;
+    }
+  }

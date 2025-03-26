@@ -13,6 +13,7 @@
 - **SoliditySmartContract05Votations**: progetto di SmartContract per sistema di votazione (campagne e diritti al voto) con due web-app per la gestione delle campagne e i voti, **funzionante**
     - presente uno script "invia-eth" per lo scambio di ETH, indispensabile perchè ogni chiamata allo smart consuma fee/gas!
     - presente uno script per cambiare il presidente della campagna!
+- **SoliditySmartContract06VotationsV2**: progetto di SmartContract per sistema di votazione evoluto (con avvio campagna, candidature e votazioni) **funzionante** con semplice frontend per la gestione delle candidature e delle votazioni
 - SolidityBrowserExample1: esempio in fase di revisione
 - Web3ProjectsExample1: esempio in fase di revisione
 

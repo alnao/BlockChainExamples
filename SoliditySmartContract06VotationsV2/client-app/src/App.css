@@ -1,0 +1,342 @@
+/* App.css - Stili principali dell'applicazione */
+
+/* Reset e base */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --primary-color: #3498db;
+  --primary-dark: #2980b9;
+  --secondary-color: #2ecc71;
+  --secondary-dark: #27ae60;
+  --danger-color: #e74c3c;
+  --warning-color: #f39c12;
+  --light-gray: #f5f5f5;
+  --medium-gray: #e0e0e0;
+  --dark-gray: #555555;
+  --text-color: #333333;
+  --card-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  --border-radius: 8px;
+  --transition-speed: 0.3s;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  line-height: 1.6;
+  color: var(--text-color);
+  background-color: #f8f9fa;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Contenuto principale */
+.app-content {
+  flex: 1;
+  padding: 20px;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Bottoni */
+.button {
+  display: inline-block;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color var(--transition-speed);
+  font-weight: 500;
+}
+
+.button:hover {
+  background-color: var(--primary-dark);
+}
+
+.button:disabled {
+  background-color: var(--medium-gray);
+  cursor: not-allowed;
+}
+
+.button.primary {
+  background-color: var(--primary-color);
+}
+
+.button.primary:hover {
+  background-color: var(--primary-dark);
+}
+
+.button.secondary {
+  background-color: var(--dark-gray);
+}
+
+.button.secondary:hover {
+  background-color: #444;
+}
+
+.button.danger {
+  background-color: var(--danger-color);
+}
+
+.button.danger:hover {
+  background-color: #c0392b;
+}
+
+.button.back {
+  background-color: transparent;
+  color: var(--dark-gray);
+  padding-left: 0;
+}
+
+.button.back:hover {
+  background-color: transparent;
+  color: #000;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--medium-gray);
+}
+
+.tab-button {
+  background-color: transparent;
+  border: none;
+  padding: 12px 20px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--dark-gray);
+  border-bottom: 3px solid transparent;
+  transition: all var(--transition-speed);
+}
+
+.tab-button:hover {
+  color: var(--primary-color);
+}
+
+.tab-button.active {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+}
+
+.tab-button:disabled {
+  color: var(--medium-gray);
+  cursor: not-allowed;
+}
+
+/* Card e contenitori */
+.card {
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.error-container {
+  text-align: center;
+  padding: 40px 20px;
+  max-width: 600px;
+  margin: 40px auto;
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+}
+
+.error-container h2 {
+  color: var(--danger-color);
+  margin-bottom: 20px;
+}
+
+.error-container p {
+  margin-bottom: 20px;
+}
+
+/* Votazione corrente */
+.current-voting {
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  padding: 25px;
+}
+
+.current-voting h2 {
+  margin-bottom: 20px;
+  color: var(--primary-color);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--light-gray);
+}
+
+.voting-info {
+  margin-bottom: 30px;
+  padding: 15px;
+  background-color: var(--light-gray);
+  border-radius: var(--border-radius);
+}
+
+.voting-info p {
+  margin-bottom: 8px;
+}
+
+.voting-info p:last-child {
+  margin-bottom: 0;
+}
+
+.already-registered {
+  background-color: var(--light-gray);
+  padding: 20px;
+  border-radius: var(--border-radius);
+  margin-bottom: 20px;
+  border-left: 4px solid var(--secondary-color);
+}
+
+.candidates-list {
+  margin-top: 30px;
+}
+
+.candidate-card {
+  background-color: var(--light-gray);
+  border-radius: var(--border-radius);
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  transition: transform var(--transition-speed);
+}
+
+.candidate-card:hover {
+  transform: translateY(-2px);
+}
+
+.candidate-card h4 {
+  margin-bottom: 5px;
+  color: var(--primary-dark);
+}
+
+.candidate-address {
+  color: var(--dark-gray);
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.candidate-proposal {
+  font-size: 15px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--medium-gray);
+}
+
+/* Nessuna votazione */
+.no-voting {
+  text-align: center;
+  padding: 40px 20px;
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+}
+
+.no-voting h2 {
+  margin-bottom: 20px;
+  color: var(--dark-gray);
+}
+
+.no-voting p {
+  margin-bottom: 25px;
+}
+
+.admin-section {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: var(--light-gray);
+  border-radius: var(--border-radius);
+  text-align: left;
+  border-left: 4px solid var(--warning-color);
+}
+
+.admin-section h3 {
+  color: var(--warning-color);
+  margin-bottom: 10px;
+}
+
+/* Media queries */
+@media (max-width: 768px) {
+  .app-content {
+    padding: 15px;
+  }
+  
+  .tabs {
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  .tab-button {
+    padding: 10px 15px;
+    font-size: 14px;
+  }
+  
+  .current-voting {
+    padding: 15px;
+  }
+  
+  .button {
+    padding: 8px 15px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tab-button {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  
+  .current-voting h2 {
+    font-size: 20px;
+  }
+  
+  .candidate-card {
+    padding: 12px;
+  }
+}
+
+/* Animazioni */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.app-content {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Scrollbar personalizzata */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--light-gray);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--medium-gray);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--dark-gray);
+}
