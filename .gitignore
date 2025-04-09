@@ -4,3 +4,5 @@ hoscdev
 SoliditySmartContract01/client
 client2
 client3
+*/*.pem
+**/dist/

@@ -1,0 +1,23 @@
+{
+    "name": "simple-blockchain",
+    "version": "1.0.0",
+    "description": "Una semplice implementazione di blockchain con proof of work",
+    "main": "dist/server.js",
+    "scripts": {
+      "build": "tsc",
+      "start": "node dist/server.js",
+      "dev": "ts-node server.ts"
+    },
+    "dependencies": {
+      "body-parser": "^1.20.2",
+      "crypto": "^1.0.1",
+      "express": "^4.18.2"
+    },
+    "devDependencies": {
+      "@types/body-parser": "^1.19.2",
+      "@types/express": "^4.17.17",
+      "@types/node": "^18.15.11",
+      "ts-node": "^10.9.1",
+      "typescript": "^5.0.4"
+    }
+  }

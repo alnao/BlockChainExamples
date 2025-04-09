@@ -1,0 +1,156 @@
+{
+	"info": {
+		"_postman_id": "17fc7ff5-ea45-4ddc-9f36-a97f5ff8758e",
+		"name": "JavascriptBlockChain",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "2936350"
+	},
+	"item": [
+		{
+			"name": "blockchain",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/blockchain",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"blockchain"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Wallet",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/wallet",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"wallet"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Wallet2",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/wallet",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"wallet"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "mine",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"minerAddress\": \"b892cba8ebc0be55288035008b35d993909972d6\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/mine",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"mine"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "transaction",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"fromAddress\": \"b892cba8ebc0be55288035008b35d993909972d6\",\n  \"toAddress\": \"fbb8e39919e4476bfad3c84ebcba5bd50b82ce6c\",\n  \"amount\": 42,\n  \"privateKey\": \"-----BEGIN PRIVATE KEY-----\\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDv7JuTvqut9KPj\\nIH5fC8UjB2qhdco/kYK/ExQtfWoNa3q/WSfjZrT+nnl4fGfsHm39Fil2mewY2QJj\\nNNxUyp4NKxXw49qmap7v1lZSVl6rKjBq5LuuMbH6NBdxoTjQU/wr+1zomJvBW32+\\nGCGeQ1p2gXcZEGPmwAJ5PO/nX6bgBbb2eq9a0EzSifNkplex4+MXPDCG3+6Qg0qy\\nqh6cNQJoW8trvmEbYCsM0xcJN43uuyrXVYhtpusKzUDLNt47yABEbQgyz3ytLgtc\\ntRUS/g8I/J+KCUJg1txNVR/9/hhakpfemw/1Pgb7WhO885JK3u9QtglqFmgRTMxZ\\nw238+CJxAgMBAAECggEAK9j03OVLmGzdl8iMN+AdjOeR1gTCK+hyuetpdF/XhjDW\\nm8pWNyHB4cfCIOIxlu4/wTFv7fg29RqR7GIQg2GNTZBKf/4Qa3oQZnooR/93aTY6\\nZ4q6fx0fbv/eqfpiOPakX0BezDZ5vrZzDk74M+WQzpgeFUNQ0q7UNOaNXJ53T7j5\\nDKI2nvrZxDKlYIv7vLSBDwLdtvOYZYPP4v4+PiqP6/eY7SRCReQB8ORHyhpKuKlt\\nqspxxAN8umxyLWdR9Tw//bZaaoGAVu+IsmzyvuePHJYy2UeEeQ4xKeLvUYPfvSda\\nVYdbkSHv9QTl34T1L61QI9IfrqVLez5MafwGNSQdzQKBgQD7jrRqRcfnfDiUW0R6\\n2LKGKpONFWgCfXC8PnRFLUrB3i645mq6tCb3f6gI0QuFytpc5xJM4CphkOcb8nwz\\nVozAk0dKDt/YGFNO20X/nMM38w02fhQEAgYP3DDtybEY/dGAxvdrlipqxgDu/CB6\\nUCSBXaHB+KTxMLMXdf8rg0WL9QKBgQD0KU8jIYl/1ZndSbL95MnPzENPlNtfY7IP\\nmrJQoGI3YWOVUt1OB6IxfxFA4MGshakLMPmVHCrmVjeLShMkalEPsqLg6c5rqK0R\\nemzv/GXP3RGaw0SzbZY2qboARqrgccdhNW4m5tfeTBqRjaHp0zU/YN2gRcANpc+d\\nCoeJrGqLDQKBgQDhNPDv82j0JJHCv7KfCEFLO/K8690h3Yt/+6m8BMBYr8DEaARF\\nAeOgz/hvbDcUoHa9lWEc0dMfZcqBiqUGkQWRokjAVHCx1ZU/k68nGADtpfq+PkFN\\nFUK4EDj9qQOTjChzUa1P9DAlRv6u9ald10HXTyvxq9h+1UqARnMbUXqBwQKBgQCg\\n+EcTSz4CiIl7SeZ22wpuNCXAZsxGVE0FWqDq5QI7rrpfrRT4J7I33aU7V7J4ElrD\\nZRN2ye5Ck17lNv3tySYOKmCV1a9gbQFE/6iog4eABihgFxLJFJuvCDD3k59+f6TK\\nItavUQvKo/P0OCMiLDvzv+H9k16t4L5Cs7lt+7z2VQKBgHtTDcfeuNeqkgdEc1pY\\n9y764pQf1mJIIcdDG7xd6n6mE+zziqqJHcgTt82GEAhpBRjIoESNKgsknnvvJxpc\\nrrpAZKKcOliyAcr8JffRHfqmwD842Hq+lXyavQQ17D7Ygl+PxrMCU+Mx4vgn/etq\\nBVNllpidPSiNzr30P4Ckgkug\\n-----END PRIVATE KEY-----\\n\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/transaction",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"transaction"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "balance",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/balance/b892cba8ebc0be55288035008b35d993909972d6",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"balance",
+						"b892cba8ebc0be55288035008b35d993909972d6"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "balance 2",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/balance/fbb8e39919e4476bfad3c84ebcba5bd50b82ce6c",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"balance",
+						"fbb8e39919e4476bfad3c84ebcba5bd50b82ce6c"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
