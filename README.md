@@ -15,6 +15,8 @@
     - presente uno script "invia-eth" per lo scambio di ETH, indispensabile perchè ogni chiamata allo smart consuma fee/gas!
     - presente uno script per cambiare il presidente della campagna!
 - **SoliditySmartContract06VotationsV2**: progetto di SmartContract per sistema di votazione evoluto (con avvio campagna, candidature e votazioni) **funzionante** con semplice frontend per la gestione delle candidature e delle votazioni
+- ***SoliditySmartContract07DocumentValidatorArbitrum**: progetto di SmartContract per sistema di validazione documento onChain (i documenti vengono salvati da un emittende e chiunque può verificare la validità) **in fase di sviluppo**
+    - questo esempio utilizza la rete Abritrum (L2 di Eth)
 - SolidityBrowserExample1: esempio in fase di revisione
 - Web3ProjectsExample1: esempio in fase di revisione
 
