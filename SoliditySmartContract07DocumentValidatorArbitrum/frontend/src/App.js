@@ -1,144 +1,156 @@
-import React, { useState } from "react";
-import { Container, Card, Button, Form, Row, Col, Alert } from "react-bootstrap";
-import { ethers } from "ethers";
-import DocumentCertifierABI from "./abis/DocumentCertifier.json";
+import React, { useState, useEffect } from 'react';
+import { Container, Row, Col, Card, Nav, Navbar, Badge } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-const CONTRACT_ADDRESS = "YOUR_CONTRACT_ADDRESS_HERE"; // <- Inserisci indirizzo
-
-const App = () => {
-  const [provider, setProvider] = useState(null);
-  const [signer, setSigner] = useState(null);
-  const [contract, setContract] = useState(null);
-  const [alert, setAlert] = useState(null);
-
-  // Form states
-  const [issuerAddress, setIssuerAddress] = useState("");
-  const [recipient, setRecipient] = useState("");
-  const [pdfHash, setPdfHash] = useState("");
-  const [metadataURI, setMetadataURI] = useState("");
-  const [verifyHash, setVerifyHash] = useState("");
-  const [docInfo, setDocInfo] = useState(null);
-
-  const connectWallet = async () => {
-  const ethProvider = new ethers.providers.Web3Provider(window.ethereum);
-  await ethProvider.send("eth_requestAccounts", []);
-  const signer = ethProvider.getSigner();
-  const contract = new ethers.Contract(CONTRACT_ADDRESS, DocumentCertifierABI, signer);
-
-  setProvider(ethProvider);
-  setSigner(signer);
-  setContract(contract);
-  setAlert({ type: "success", message: "Wallet connesso!" });
-  };
-
-  const addIssuer = async () => {
-  try {
-    const tx = await contract.addIssuer(issuerAddress);
-    await tx.wait();
-    setAlert({ type: "success", message: `Issuer ${issuerAddress} aggiunto.` });
-  } catch (err) {
-    setAlert({ type: "danger", message: err.message });
-  }
-  };
-
-  const issueDocument = async () => {
-  try {
-    const tx = await contract.issueDocument(recipient, pdfHash, metadataURI);
-    await tx.wait();
-    setAlert({ type: "success", message: `Documento emesso per ${recipient}` });
-  } catch (err) {
-    setAlert({ type: "danger", message: err.message });
-  }
-  };
-
-  const verifyDocument = async () => {
-  try {
-    const data = await contract.getDocument(verifyHash);
-    setDocInfo(data);
-  } catch (err) {
-    setAlert({ type: "danger", message: "Documento non trovato." });
-  }
-  };
-
-  return (
-  <Container className="py-4">
-    <h2 className="mb-4">Document Certifier (Arbitrum)</h2>
-    <Button onClick={connectWallet} className="mb-3">Connetti Wallet</Button>
-    {alert && <Alert variant={alert.type}>{alert.message}</Alert>}
-
-    <Row>
-    <Col md={6}>
-      <Card className="mb-4">
-      <Card.Body>
-        <Card.Title>➕ Aggiungi Issuer</Card.Title>
-        <Form.Control type="text" placeholder="Indirizzo issuer" value={issuerAddress} onChange={(e) => setIssuerAddress(e.target.value)} className="my-2" />
-        <Button onClick={addIssuer}>Aggiungi</Button>
-      </Card.Body>
-      </Card>
-    </Col>
-
-    <Col md={6}>
-      <Card className="mb-4">
-      <Card.Body>
-        <Card.Title>📄 Emetti Documento</Card.Title>
-        <Form.Control type="text" placeholder="Destinatario" value={recipient} onChange={(e) => setRecipient(e.target.value)} className="my-2" />
-        <Form.Control type="text" placeholder="Hash del PDF (keccak256)" value={pdfHash} onChange={(e) => setPdfHash(e.target.value)} className="my-2" />
-        <Form.Control type="text" placeholder="Metadata URI (IPFS, etc.)" value={metadataURI} onChange={(e) => setMetadataURI(e.target.value)} className="my-2" />
-        <Button onClick={issueDocument}>Emetti</Button>
-      </Card.Body>
-      </Card>
-    </Col>
-
-    <Col md={12}>
-      <Card className="mb-4">
-      <Card.Body>
-        <Card.Title>🔍 Verifica Documento</Card.Title>
-        <Form.Control type="text" placeholder="Hash del documento" value={verifyHash} onChange={(e) => setVerifyHash(e.target.value)} className="my-2" />
-        <Button onClick={verifyDocument}>Verifica</Button>
-
-        {docInfo && (
-        <div className="mt-3">
-          <p><strong>Issuer:</strong> {docInfo.issuer}</p>
-          <p><strong>Recipient:</strong> {docInfo.recipient}</p>
-          <p><strong>Metadata URI:</strong> <a href={docInfo.metadataURI} target="_blank" rel="noopener noreferrer">{docInfo.metadataURI}</a></p>
-          <p><strong>Timestamp:</strong> {new Date(docInfo.issuedAt * 1000).toLocaleString()}</p>
-          <p><strong>Revocato:</strong> {docInfo.revoked ? "Sì" : "No"}</p>
-        </div>
-        )}
-      </Card.Body>
-      </Card>
-    </Col>
-    </Row>
-  </Container>
-  );
-};
-
-export default App;
-
-/*
-import logo from './logo.svg';
-import './App.css';
+import { useContract } from './hooks/useContract';
+import { switchToArbitrum } from './utils/contract';
+import ConnectWallet from './components/ConnectWallet';
+import AdminPanel from './components/AdminPanel';
+import IssuerPanel from './components/IssuerPanel';
+import VerifyDocument from './components/VerifyDocument';
 
 function App() {
+  const { contract, account, isAdmin, isIssuer, loading, connectWallet } = useContract();
+  const [activeTab, setActiveTab] = useState('verify');
+  const [networkName, setNetworkName] = useState('');
+
+  // Aggiungi questo useEffect in App.js per debug
+  useEffect(() => {
+    console.log('Account cambiato in App:', account);
+    console.log('Ruoli:', { isAdmin, isIssuer });
+  }, [account, isAdmin, isIssuer]);
+
+  useEffect(() => {
+    const checkNetwork = async () => {
+      if (window.ethereum) {
+        try {
+          const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+          switch (chainId) {
+            case '0xa4b1':
+              setNetworkName('Arbitrum One');
+              break;
+            case '0x7a69':
+              setNetworkName('Locale (Hardhat)');
+              break;
+            default:
+              setNetworkName('Rete sconosciuta');
+          }
+        } catch (error) {
+          console.error('Errore verifica rete:', error);
+        }
+      }
+    };
+
+    checkNetwork();
+  }, [account]);
+
+  const handleConnect = async () => {
+    if (window.ethereum) {
+      const switched = await switchToArbitrum();
+      if (switched) {
+        await connectWallet();
+      }
+    } else {
+      await connectWallet();
+    }
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Navbar bg="dark" variant="dark" expand="lg" className="mb-4">
+        <Container>
+          <Navbar.Brand href="#home">
+            📋 Document Certifier
+          </Navbar.Brand>
+          <Navbar.Text>
+            {account ? (
+              <>
+                {account.slice(0, 6)}...{account.slice(-4)}
+                <Badge bg="info" className="ms-2">{networkName}</Badge>
+              </>
+            ) : (
+              'Non connesso'
+            )}
+          </Navbar.Text>
+        </Container>
+      </Navbar>
+
+      <Container>
+        {!account ? (
+          <Row className="justify-content-center">
+            <Col md={6}>
+              <ConnectWallet onConnect={handleConnect} loading={loading} />
+            </Col>
+          </Row>
+        ) : (
+          <>
+            <Row className="mb-4">
+              <Col>
+                <Card>
+                  <Card.Header>
+                    <Nav variant="tabs" activeKey={activeTab} onSelect={setActiveTab}>
+                      <Nav.Item>
+                        <Nav.Link eventKey="verify">🔍 Verifica Documento</Nav.Link>
+                      </Nav.Item>
+                      {isIssuer && (
+                        <Nav.Item>
+                          <Nav.Link eventKey="issue">📝 Emetti Documento</Nav.Link>
+                        </Nav.Item>
+                      )}
+                      {isAdmin && (
+                        <Nav.Item>
+                          <Nav.Link eventKey="admin">⚙️ Pannello Admin</Nav.Link>
+                        </Nav.Item>
+                      )}
+                    </Nav>
+                  </Card.Header>
+                  <Card.Body>
+                    {activeTab === 'verify' && (
+                      <VerifyDocument contract={contract} />
+                    )}
+                    {activeTab === 'issue' && isIssuer && (
+                      <IssuerPanel contract={contract} account={account} />
+                    )}
+                    {activeTab === 'admin' && isAdmin && (
+                      <AdminPanel contract={contract} />
+                    )}
+                  </Card.Body>
+                </Card>
+              </Col>
+            </Row>
+
+            <Row>
+              <Col>
+                <Card className="bg-light">
+                  <Card.Body>
+                    <Row>
+                      <Col md={4}>
+                        <strong>Il tuo ruolo:</strong>
+                        <br />
+                        {isAdmin && <Badge bg="danger" className="me-1">Admin</Badge>}
+                        {isIssuer && <Badge bg="success" className="me-1">Issuer</Badge>}
+                        {!isAdmin && !isIssuer && <Badge bg="secondary">Visualizzatore</Badge>}
+                      </Col>
+                      <Col md={4}>
+                        <strong>Contratto:</strong>
+                        <br />
+                        <code className="small">{contract?.target || 'Non connesso'}</code>
+                      </Col>
+                      <Col md={4}>
+                        <strong>Rete:</strong>
+                        <br />
+                        <Badge bg="info">{networkName}</Badge>
+                      </Col>
+                    </Row>
+                  </Card.Body>
+                </Card>
+              </Col>
+            </Row>
+          </>
+        )}
+      </Container>
     </div>
   );
 }
 
 export default App;
-*/
