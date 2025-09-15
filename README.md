@@ -20,8 +20,8 @@ Questo repository raccoglie una serie di progetti e implementazioni relativi all
     - presente uno script "invia-eth" per lo scambio di ETH, indispensabile perchè ogni chiamata allo smart consuma fee/gas!
     - presente uno script per cambiare il presidente della campagna!
 - **SoliditySmartContract06VotationsV2** 👥: progetto di smart-contract per sistema di votazione evoluto rispetto al punto precedente con in agggiunta l'avvio specifico delle campagna, gestione delle cadidature e un sistema migliorato delle votazioni. *Funzionante* con semplice frontend per la gestione delle candidature e delle votazioni
-- **SoliditySmartContract07DocumentValidatorArbitrum** 📎: progetto di smart-contract per sistema di validazione documento onChain (i documenti vengono salvati da un emittende e chiunque può verificare la validità). Document Validator è un sistema per la certificazione e verifica di documenti costruito su blockchain Ethereum compatibile con **Arbitrum**. Il sistema permette di emettere, verificare e revocare certificati digitali in modo sicuro e trasparente, garantendo l'integrità e l'autenticità dei documenti attraverso la tecnologia blockchain, *funzionante* con semplice frontend per la gestione dei documenti.
-- **SoliditySmartContract08guessTheNumberGame** 🎲: *coming soon* progetto di mini-gioco dove lo scopo è indovinare il numero degli altri utenti *coming soon*.
+- **SoliditySmartContract07DocumentValidatorArbitrum** 📎: progetto di smart-contract per sistema di validazione documento onChain (i documenti vengono salvati da un emittende e chiunque può verificare la validità). Document Validator è un sistema per la certificazione e verifica di documenti costruito su blockchain Ethereum compatibile con **Arbitrum**. Il sistema permette di emettere, verificare e revocare certificati digitali in modo sicuro e trasparente, garantendo l'integrità e l'autenticità dei documenti attraverso la tecnologia blockchain, *funzionante* con semplice frontend per la gestione dei documenti. Sviluppato con Hardhat.
+- **SoliditySmartContract08guessTheNumberGame** 🎲: Un gioco blockchain "indovina il numero" multi-partita dove ogni utente può avviare la propria partita e chiunque può provare a indovinare su tutte le partite attive simultaneamente. Sviluppato con **Hardhat**, per eseguirlo in locale non servono truffle, ganache e metamask.
 - **Web3ProjectsExample1** 🏗️: esempio in fase di revisione
 
 
@@ -29,8 +29,11 @@ Questo repository raccoglie una serie di progetti e implementazioni relativi all
 La maggior parte dei progetti di esempio hanno bisogno di alcuni software dedicati: 
 - Node.js (v14+) con installazione della libreria web3 con il comando:
     - `npm install web3`
+- **Hardhat** è un ambiente di sviluppo moderno per smart contract Ethereum che offre un'esperienza di sviluppo completa e flessibile. È diventato lo standard de facto per lo sviluppo di DApps negli ultimi anni. *Molto meglio di Truffle* e non necessita di Ganache per funzionare in locale. 
 - Truffle Framework installato nel sistema con il comando:
     - `npm install @openzeppelin/test-helpers @truffle/hdwallet-provider dotenv`
+    - **Truffle** è uno dei primi e più maturi framework per sviluppo Ethereum, molto popolare fino a qualche anno fa.
+    - `npm install @openzeppelin/contracts @nomicfoundation/hardhat-ethers @nomicfoundation/hardhat-toolbox`
 - **Ganache** o un'altra blockchain Ethereum locale per lo sviluppo
     - Ganache è una blockchain Ethereum locale pensata per lo sviluppo e il testing di smart contract in modo rapido e sicuro.
     - ogni volta che si avvia Ganache bisogna prestare attenzione a quale file di configurazione `truffle-config.js` è configurato

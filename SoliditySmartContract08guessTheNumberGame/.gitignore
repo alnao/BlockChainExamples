@@ -1,0 +1,6 @@
+.env
+local-keys.json
+artifacts
+cache
+deployed-contract.json
+deployed-addresses.json
