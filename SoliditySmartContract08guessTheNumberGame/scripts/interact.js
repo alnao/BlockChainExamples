@@ -41,7 +41,7 @@ async function main() {
     
   } catch (error) {
     console.error("❌ Errore nel caricamento degli indirizzi:", error.message);
-    console.log("💡 Suggerimento: Esegui prima 'npx hardhat run scripts/deploy.js --network localhost'");
+    console.log("💡 Suggerimento: controlla il deploy dello smart contract");
     return;
   }
 

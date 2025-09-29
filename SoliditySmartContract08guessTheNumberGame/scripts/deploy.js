@@ -8,7 +8,7 @@ async function main() {
   
   // Deploy ERC20Mock first
   const MockToken = await hre.ethers.getContractFactory("ERC20Mock");
-  const mockToken = await MockToken.deploy("Test Token", "TEST", deployer.address, hre.ethers.parseEther("1000000"));
+  const mockToken = await MockToken.deploy("Nao Token", "NAO", deployer.address, hre.ethers.parseEther("1000000"));
   await mockToken.waitForDeployment();
   
   const tokenAddress = await mockToken.getAddress();
