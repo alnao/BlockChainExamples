@@ -83,148 +83,172 @@ In sintesi: Cosa puoi fare per testare i tuoi smart contract:
 - Usa ambienti locali come Hardhat o Ganache per sviluppo e test.
 
 
-### Esecuzione su EC2 con geth
-Una possiblità è eseguire **Geth** in una istanza AWS-EC2 e rilasciare uno smart-contract e eseguire operazioni, nell'esempio viene usato l'esempio *SoliditySmartContract08guessTheNumberGame*, i passi da eseguire sono:
+## Esecuzione su EC2 con geth
+Una possibilità è eseguire **Geth** su un’istanza AWS-EC2 per rilasciare uno smart contract ed eseguire operazioni. Nell’esempio viene usato *SoliditySmartContract08guessTheNumberGame*. I passi da seguire sono:
+
 1. Avviare una nuova istanza EC2
-    - Su **EC2** → **Launch Instance**.
-    - Scegliere una AMI Ubuntu (es: Ubuntu 22.04 LTS).
-    - Scegliere una dimensione (t2.medium o superiore per test).
-    - Scegliere una chiave pem già esistente (o crearene una nuova)
+    - Andare su **EC2** → **Launch Instance**
+    - Scegliere una AMI Ubuntu (es: Ubuntu 22.04 LTS)
+    - Scegliere una dimensione (t2.medium o superiore per test)
+    - Scegliere una chiave pem già esistente (o crearne una nuova)
     - Configurare il security group:
-        - autorizzare porta SSH-22 dall'IP attuale
-        - autorizzare le porte **30303** (TCP/UDP) e **8545** (RPC, opzionale, solo per IP sicuri).
-        - nota sicurezza: Non esporre la porta 8545 pubblicamente in produzione! Usa VPN o limita l’accesso agli IP sicuri. questo è solo un esempio/prototipo 
-    - Avviare l’istanza e annota l’IP pubblico.
+        - Autorizzare porta SSH-22 dall’IP attuale
+        - Autorizzare le porte **30303** (TCP/UDP) e **8545** (RPC, opzionale, solo per IP sicuri)
+        - Nota sicurezza: non esporre la porta 8545 pubblicamente in produzione! Usare VPN o limitare l’accesso agli IP sicuri. Questo è solo un esempio/prototipo
+    - Avviare l’istanza e annotare l’IP pubblico
+
 2. Connettersi via SSH
     ```bash
     ssh -i /percorso/chiave.pem ubuntu@<IP_EC2>
     ```
+
 3. Installare Geth
     ```bash
     sudo add-apt-repository -y ppa:ethereum/ethereum
     sudo apt update
     sudo apt install -y ethereum
-    geth -version 
+    geth -version
     ```
-    dovebbe essere la versione `geth version 1.16.3-stable-d818a9af` (a settembre 2025)
+    La versione dovrebbe essere `geth version 1.16.3-stable-d818a9af` (a settembre 2025)
+
 4. Inizializzare la rete privata
-    Creare una cartella per la blockchain:
-    ```bash
-    mkdir ~/mychain && cd ~/mychain
-    ```
-    Creare un file di genesis (esempio minimal):
-    ```bash
-    nano genesis.json
-    ```
-    Incollare il contenuto (poi sarà modificato):
-    ```json
-    {
-    "config": {
-        "chainId": 2025,
-        "homesteadBlock": 0,
-        "eip150Block": 0,
-        "eip155Block": 0,
-        "eip158Block": 0,
-        "byzantiumBlock": 0,
-        "constantinopleBlock": 0,
-        "petersburgBlock": 0,
-        "istanbulBlock": 0,
-        "berlinBlock": 0,
-        "londonBlock": 0,
-        "terminalTotalDifficulty": "0"
-    },
-    "difficulty": "0x1",
-    "gasLimit": "8000000",
-    "alloc": {}
-    }
-    ```
-    Inizializzare la blockchain:
-    ```bash
-    geth --datadir ~/mychain init genesis.json
-    ```
+    - Creare una cartella per la blockchain:
+      ```bash
+      mkdir ~/mychain && cd ~/mychain
+      ```
+    - Creare un file di genesis (esempio minimal):
+      ```bash
+      nano genesis.json
+      ```
+    - Incollare il contenuto (poi sarà modificato):
+      ```json
+      {
+        "config": {
+          "chainId": 2025,
+          "homesteadBlock": 0,
+          "eip150Block": 0,
+          "eip155Block": 0,
+          "eip158Block": 0,
+          "byzantiumBlock": 0,
+          "constantinopleBlock": 0,
+          "petersburgBlock": 0,
+          "istanbulBlock": 0,
+          "berlinBlock": 0,
+          "londonBlock": 0,
+          "terminalTotalDifficulty": "0"
+        },
+        "difficulty": "0x1",
+        "gasLimit": "8000000",
+        "alloc": {}
+      }
+      ```
+    - Inizializzare la blockchain:
+      ```bash
+      geth --datadir ~/mychain init genesis.json
+      ```
+
 5. Avviare il nodo per creare la prima rete
     ```bash
-    geth --datadir ~/mychain --networkid 2025 --http --http.addr "0.0.0.0" --http.port 8545 --http.api "eth,net,web3,personal" --allow-insecure-unlock --nodiscover --mine 
+    geth --datadir ~/mychain --networkid 2025 --http --http.addr "0.0.0.0" --http.port 8545 --http.api "eth,net,web3,personal" --allow-insecure-unlock --nodiscover --mine
     ```
-    - Puoi aggiungere `--http.corsdomain "*" --http.vhosts "*"` per test da remoto (solo in ambienti sicuri!).
-6. Sblocca un nuovo account per il deploy e creare un account:
+    - Aggiungere `--http.corsdomain "*"` e `--http.vhosts "*"` per test da remoto (solo in ambienti sicuri)
+
+6. Sbloccare un nuovo account per il deploy e creare un account:
     ```bash
     geth --datadir ~/mychain account new
-    geth --datadir ~/mychain account list 
+    geth --datadir ~/mychain account list
     ```
-    - Ti verrà chiesto di inserire una password (scegline una e ricordala!). Dopo aver confermato, Geth ti mostrerà l’indirizzo pubblico del nuovo account, ad esempio: `Address: {1234...}`
+    - Viene chiesto di inserire una password (scegline una e ricordala!).
+    - Annotare l’indirizzo pubblico del nuovo account
     - A me non mostra l'account di risposta e il secondo comando ritorna la lsita degli account con il file di riferimento da annotare per il prossimo passo
-7. Per recupeare la chiave privata dalla password (*a me non mostra il valore dell'address*), fare uno script in node per decriptare la key a partire dalla password, prima bisogna installare `nodejs`, `npm` ed eseguire il comando
-    ```bash
-    sudo apt install nodejs npm
-    npm install web3
-    ```
-    Poi scrivere il file web3.js:
-    ```js
-    const fs = require('fs');
-    const { Web3 } = require('web3');
 
-    const keyfile = fs.readFileSync('/home/ubuntu/mychain/keystore/UTC--<nomeFile>').toString();
-    const password = '<passord>';
-    console.log(keyfile);
-    const web3 = new Web3();
-    const account = web3.eth.accounts.decrypt(JSON.parse(keyfile), password);
-    account.then(e => console.log(e) );
-    console.log('Private key:', account.privateKey);
-    console.log('Address:', account.address);
-    ```
-    E infine eseguire 
-    ```bash
-    nano web3.js
-    ```
-    Una volta eseguito lo script web3.js, otterrai la private key da annotare ma non dare a nessuno.
-8. Allocare un po' di token all'utente che dovrà creare lo smart (senza token non sarà possibile rilasciare lo smart-contract),
-    Modificare il file `genesis.json` modificando la sezione alloc con l'oggetto json
-    ```json
-        "alloc": {
-            "31d0aFD9C8922a611AB15D62A8E33Bc31304F2f2": {
-            "balance": "1000000000000000000000"
-            }
+7. Recuperare la chiave privata dalla password tramite uno script Node.js:
+    - Installare nodejs, npm e web3:
+      ```bash
+      sudo apt install nodejs npm
+      npm install web3
+      ```
+    - Scrivere il file web3.js:
+      ```js
+      const fs = require('fs');
+      const { Web3 } = require('web3');
+
+      const keyfile = fs.readFileSync('/home/ubuntu/mychain/keystore/UTC--<nomeFile>').toString();
+      const password = '<password>';
+      const web3 = new Web3();
+      const account = web3.eth.accounts.decrypt(JSON.parse(keyfile), password);
+      account.then(e => console.log(e) );
+      console.log('Private key:', account.privateKey);
+      console.log('Address:', account.address);
+      ```
+    - Eseguire lo script:
+      ```bash
+      node web3.js
+      ```
+    - Annotare la private key (senza condividerla)
+
+8. Allocare ETH all’account per poter deployare lo smart contract:
+    - Modificare il file `genesis.json` nella sezione alloc:
+      ```json
+      "alloc": {
+        "1234567890ABCDEF...": {
+          "balance": "1000000000000000000000"
         }
-    ```
-    *per un motivo oscuro* l'address deve essere senza `0x`, inserire la chiave pubblica dell'address creato nei punti precedenti
-    Successivamente è necessario riavviare la chain (rimuovendo tutta la catena precedente)
-    ```bash
-    rm -rf ~/mychain/geth
-    geth --datadir ~/mychain init genesis.json
-    # Far ripartire la chain
-    geth --datadir ~/mychain --http --http.addr "0.0.0.0" --http.port 8545 --http.api "eth,net,web3,personal,debug" --allow-insecure-unlock --nodiscover --dev --dev.period 10
-    ```
-9. Eseguire il deploy dello smartcontract nella rete corretta usando l’endpoint `http://<IP_EC2>:8545` come RPC endpoint nel tuo script Node.js/Hardhat/Truffle. Modificare il file `hardhat.config.js` aggiungendo il network:
-    ```json
-    ec2geth: {
-        url: "http://<IP_EC2>:8545",
-        accounts: ["0xTUA_PRIVATE_KEY_SENZA_0x"]
-    }
-    ```
-    Eseguire i comandi di deploy nella rete
-    ```bash
-    npx hardhat run scripts/deploy.js --network ec2geth
-    ```
-    E il risulstato sarà qualcosa del tipo
-    ```
-    Deploying contracts with the account: 0xAAAAAAAA
-    MockToken deployed to: 0xBBBBBB
-    GuessTheNumberMulti deployed to: 0xCCCCCCCCCCC
-    Indirizzi salvati in: deployed-addresses.json
+      }
+      ```
+      > L’indirizzo deve essere senza il prefisso `0x` e corrispondere all’account creato
 
-    Deployment completed!
-    Token address: 0xCCCCCCCCCCCC
-    Game address: 0xDDDDDDDD
+    - Riavviare la chain (rimuovendo la catena precedente):
+      ```bash
+      rm -rf ~/mychain/geth
+      geth --datadir ~/mychain init genesis.json
+      geth --datadir ~/mychain --http --http.addr "0.0.0.0" --http.port 8545 --http.api "eth,net,web3,personal,debug" --allow-insecure-unlock --nodiscover --dev --dev.period 10
+      ```
+
+9. Deployare lo smart contract nella rete corretta usando l’endpoint `http://<PUBLIC_IP_EC2>:8545` come RPC endpoint nel file di configurazione Hardhat:
+    ```javascript
+    module.exports = {
+      solidity: {
+        version: "0.8.18"
+      },
+      networks: {
+        hardhat: {},
+        localhost: {
+          url: "http://127.0.0.1:8545"
+        },
+        ec2geth: {
+          url: "http://<PUBLIC_IP_EC2>:8545",
+          accounts: ["0xTUA_PRIVATE_KEY_SENZA_0x"]
+        }
+      }
+    };
     ```
-10. Eseguire il contratto, verificando il file `deployed-addresses.json' dove devono essere censiti la rete e gli indirizzi corretti, poi lanciare il comando di verifica
-    ```bash
-    npx hardhat console --network ec2geth
-    ```
-    Infine *finalmente* è possibile eseguire il contratto con il comando
-    ```bash
-    npx hardhat run scripts/interact.js --network ec2geth
-    ```
+    - Eseguire il deploy:
+      ```bash
+      npx hardhat run scripts/deploy.js --network ec2geth
+      ```
+    - Il risulstato è del tipo:
+      ```
+      Deploying contracts with the account: 0xAAAAAAAA
+      MockToken deployed to: 0xBBBBBB
+      GuessTheNumberMulti deployed to: 0xCCCCCCCCCCC
+      Indirizzi salvati in: deployed-addresses.json
+
+      Deployment completed!
+      Token address: 0xCCCCCCCCCCCC
+      Game address: 0xDDDDDDDD
+      ```
+    - Annotare gli indirizzi dei contratti e verificare il contenuto del file `deployed-addresses.json`
+
+10. Interagire con il contratto:
+    - Aprire la console Hardhat:
+      ```bash
+      npx hardhat console --network ec2geth
+      ```
+    - Eseguire lo script di interazione:
+      ```bash
+      npx hardhat run scripts/interact.js --network ec2geth
+      ```
 
 
 
