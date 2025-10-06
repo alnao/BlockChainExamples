@@ -4,6 +4,8 @@
 Questo repository raccoglie una serie di progetti e implementazioni relativi alla tecnologia blockchain, con particolare attenzione allo sviluppo di smart-contract su Ethereum e all'integrazione con applicazioni client. I progetti inclusi coprono diversi casi d'uso, tra cui sistemi di votazione 🗳️, gestione di NFT 🖼️, raccolte fondi 💰, validazione documentale on-chain 📄 e semplici blockchain didattiche in Python 🐍 e TypeScript 🟦. Ogni esempio è strutturato per favorire la comprensione delle principali tecniche di sviluppo, test e deployment di soluzioni decentralizzate, fornendo codice sorgente, script di migrazione, test automatici e, ove presente, interfacce utente per l'interazione con la blockchain.
 
 
+🟡 Non divulgare mai le chiavi private associate ai tuoi account blockchain: custodirle con la massima attenzione è fondamentale per la sicurezza dei tuoi fondi e dei tuoi smart contract. Condividere o esporre accidentalmente una chiave privata può portare alla perdita irreversibile di tutti i tuoi asset digitali. 🟡
+
 
 - **FundraiserApplication** 💰: esempio *funzionante* di smart-contract che simula una raccolta fondi con metodi per donare e eventi, comprende anche una piccola applicazione React per eseguire le donazioni e gestire i fondi. Esempio preso dal capitolo 6 del libro "Hands-On Smart Contract Development with Solidity and Ethereum - 2020 - O'Reilly"
 - **FundraiserFactory** 🏭: esempio *funzionante* di smart-contract, partendo dal FundraiserApplication vengono aggiunti i componenti per gestire più progetti. Esempio preso dal capitolo 7 del libro "Hands-On Smart Contract Development with Solidity and Ethereum - 2020 - O'Reilly"
@@ -22,7 +24,8 @@ Questo repository raccoglie una serie di progetti e implementazioni relativi all
 - **SoliditySmartContract06VotationsV2** 👥: progetto di smart-contract per sistema di votazione evoluto rispetto al punto precedente con in agggiunta l'avvio specifico delle campagna, gestione delle cadidature e un sistema migliorato delle votazioni. *Funzionante* con semplice frontend per la gestione delle candidature e delle votazioni
 - **SoliditySmartContract07DocumentValidatorArbitrum** 📎: progetto di smart-contract per sistema di validazione documento onChain (i documenti vengono salvati da un emittende e chiunque può verificare la validità). Document Validator è un sistema per la certificazione e verifica di documenti costruito su blockchain Ethereum compatibile con **Arbitrum**. Il sistema permette di emettere, verificare e revocare certificati digitali in modo sicuro e trasparente, garantendo l'integrità e l'autenticità dei documenti attraverso la tecnologia blockchain, *funzionante* con semplice frontend per la gestione dei documenti. Sviluppato con Hardhat.
 - **SoliditySmartContract08guessTheNumberGame** 🎲: Un gioco blockchain "indovina il numero" multi-partita dove ogni utente può avviare la propria partita e chiunque può provare a indovinare su tutte le partite attive simultaneamente. Sviluppato con **Hardhat**, per eseguirlo in locale non servono truffle, ganache e metamask.
-    - esempio eseguito anche con geth su istanza AWS-EC2 (visto che Amazon Managed Blockchain non prevede rete di test)
+    - esempio rilasciato su **Testnet Sepolia** (vedi sezione dedicata in questo README)
+    - esempio rilasciato anche con geth su istanza AWS-EC2 (visto che Amazon Managed Blockchain non prevede rete di test)
 - **Web3ProjectsExample1** 🏗️: esempio in fase di revisione
 
 
@@ -42,7 +45,82 @@ La maggior parte dei progetti di esempio hanno bisogno di alcuni software dedica
 - **Metamask** o un altro wallet Ethereum per interagire con la blockchain
     - MetaMask è un wallet digitale che consente di gestire account Ethereum e interagire con dApp direttamente dal browser.
     - se si usano più account su Metamask bisogna ricordarsi di autorizzare i successivi account: cliccando su tre icone al fianco dell'account, premere su voce "All permission", selezionare la rete corretta come "localhost:3000" e selezionare gli account da abilitare. Senza questa configurazione la libreria web3 non funziona correttamente e nei frontend viene caricata SOLO l'account principale configurato in Metamask! *Ho perso un sacco di tempo per questa stupida configurazione* 
-- Per il corretto funzionamento di questi esempi è consigliato utilizzare un sistema GNU Linux ma è possibile usare anche altri sistemi oprativi se ben configurati.
+- Per il rilascio su rete **Testnet Sepolia** è necessario un account nel sito `https://developer.metamask.io/`, per questi smartcontract di esempio è possibile usare senza problemi il profilo *free*
+- Per il corretto funzionamento di questi esempi è consigliato utilizzare un sistema GNU Linux ma è possibile usare anche altri sistemi oprativi se ben configurati
+
+
+## Esecuzione su Testnet Sepolia
+**Sepolia** è una delle principali testnet pubbliche di Ethereum, progettata per testare smart contract e DApp in un ambiente sicuro e gratuito, senza usare ETH reale. Per usarla, è possibile configurare il tuo progetto con un endpoint RPC Sepolia (ad esempio Infura o Alchemy) e importando la chiave privata di un account con ETH di test ottenuto da un faucet. Puoi è possibile deployare e interagire con i tuoi smart contract su Sepolia come faresti su mainnet, ma *senza rischi economici oppure con pochissimi euro/dollari di costo*.
+
+
+I passi per eseguire il rilascio del progetto di esempio "08 Guess the number" su rete Sepolia tramite Infura sono: 
+
+1. Registrarsi su Infura nel sito `https://developer.metamask.io/`, per le prove di un semlice SmartContract è possibile selezionare il piano gratuito che prevede un "api key" e un numero limitato di richieste. In fase di creazione della key viene generato un KeyId e un KeySecret che serviranno. Nelle pagine di configurazione `https://developer.metamask.io/key/settings` è possibile recuperare il "AccountId", questo è utile per determinare l'endpoint della rete che sarà del tipo
+    ```
+    https://sepolia.infura.io/v3/<account_id>
+    ```
+    la lista di tutti gli endpoint a disposizione da infura è disponibile nella videata "Active Endpoints" nel dettaglio delle API.
+2. Testare la rete creata con una chiamata alle API, per esempio usando il comando curl
+    ```bash
+    curl --user :<YOUR-API-KEY-SECRET> \
+      https://mainnet.infura.io/v3/<YOUR-API-KEY> \
+      -d '{"jsonrpc": "2.0", "method": "eth_blockNumber", "params": [], "id": 1}'  
+    ```
+2. Utilizzare questo servizio richiede monitorare costantemente l'utilizzo per rimanere entro i limiti previsti dal profilo *free* di Infura; per un uso intensivo è necessario effettuare l'[upgrade a un piano a pagamento](https://docs.metamask.io/developer-tools/dashboard/how-to/upgrade-your-plan/) che offre limiti più elevati rispetto a quelli gratuiti. Tutti i dettagli sono ben descritti nella [Documentazione ufficiale](https://docs.metamask.io/developer-tools/dashboard/how-to/secure-an-api/set-rate-limits/)
+3. Procurarsi la chiave privata di un account testnet con ETH di test (puoi usare faucet pubblici).
+
+    🟡 TODO: non ricordo come ho generato la chiave primaria, sicuramente è stata generata da Sepolia/infura o da Metamask ma non ricordo come
+4. Nel progetto installare le dipendenze mancanti con il comando
+    ```
+    npm install --save-dev @nomiclabs/hardhat-ethers ethers @nomiclabs/hardhat-etherscan --legacy-peer-deps
+    ```
+5. Configurare il file `hardhat.config.js` aggiungendo la riga di configurazione per la rete specifica
+    ```
+      sepolia: {
+        url: "https://sepolia.infura.io/v3/<KEY_ID>", 
+        accounts: ["0xTUA_PRIVATE_KEY_SENZA_0x"
+          ,"0xTUA_SECONDA_PRIVATE_KEY_SENZA_0x"
+        ]
+      }
+    ```
+    nel file è necessario indicare la KEY_ID creata da infura, una o più chiavi primarie, come prima chiave bisogna indicare l'owner del contratto che è generato al passo 3, le successive chiavi saranno usate dallo script interact
+
+    🟡 Attenzione: non rilasciare mai nei repository le chiavi private, è facile incappare nell'errore di eseguire commit/push del file di configurazione con le chiavi private inserite. 
+6. Deploy sulla testnet: avviare il deploy nella rete sepolia (o quella configurata):
+    ```
+    npx hardhat run scripts/deploy.js --network sepolia
+    ```
+7. Gestione errore *insufficient funds*: al deploy nella rete Sepolia è necessario avere a disposizione degli Sepolia-ETH token per eseguire il deploy, in caso di mancanza di questi token l'errore sarà `ProviderError: insufficient funds for gas * price + value: balance 0, tx cost xxxxxx, overshot xxxxxxx`. Per ovviare a questo problema è possibile richiedere i token tramite i siti faucet (che di solito hanno sistemi anti-bot come captcha). Il sistema più semplice è usare
+    ```
+    https://www.alchemy.com/faucets/ethereum-sepolia
+    ```
+    che permette di inviare 0.1 Sepolia ETH ogni 72 ore ma alla condizione che nell'indirizzo di destinazione, nella rete pubblica reale ci siano almeno 0.001 ETH reali. 
+    
+    🟡 Nota: gli ETH richiesti non vengono consumati/bruciati e nemmeno sequestrati ma servono solo per verifica antispam/antibot, comunque devono essere token reali di produzione.
+8. Una volta rilasciato lo smart contract comparira un messaggio del tipo
+    ```
+    Deploying contracts with the account: 0x1234567890ABCDEF1
+    MockToken deployed to: 0x1234567890ABCDEF2
+    GuessTheNumberMulti deployed to: 0x1234567890ABCDEF3
+    Indirizzi salvati in: /mnt/Dati/Workspace/BlockChainExamples/SoliditySmartContract08guessTheNumberGame/deployed-addresses.json
+    Deployment completed!
+    Token address: 0x1234567890ABCDEF4
+    Game address: 0x1234567890ABCDEF5
+    ```
+9. Infine sarà possibile interagire con lo smart contract manualmente con lo script
+    ```
+    npx hardhat run scripts/interact.js --network sepolia
+    ```
+    tramite Metamask è possibile monitorare gli spostamenti dei token Sepolia ETH e dei token NAO (se correttamente configurato come token su Metamsk). In aggiunta è possibile verificare transazioni e funzionamento tramite **Etherscan Sepolia** e/o **Remix IDE** come descritto nei prossimi punti.
+
+### Etherscan Sepolia
+*Etherscan Sepolia* è un block explorer dedicato alla testnet Sepolia di Ethereum, che permette di visualizzare in tempo reale transazioni, blocchi, indirizzi, smart contract e i loro eventi sulla rete Sepolia. Offre strumenti per verificare e interagire con smart contract (funzioni "Read/Write Contract") direttamente dal browser, purché il contratto sia stato verificato pubblicamente. È accessibile all’indirizzo https://sepolia.etherscan.io/.
+
+Per esempio all'indirizzo
+```
+https://sepolia.etherscan.io/address/0xAAAAAAAAAAAAAAA
+```
+è possibile monitorare i movimento e lo stato di un contratto.
 
 
 ## AWS Managed Blockchain

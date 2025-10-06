@@ -5,7 +5,7 @@ const path = require("path");
 function saveDeployedAddresses(tokenAddress, gameAddress) {
   const addresses = {
     timestamp: new Date().toISOString(),
-    network: "localhost",
+    network: "TODO_SET_NETWORK_NAME", // impostare il nome della rete qui
     token: tokenAddress,
     game: gameAddress
   };

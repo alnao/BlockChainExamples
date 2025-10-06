@@ -5,6 +5,9 @@ Un gioco blockchain "indovina il numero" multi-partita dove ogni utente può avv
 Questo esempio utilizza **hardhat** al posto di **truffle**: Hardhat è un ambiente di sviluppo moderno per smart contract Ethereum che offre un'esperienza di sviluppo completa e flessibile. È diventato lo standard de facto per lo sviluppo di DApps negli ultimi anni. Truffle è uno dei primi e più maturi framework per sviluppo Ethereum, molto popolare fino a qualche anno fa.
 
 
+Nota: vedere il README generale per il rilascio di questo Smart Contract nella rete Testnet Sepolia e/o esecuzione con Geth.
+
+
 ## 🎯 Caratteristiche Principali
 - L'amministratore deploya il contratto impostando due fee: `setFee` e `guessFee`
 - Il contratto viene deployato con un token ERC20Mock per i pagamenti
