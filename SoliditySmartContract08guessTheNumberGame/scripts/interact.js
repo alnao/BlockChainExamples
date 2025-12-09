@@ -8,6 +8,24 @@ async function prompt(question) {
   return new Promise((resolve) => rl.question(question, (ans) => { rl.close(); resolve(ans); }));
 }
 
+async function ensureAllowance(token, user, spender, amount, promptFunc) {
+  const allowance = await token.allowance(user.address, spender);
+  if (allowance < amount) {
+    console.log(`⚠️ Allowance insufficiente: approvato ${ethers.formatEther(allowance)} NAO, richiesto ${ethers.formatEther(amount)} NAO`);
+    const ans = await promptFunc(`💡 Vuoi approvare ${ethers.formatEther(amount)} NAO ora? (s/n): `);
+    if (ans.toLowerCase() === 's') {
+      console.log("✅ Approvando token...");
+      const tx = await token.connect(user).approve(spender, amount);
+      await tx.wait();
+      console.log("🎉 Approvazione completata!");
+      return true;
+    }
+    console.log("❌ Operazione annullata.");
+    return false;
+  }
+  return true;
+}
+
 async function main() {
   let contract, token, addresses;
   let running = true;
@@ -25,7 +43,7 @@ async function main() {
     console.log("👤 Account corrente:", user.address);
     
     contract = await ethers.getContractAt("GuessTheNumberMulti", addresses.game);
-    token = await ethers.getContractAt("ERC20Mock", addresses.token);
+    token = await ethers.getContractAt("NAOTOKENERC20", addresses.token);
     
     // Controlla balance token
     const balance = await token.balanceOf(user.address);
@@ -73,9 +91,22 @@ async function main() {
     try {
       if (choice === "8") {
         console.log("\n🔄 Seleziona account:");
-        signers.forEach((s, i) => {
-          console.log(`[${i}] ${s.address}`);
+        console.log("⏳ Recupero dati account...");
+        const accountsData = await Promise.all(signers.map(async (s, i) => {
+            const bal = await token.balanceOf(s.address);
+            const all = await token.allowance(s.address, addresses.game);
+            return {
+                index: i,
+                address: s.address,
+                balance: ethers.formatEther(bal),
+                allowance: ethers.formatEther(all)
+            };
+        }));
+        
+        accountsData.forEach((d) => {
+          console.log(`[${d.index}] ${d.address} | 💰 ${d.balance} NAO | ✅ Approved: ${d.allowance} NAO`);
         });
+
         const idx = await prompt("Numero account [0-9]: ");
         const idxNum = Number(idx);
         if (!isNaN(idxNum) && idxNum >= 0 && idxNum < signers.length) {
@@ -97,13 +128,8 @@ async function main() {
           break;
         }
         console.log("⏳ Controllando allowance...");
-        const allowance = await token.allowance(user.address, addresses.game);
         const setFee = await contract.setFee();
-        if (allowance < setFee) {
-          console.log("❌ Allowance insufficiente!");
-          console.log("💡 Usa l'opzione 6 per approvare prima i token");
-          continue;
-        }
+        if (!(await ensureAllowance(token, user, addresses.game, setFee, prompt))) continue;
         console.log("✅ Avviando partita...");
         try {
           // Connetti il contratto all'account corrente selezionato
@@ -125,13 +151,8 @@ async function main() {
           break;
         }
         console.log("⏳ Controllando allowance...");
-        const allowance = await token.allowance(user.address, addresses.game);
         const setFee = await contract.setFee();
-        if (allowance < setFee) {
-          console.log("❌ Allowance insufficiente!");
-          console.log("💡 Usa l'opzione 6 per approvare prima i token");
-          continue;
-        }
+        if (!(await ensureAllowance(token, user, addresses.game, setFee, prompt))) continue;
         console.log("✅ Aggiornando numero...");
         try {
           // Connetti il contratto all'account corrente selezionato
@@ -153,13 +174,8 @@ async function main() {
           break;
         }
         console.log("⏳ Controllando allowance...");
-        const allowance = await token.allowance(user.address, addresses.game);
         const guessFee = await contract.guessFee();
-        if (allowance < guessFee) {
-          console.log("❌ Allowance insufficiente!");
-          console.log("💡 Usa l'opzione 6 per approvare prima i token");
-          continue;
-        }
+        if (!(await ensureAllowance(token, user, addresses.game, guessFee, prompt))) continue;
         console.log("✅ Tentando su tutti i game...");
         try {
           // Connetti il contratto all'account corrente selezionato

@@ -1,25 +1,31 @@
 require("@nomicfoundation/hardhat-ethers");
 require("@nomicfoundation/hardhat-chai-matchers");
+require("dotenv").config(); // Assicurati di avere dotenv
+
+// Usa una chiave dummy se la variabile non c'è, così la compilazione non fallisce
+const PRIVATE_KEY = process.env.PRIVATE_KEY || "0x0000000000000000000000000000000000000000000000000000000000000000";
+const SECOND_PRIVATE_KEY = process.env.SECOND_PRIVATE_KEY || "0x0000000000000000000000000000000000000000000000000000000000000000"; // Aggiunto
+const LOCALHOST_URL = "http://127.0.0.1:8545";
+const REMOTE_URL = `https://sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID || "YOUR_INFURA_PROJECT_ID_HERE"}`;
+const EC2_URL = process.env.EC2_URL || "http://1.2.3.4:8545";
+
 
 module.exports = {
   solidity: {
-    version: "0.8.18"
+    version: "0.8.24"
   },
   networks: {
     hardhat: {},
     localhost: {
-      url: "http://127.0.0.1:8545"
+      url: LOCALHOST_URL
     },
     ec2geth: {
-      url: "http://1.2.3.4:8545",
-      // opzionale: inserire qui la private key dell’account creato su Geth 0xTUA_PRIVATE_KEY_SENZA_0x
-      accounts: ["0xTUA_PRIVATE_KEY_SENZA_0x"]
+      url: EC2_URL,
+      accounts: [PRIVATE_KEY]
     },
     sepolia: {
-      url: "https://sepolia.infura.io/v3/<KEY_ID>", // o endpoint Alchemy
-      accounts: ["0xTUA_PRIVATE_KEY_SENZA_0x"
-        ,"0xTUA_SECONDA_PRIVATE_KEY_SENZA_0x"
-      ]
+      url: REMOTE_URL, // o endpoint Alchemy
+      accounts: [PRIVATE_KEY,SECOND_PRIVATE_KEY] // inserire la private key dell’account di Sepolia
     }
   }
  

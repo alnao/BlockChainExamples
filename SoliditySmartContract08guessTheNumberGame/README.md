@@ -5,7 +5,7 @@ Un gioco blockchain "indovina il numero" multi-partita dove ogni utente può avv
 Questo esempio utilizza **hardhat** al posto di **truffle**: Hardhat è un ambiente di sviluppo moderno per smart contract Ethereum che offre un'esperienza di sviluppo completa e flessibile. È diventato lo standard de facto per lo sviluppo di DApps negli ultimi anni. Truffle è uno dei primi e più maturi framework per sviluppo Ethereum, molto popolare fino a qualche anno fa.
 
 
-Nota: vedere il README generale per il rilascio di questo Smart Contract nella rete Testnet Sepolia e/o esecuzione con Geth.
+Nota: vedere il README generale per il rilascio di questo Smart Contract nella rete Testnet Sepolia e/o esecuzione con Geth su AWS-EC2.
 
 
 ## 🎯 Caratteristiche Principali
@@ -24,13 +24,15 @@ Nota: vedere il README generale per il rilascio di questo Smart Contract nella r
 SoliditySmartContract08guessTheNumberGame/
 ├── contracts/
 │   ├── GuessTheNumber.sol         # Contratto principale del gioco
-│   └── ERC20Mock.sol              # Token di test per i pagamenti
+│   └── NAO-TOKEN-ERC20.sol        # Token per i pagamenti
 ├── scripts/
 │   ├── deploy.js                  # Script di deployment
 │   ├── interact.js                # CLI interattiva completa
 │   └── addresses.js               # Gestione indirizzi deployed
 ├── test/
 │   └── GuessTheNumber.test.js     # Test completi
+├── create_ec2_node.sh			   # Creazione di una EC2 per eseguire il contratto con geth
+├── destroy_ec2_node.sh			   # Distruzione della EC2
 ├── hardhat.config.js              # Configurazione Hardhat
 ├── package.json                   # Dipendenze del progetto
 └── README.md                      # Questa documentazione
@@ -43,7 +45,14 @@ SoliditySmartContract08guessTheNumberGame/
   	- npm o yarn
 - Installazione Dipendenze
 	```bash
-	npm install
+	npm install --legacy-peer-deps
+	```
+- Creazione del file `.env` con le configurazioni
+	```bash
+	PRIVATE_KEY=0xYOUR_PRIVATE_KEY_HERE
+	SECOND_PRIVATE_KEY=0xYOUR_SECOND_PRIVATE_KEY_HERE
+	INFURA_PROJECT_ID=YOUR_INFURA_PROJECT_ID_HERE
+	EC2_URL=http://1.2.3.4:8545
 	```
 - Compilazione Contratti
 	```bash
@@ -89,6 +98,8 @@ SoliditySmartContract08guessTheNumberGame/
 	- **🪙 Gestione token**: Balance, allowance, approvazioni
 	- **🎁 Trasferimenti**: Sposta token tra account
 	- **🔄 Cambiare account**: Passa tra i diversi account disponibili
+5. Note:
+	- In Ethereum (standard ERC20), uno smart contract (come il gioco) non può prelevare token dal tuo portafoglio senza il tuo esplicito permesso. La funzione 6 dello script di interazione serve a chiamare approve sul contratto del Token, autorizzando il contratto del Gioco a spendere i tuoi NAO (per pagare le fee di avvio partita o di guess). È una misura di sicurezza fondamentale: senza approve, la transazione transferFrom nel gioco fallirebbe.
 
 ## 🧪 Test
 
@@ -143,23 +154,6 @@ Output di esempio:
 - **Fairness non garantita**: L'amministratore ha privilegi speciali
 - **Testnet only**: Testare solo su reti di sviluppo
 
-
-## 🛠️ Sviluppo e Contributi
-
-### Comandi di Sviluppo
-```bash
-# Pulizia artifacts
-npx hardhat clean
-
-# Compilazione forzata
-npx hardhat compile --force
-
-# Test con coverage
-npx hardhat coverage
-
-# Deploy su rete specifica
-npx hardhat run scripts/deploy.js --network <network-name>
-```
 
 ## 🔗 Collegamenti Utili
 

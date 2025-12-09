@@ -23,10 +23,24 @@ Questo repository raccoglie una serie di progetti e implementazioni relativi all
     - presente uno script per cambiare il presidente della campagna!
 - **SoliditySmartContract06VotationsV2** 👥: progetto di smart-contract per sistema di votazione evoluto rispetto al punto precedente con in agggiunta l'avvio specifico delle campagna, gestione delle cadidature e un sistema migliorato delle votazioni. *Funzionante* con semplice frontend per la gestione delle candidature e delle votazioni
 - **SoliditySmartContract07DocumentValidatorArbitrum** 📎: progetto di smart-contract per sistema di validazione documento onChain (i documenti vengono salvati da un emittende e chiunque può verificare la validità). Document Validator è un sistema per la certificazione e verifica di documenti costruito su blockchain Ethereum compatibile con **Arbitrum**. Il sistema permette di emettere, verificare e revocare certificati digitali in modo sicuro e trasparente, garantendo l'integrità e l'autenticità dei documenti attraverso la tecnologia blockchain, *funzionante* con semplice frontend per la gestione dei documenti. Sviluppato con Hardhat.
-- **SoliditySmartContract08guessTheNumberGame** 🎲: Un gioco blockchain "indovina il numero" multi-partita dove ogni utente può avviare la propria partita e chiunque può provare a indovinare su tutte le partite attive simultaneamente. Sviluppato con **Hardhat**, per eseguirlo in locale non servono truffle, ganache e metamask.
-    - esempio rilasciato su **Testnet Sepolia** (vedi sezione dedicata in questo README)
-    - esempio rilasciato anche con geth su istanza AWS-EC2 (visto che Amazon Managed Blockchain non prevede rete di test)
+- **SoliditySmartContract08guessTheNumberGame** 🎲: Un gioco blockchain "indovina il numero" multi-partita dove ogni utente può avviare la propria partita e chiunque può provare a indovinare su tutte le partite attive simultaneamente. 
+  - Sviluppato con **Hardhat** al posto dei vecchi e complessi truffle e ganache (nemmeno metamask serve in locale!)
+  - Esempio rilasciato su **Testnet Sepolia** (vedi sezione dedicata in questo README)
+  - Esempio rilasciato anche con geth su istanza AWS-EC2 (visto che Amazon Managed Blockchain non prevede rete di test, vedi sezione dedicata in questo README)
+  - In Ethereum (standard ERC20), uno smart contract (come il gioco) non può prelevare token dal tuo portafoglio senza il tuo esplicito permesso. La funzione dello script di interazione serve a chiamare approve sul contratto del Token, autorizzando il contratto del Gioco a spendere i tuoi NAO (per pagare le fee di avvio partita o di guess). È una misura di sicurezza fondamentale: senza approve, la transazione transferFrom nel gioco fallirebbe.
+  - Il file `NAO-TOKEN-ERC20.sol` è identico in tutti i progetti dove è presente (08, 09, 10, 12, 13)
+- **SoliditySmartContract09Staking**: Staking & Yield Farming.
+  - *Esempio in fase di sviluppo*
+- **SoliditySmartContract10DexAmm**: Decentralized Exchange (AMM).
+  - *Esempio in fase di sviluppo*
+- **SoliditySmartContract11DaoGovernanceToken**: DAO & Governance.
+  - *Esempio in fase di sviluppo*
+- **SoliditySmartContract12MarketplaceNFT**: NFT Marketplace con Royalties.
+  - *Esempio in fase di sviluppo*
+- **SoliditySmartContract13LotteryChainlink**: Lotteria con Chainlink VRF.
+  - *Esempio in fase di sviluppo*
 - **Web3ProjectsExample1** 🏗️: esempio in fase di revisione
+
 
 
 ## Prerequisiti
@@ -65,23 +79,26 @@ I passi per eseguire il rilascio del progetto di esempio "08 Guess the number" s
     curl --user :<YOUR-API-KEY-SECRET> \
       https://mainnet.infura.io/v3/<YOUR-API-KEY> \
       -d '{"jsonrpc": "2.0", "method": "eth_blockNumber", "params": [], "id": 1}'  
+
+    curl --user :vHBn8DtzBcyNazQe3LdxtXrjEYHXVQXQIREgXW++aw8f6kOC8j3N7w \
+      https://mainnet.infura.io/v3/6a468662cc6d4562ab9d4aa1ea876354 \
+      -d '{"jsonrpc": "2.0", "method": "eth_blockNumber", "params": [], "id": 1}'  
+
     ```
 2. Utilizzare questo servizio richiede monitorare costantemente l'utilizzo per rimanere entro i limiti previsti dal profilo *free* di Infura; per un uso intensivo è necessario effettuare l'[upgrade a un piano a pagamento](https://docs.metamask.io/developer-tools/dashboard/how-to/upgrade-your-plan/) che offre limiti più elevati rispetto a quelli gratuiti. Tutti i dettagli sono ben descritti nella [Documentazione ufficiale](https://docs.metamask.io/developer-tools/dashboard/how-to/secure-an-api/set-rate-limits/)
 3. Procurarsi la chiave privata di un account testnet con ETH di test (puoi usare faucet pubblici).
-
     🟡 TODO: non ricordo come ho generato la chiave primaria, sicuramente è stata generata da Sepolia/infura o da Metamask ma non ricordo come
 4. Nel progetto installare le dipendenze mancanti con il comando
     ```
     npm install --save-dev @nomiclabs/hardhat-ethers ethers @nomiclabs/hardhat-etherscan --legacy-peer-deps
     ```
-5. Configurare il file `hardhat.config.js` aggiungendo la riga di configurazione per la rete specifica
+5. Configurare il file `hardhat.config.js` aggiungendo la riga di configurazione `.env` per la rete specifica
     ```
-      sepolia: {
-        url: "https://sepolia.infura.io/v3/<KEY_ID>", 
-        accounts: ["0xTUA_PRIVATE_KEY_SENZA_0x"
-          ,"0xTUA_SECONDA_PRIVATE_KEY_SENZA_0x"
-        ]
-      }
+      PRIVATE_KEY=0xAAAAAAAAAAA
+      PUBLICK_KEY=0xBBBBBBBBBBB
+      SECOND_PRIVATE_KEY=0xCCCCCCCCCCCCCC
+      INFURA_PROJECT_ID=DDDDDDDDDDD
+
     ```
     nel file è necessario indicare la KEY_ID creata da infura, una o più chiavi primarie, come prima chiave bisogna indicare l'owner del contratto che è generato al passo 3, le successive chiavi saranno usate dallo script interact
 
@@ -166,28 +183,39 @@ Una possibilità è eseguire **Geth** su un’istanza AWS-EC2 per rilasciare uno
 
 1. Avviare una nuova istanza EC2
     - Andare su **EC2** → **Launch Instance**
-    - Scegliere una AMI Ubuntu (es: Ubuntu 22.04 LTS)
-    - Scegliere una dimensione (t2.medium o superiore per test)
-    - Scegliere una chiave pem già esistente (o crearne una nuova)
-    - Configurare il security group:
-        - Autorizzare porta SSH-22 dall’IP attuale
-        - Autorizzare le porte **30303** (TCP/UDP) e **8545** (RPC, opzionale, solo per IP sicuri)
-        - Nota sicurezza: non esporre la porta 8545 pubblicamente in produzione! Usare VPN o limitare l’accesso agli IP sicuri. Questo è solo un esempio/prototipo
-    - Avviare l’istanza e annotare l’IP pubblico
-
+      - Scegliere una AMI Ubuntu (es: Ubuntu 22.04 LTS)
+      - Scegliere una dimensione (t2.medium o superiore per test)
+      - Scegliere una chiave pem già esistente (o crearne una nuova)
+      - Configurare il security group:
+          - Autorizzare porta SSH-22 dall’IP attuale
+          - Autorizzare le porte **30303** (TCP/UDP) e **8545** (RPC, opzionale, solo per IP sicuri)
+          - Nota sicurezza: non esporre la porta 8545 pubblicamente in produzione! Usare VPN o limitare l’accesso agli IP sicuri. Questo è solo un esempio/prototipo a titolo di 
+      - Avviare l’istanza e annotare l’IP pubblico
+    - Nell'esempio `SoliditySmartContract08guessTheNumberGame` è stato creato lo script `./create_ec2_node.sh` che salva anche l'ip nel file `.env` locale, poi è disponibile anche il `destroy_ec2_node.sh` per distruggere la EC2 e il security group!
 2. Connettersi via SSH
     ```bash
     ssh -i /percorso/chiave.pem ubuntu@<IP_EC2>
     ```
 
-3. Installare Geth
+3. Installare Geth (alla versione stabile v1.13 e non la ultimissima)
     ```bash
-    sudo add-apt-repository -y ppa:ethereum/ethereum
     sudo apt update
-    sudo apt install -y ethereum
+    cd ~
+    wget https://gethstore.blob.core.windows.net/builds/geth-linux-amd64-1.13.15-c5ba367e.tar.gz
+    tar -xvf geth-linux-amd64-1.13.15-c5ba367e.tar.gz
+    sudo mv geth-linux-amd64-1.13.15-c5ba367e/geth /usr/local/bin/
+    rm -rf geth-linux-amd64-1.13.15-c5ba367e*
+    sudo chmod 777 /usr/local/bin/geth 
+    # Verifica la versione
     geth -version
     ```
-    La versione dovrebbe essere `geth version 1.16.3-stable-d818a9af` (a settembre 2025)
+    - La versione dovrebbe essere la `1.13.15-stable-c5ba367e`
+    - Nota: esistono versioni più recenti installabili con 
+      ```
+      sudo add-apt-repository -y ppa:ethereum/ethereum
+      sudo apt install -y ethereum
+      ```
+      - ma la versione dovrebbe essere `geth version 1.16.7-stable-b9f3a3d9` (a settembre 2025) che non è compatibile con il proof-of-work usato in questo esempio! L'errore è `ERROR[12-09|17:38:27.279] Geth only supports PoS networks. Please transition legacy networks using Geth v1.13.x. Fatal: Failed to register the Ethereum service: 'terminalTotalDifficulty' is not set in genesis block`
 
 4. Inizializzare la rete privata
     - Creare una cartella per la blockchain:
@@ -213,23 +241,19 @@ Una possibilità è eseguire **Geth** su un’istanza AWS-EC2 per rilasciare uno
           "istanbulBlock": 0,
           "berlinBlock": 0,
           "londonBlock": 0,
-          "terminalTotalDifficulty": "0"
+          "terminalTotalDifficulty": 0
         },
         "difficulty": "0x1",
         "gasLimit": "8000000",
         "alloc": {}
       }
-      ```
-    - Inizializzare la blockchain:
-      ```bash
-      geth --datadir ~/mychain init genesis.json
-      ```
 
-5. Avviare il nodo per creare la prima rete
+      ```
+5. Inizializzare la blockchain:
     ```bash
-    geth --datadir ~/mychain --networkid 2025 --http --http.addr "0.0.0.0" --http.port 8545 --http.api "eth,net,web3,personal" --allow-insecure-unlock --nodiscover --mine
+    geth --datadir ~/mychain init genesis.json
+    
     ```
-    - Aggiungere `--http.corsdomain "*"` e `--http.vhosts "*"` per test da remoto (solo in ambienti sicuri)
 
 6. Sbloccare un nuovo account per il deploy e creare un account:
     ```bash
@@ -238,21 +262,29 @@ Una possibilità è eseguire **Geth** su un’istanza AWS-EC2 per rilasciare uno
     ```
     - Viene chiesto di inserire una password (scegline una e ricordala!).
     - Annotare l’indirizzo pubblico del nuovo account
-    - A me non mostra l'account di risposta e il secondo comando ritorna la lsita degli account con il file di riferimento da annotare per il prossimo passo
+      - A me non mostra l'account di risposta e il secondo comando ritorna la lista degli account con il file di riferimento da annotare per il prossimo passo
 
 7. Recuperare la chiave privata dalla password tramite uno script Node.js:
     - Installare nodejs, npm e web3:
+      - non usare il pacchetto ufficiale perchè sarebbe troppo vecchia la versione installata con `sudo apt install nodejs npm`
       ```bash
-      sudo apt install nodejs npm
+      # Scarica lo script di setup per Node.js 20 (LTS)
+      curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+      # Installa Node.js
+      sudo apt-get install -y nodejs
       npm install web3
       ```
-    - Scrivere il file web3.js:
+    - Recuperare il nomefile nel keystore:
+      ```bash
+      ls /home/ubuntu/mychain/keystore/
+      ```
+    - Scrivere il file `web3.js` inserendo i parametri corretti come nomeFile e password dei punti precedenti:
       ```js
       const fs = require('fs');
       const { Web3 } = require('web3');
 
-      const keyfile = fs.readFileSync('/home/ubuntu/mychain/keystore/UTC--<nomeFile>').toString();
-      const password = '<password>';
+      const keyfile = fs.readFileSync('/home/ubuntu/mychain/keystore/UTC--<nome-nel-keystore>').toString();
+      const password = '<la-tua-password>';
       const web3 = new Web3();
       const account = web3.eth.accounts.decrypt(JSON.parse(keyfile), password);
       account.then(e => console.log(e) );
@@ -264,43 +296,72 @@ Una possibilità è eseguire **Geth** su un’istanza AWS-EC2 per rilasciare uno
       node web3.js
       ```
     - Annotare la private key (senza condividerla)
+    - Creare variabile con la public-key
+      ```bash
+      ADDR="ABC" #senza 0x
+      echo "0x$(printf '%064d' 0)${ADDR}$(printf '%0130d' 0)"
+      ```
 
 8. Allocare ETH all’account per poter deployare lo smart contract:
     - Modificare il file `genesis.json` nella sezione alloc:
       ```json
-      "alloc": {
-        "1234567890ABCDEF...": {
-          "balance": "1000000000000000000000"
+      {
+        "config": {
+          "chainId": 2025,
+          "homesteadBlock": 0,
+          "eip150Block": 0,
+          "eip155Block": 0,
+          "eip158Block": 0,
+          "byzantiumBlock": 0,
+          "constantinopleBlock": 0,
+          "petersburgBlock": 0,
+          "istanbulBlock": 0,
+          "berlinBlock": 0,
+          "londonBlock": 0,
+          "clique": {
+            "period": 15,
+            "epoch": 30000
+          }
+        },
+        "difficulty": "1",
+        "gasLimit": "8000000",
+        "extradata": "0x<valore-mostrato-al-punto-precedente-con-tanti-zeri>",
+        "alloc": {
+          "<address-senza-0x>": {
+            "balance": "1000000000000000000000"
+          }
         }
       }
       ```
-      > L’indirizzo deve essere senza il prefisso `0x` e corrispondere all’account creato
-
-    - Riavviare la chain (rimuovendo la catena precedente):
+      - L’indirizzo corrisponde al campo `address` del punto precedente e deve essere inserito senza il prefisso `0x`
+      - Il valore di `extradata` deve essere quello tornato al punto precedene dall'istruzione ```echo "0x$(printf '%064d' 0)${ADDR}$(printf '%0130d' 0)"```
+    - Riavviare la chain (rimuovendo la catena precedente) e impostando l'address del punto precedente:
       ```bash
+      ADDR="0xADDRESS-CHIAVE-PUBBLICA-CON0x"
+      echo "LA_TUA_PASSWORD" > password.txt
+      killall geth
       rm -rf ~/mychain/geth
       geth --datadir ~/mychain init genesis.json
-      geth --datadir ~/mychain --http --http.addr "0.0.0.0" --http.port 8545 --http.api "eth,net,web3,personal,debug" --allow-insecure-unlock --nodiscover --dev --dev.period 10
+      # Avvio geth
+      geth --datadir ~/mychain --networkid 2025 \
+        --http --http.addr "0.0.0.0" --http.port 8545 \
+        --http.api "eth,net,web3,debug,clique" \
+        --nodiscover \
+        --mine --miner.etherbase $ADDR \
+        --unlock $ADDR --password password.txt \
+        --allow-insecure-unlock
       ```
-
-9. Deployare lo smart contract nella rete corretta usando l’endpoint `http://<PUBLIC_IP_EC2>:8545` come RPC endpoint nel file di configurazione Hardhat:
-    ```javascript
-    module.exports = {
-      solidity: {
-        version: "0.8.18"
-      },
-      networks: {
-        hardhat: {},
-        localhost: {
-          url: "http://127.0.0.1:8545"
-        },
-        ec2geth: {
-          url: "http://<PUBLIC_IP_EC2>:8545",
-          accounts: ["0xTUA_PRIVATE_KEY_SENZA_0x"]
-        }
-      }
-    };
-    ```
+    - Note aggiuntive: 
+      - Clique (Proof-of-Authority) è l'unica modalità supportata per reti private su Geth moderno. Non richiede mining intensivo e i blocchi vengono firmati automaticamente. Geth only supports PoS networks. Please transition legacy networks using Geth v1.13.x. Fatal: Failed to register the Ethereum service: 'terminalTotalDifficulty' is not set in genesis block
+      - Aggiungere `--http.corsdomain "*"` e `--http.vhosts "*"` per test da remoto (solo in ambienti sicuri)
+      - Con le versioni più recenti di Geth, rimuovendo il `terminalTotalDifficulty` mi da l'errore `Geth only supports PoS networks. Please transition legacy networks using Geth v1.13.x`
+9. Deployare lo smart contract nella rete corretta usando l’endpoint `http://<PUBLIC_IP_EC2>:8545` come RPC endpoint nel file di configurazione Hardhat modificando il file `.env` locale 
+    - In ogni caso bisogna modificare il file impostando "PUBLICK_KEY" e "PRIVATE_KEY" restituita al punto 7 ma se è stato usato lo script `create_ec2_node.sh` non serve eseguire l'aggiornamento del file
+    - Verifica del contratto
+      ```
+      curl -X POST --data '{"jsonrpc":"2.0","method":"eth_getBalance","params":["0x<public-key>", "latest"],"id":1}' -H "Content-Type: application/json" http://<IP_EC2>:8545
+      ```
+      - Se la risposta contiene "result":"0x0", significa che il genesis non è stato caricato. Se invece vedi un valore esadecimale grande (es. 0x123456789), allora i fondi ci sono.
     - Eseguire il deploy:
       ```bash
       npx hardhat run scripts/deploy.js --network ec2geth
@@ -327,8 +388,6 @@ Una possibilità è eseguire **Geth** su un’istanza AWS-EC2 per rilasciare uno
       ```bash
       npx hardhat run scripts/interact.js --network ec2geth
       ```
-
-
 
 
 # &lt; AlNao /&gt;

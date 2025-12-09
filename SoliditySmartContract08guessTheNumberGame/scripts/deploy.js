@@ -6,13 +6,13 @@ async function main() {
   
   console.log("Deploying contracts with the account:", deployer.address);
   
-  // Deploy ERC20Mock first
-  const MockToken = await hre.ethers.getContractFactory("ERC20Mock");
-  const mockToken = await MockToken.deploy("Nao Token", "NAO", deployer.address, hre.ethers.parseEther("1000000"));
+  // Deploy NAOTOKENERC20 first
+  const MockToken = await hre.ethers.getContractFactory("NAOTOKENERC20");
+  const mockToken = await MockToken.deploy("Nao Token", "NAO");
   await mockToken.waitForDeployment();
   
   const tokenAddress = await mockToken.getAddress();
-  console.log("MockToken deployed to:", tokenAddress);
+  console.log("Token deployed to:", tokenAddress);
   
   // Deploy GuessTheNumberMulti with the token address and fees
   const GuessTheNumber = await hre.ethers.getContractFactory("GuessTheNumberMulti");
