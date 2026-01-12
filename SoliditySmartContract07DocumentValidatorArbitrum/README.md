@@ -61,9 +61,9 @@ Flusso di utilizzo
 - Installa Hardhat (se non già presente):
     ```
 	npm init -y
-	npm install --save-dev hardhat
+	npm install --save-dev hardhat  --legacy-peer-deps
 	npx hardhat
-	npm install --save-dev @nomiclabs/hardhat-ethers ethers dotenv
+	npm install --save-dev @nomiclabs/hardhat-ethers ethers dotenv  --legacy-peer-deps
     ```
 - File `.env` per la chiave privata e l'RPC di Arbitrum:
     ```
@@ -169,10 +169,11 @@ Flusso di utilizzo
     npx hardhat run scripts/deploy.js --network arbitrumFork
     ```
     - Note: ottenere ETH testnet da: https://faucet.quicknode.com/arbitrum/sepolia
-- Sviluppo di un frontend in react con grafica bootstrap:
+- Frontend in react con grafica bootstrap:
     - Creazione del progetto
         ```
         npx create-react-app frontend
+        cd frontend
         npm install bootstrap
         npm install bootstrap react-bootstrap ethers
         index.js import 'bootstrap/dist/css/bootstrap.min.css';
@@ -199,6 +200,7 @@ Flusso di utilizzo
         ├── hardhat.config.js
         └── package.json
         ```
+    - Prima di eseguie il progetto aggiornare il file `frontend/src/utils/contract.js` con l'indirizzo contratto restituito nel punto precedente!
     - Configurazione metamask per prove in locale con frontend
         - aggiungere rete "ArbitrumLH GoChain Testnet" -> "Arbitrum locale 127.0.0.1:8545", "simbolo GO", chainId 31337
         - aggiungere indirizzi (chiavi) nel local-keys.json
