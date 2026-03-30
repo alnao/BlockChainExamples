@@ -1,0 +1,21 @@
+{
+  "name": "staking-dapp",
+  "version": "1.0.0",
+  "description": "Staking DApp Example",
+  "scripts": {
+    "test": "npx hardhat test",
+    "compile": "npx hardhat compile",
+    "deploy": "npx hardhat run scripts/deploy.js"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0",
+    "@tanstack/react-query": "^5.95.2",
+    "dotenv": "^16.4.0",
+    "viem": "^2.47.6",
+    "wagmi": "^3.6.0"
+  }
+}

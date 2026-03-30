@@ -1,64 +1,96 @@
 # ⚙️ BlockChainExamples 🪙
 
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3766AB?logo=Python&logoColor=white" height=32/>
+  <img src="https://img.shields.io/badge/TypeScript-007ACC?logo=TypeScript&logoColor=white" height=32/>
+  <img src="https://img.shields.io/badge/Solidity-000000?logo=Solidity&logoColor=white" height=32/>
+  <img src="https://img.shields.io/badge/React-61DAFB?logo=React&logoColor=white" height=32/>
+  <br />
+  <img src="https://img.shields.io/badge/Hardhat-302C53?logo=Hardhat&logoColor=white" height=32/>
+  <img src="https://img.shields.io/badge/Ethereum-000000?logo=Ethereum&logoColor=white" height=32/>
+  <img src="https://img.shields.io/badge/Arbitrum-000000?logo=Arbitrum&logoColor=white" height=32/>
+</p>
+
 Questo repository raccoglie una serie di progetti e implementazioni relativi alla tecnologia blockchain, con particolare attenzione allo sviluppo di smart-contract su Ethereum e all'integrazione con applicazioni client. I progetti inclusi coprono diversi casi d'uso, tra cui sistemi di votazione 🗳️, gestione di NFT 🖼️, raccolte fondi 💰, validazione documentale on-chain 📄 e semplici blockchain didattiche in Python 🐍 e TypeScript 🟦. Ogni esempio è strutturato per favorire la comprensione delle principali tecniche di sviluppo, test e deployment di soluzioni decentralizzate, fornendo codice sorgente, script di migrazione, test automatici e, ove presente, interfacce utente per l'interazione con la blockchain.
 
 
 🟡 Non divulgare mai le chiavi private associate ai tuoi account blockchain: custodirle con la massima attenzione è fondamentale per la sicurezza dei tuoi fondi e dei tuoi smart contract. Condividere o esporre accidentalmente una chiave privata può portare alla perdita irreversibile di tutti i tuoi asset digitali. 🟡
 
 
-- **FundraiserApplication** 💰: esempio *funzionante* di smart-contract che simula una raccolta fondi con metodi per donare e eventi, comprende anche una piccola applicazione React per eseguire le donazioni e gestire i fondi. Esempio preso dal capitolo 6 del libro "Hands-On Smart Contract Development with Solidity and Ethereum - 2020 - O'Reilly"
-- **FundraiserFactory** 🏭: esempio *funzionante* di smart-contract, partendo dal FundraiserApplication vengono aggiunti i componenti per gestire più progetti. Esempio preso dal capitolo 7 del libro "Hands-On Smart Contract Development with Solidity and Ethereum - 2020 - O'Reilly"
-    - Il client è una applicazione React descritta nel capito e il codice è preso dal repository [RedSquirrelTech](https://github.com/RedSquirrelTech/hoscdev/tree/master/chapter-7/fundraiser) e modificato per gestire tutto poi sistemato con Claude per funzionare e gestire le transazioni
-    - Il client per funzionare deve avere Ganache configurato con il file `truffle/truffle-config.js`, verificare che i DUE smart-contract siano presenti in ganache e siano in stato "deployed", prestare attenzione a rimuovere eventuali altri file di configurazione presenti (per esempio l'esempio FundraiserApplication va in contrasto con questo)
-    - Su metamask il cambio di account deve essere configurato: dopo aver selezionato la rete, cliccare sui tre puntini a fianco degli account e selezionare la voce "All Permission", qui selezionare la rete corretta e abilitare gli account corretti. Senza questa configurazione cambiando account su metamask non viene visualizzato il nuovo account nella app, *io ho perso un sacco di tempo perchè non si capisce il motivo*.
-- **JavascriptBlockChain** 🟦: semplice esempio di BlockChain in typescript di tipo mono-node
-- **PythonBlockChain** 🐍: esempio di BlockChain in python con entrmabi i tipi: mono-node e multi-node, è basato sull'algoritmo del *proof-of-work*
-- **SoliditySmartContract01** 📝: esempio di primo smart contract, ispirato al capitolo 4 del libro "Hands-On Smart Contract Development with Solidity and Ethereum - 2020 - O'Reilly", *non funzionante e nemmeno la IA riesce a capire il motivo!*
-- **SoliditySmartContract02** 📚: progetto di un semplice smart-contract, progetto creato prendendo spunto dalla guida di [freecodecamp.org](https://www.freecodecamp.org/italian/news/la-guida-completa-allo-sviluppo-completo-di-ethereum/), *non funzionante*
-- **SoliditySmartContract03** ✅: progetto di un semplice smart-contract, funzionante creato con l'aiuto di Claude partendo dai due punti precedenti, *funzionante*
-- **SoliditySmartContract04NFT** 🖼️: progetto di smart-contract per la gestione di NFT molto semplice con la possibliti di creare/mintare NFT e di trasferirli. L'esempio è *funzionante* con script di esempio 
-- **SoliditySmartContract05Votations** 🗳️: progetto di smart-contract per sistema di votazione (campagne e diritti al voto) con due web-app per la gestione delle campagne e i voti, *funzionante*
-    - presente uno script "invia-eth" per lo scambio di ETH, indispensabile perchè ogni chiamata allo smart consuma fee/gas!
-    - presente uno script per cambiare il presidente della campagna!
-- **SoliditySmartContract06VotationsV2** 👥: progetto di smart-contract per sistema di votazione evoluto rispetto al punto precedente con in agggiunta l'avvio specifico delle campagna, gestione delle cadidature e un sistema migliorato delle votazioni. *Funzionante* con semplice frontend per la gestione delle candidature e delle votazioni
-- **SoliditySmartContract07DocumentValidatorArbitrum** 📎: progetto di smart-contract per sistema di validazione documento onChain (i documenti vengono salvati da un emittende e chiunque può verificare la validità). Document Validator è un sistema per la certificazione e verifica di documenti costruito su blockchain Ethereum compatibile con **Arbitrum**. Il sistema permette di emettere, verificare e revocare certificati digitali in modo sicuro e trasparente, garantendo l'integrità e l'autenticità dei documenti attraverso la tecnologia blockchain, *funzionante* con semplice frontend per la gestione dei documenti. Sviluppato con Hardhat.
-- **SoliditySmartContract08guessTheNumberGame** 🎲: Un gioco blockchain "indovina il numero" multi-partita dove ogni utente può avviare la propria partita e chiunque può provare a indovinare su tutte le partite attive simultaneamente. 
-  - Sviluppato con **Hardhat** al posto dei vecchi e complessi truffle e ganache (nemmeno metamask serve in locale!)
-  - Esempio rilasciato su **Testnet Sepolia** (vedi sezione dedicata in questo README)
-  - Esempio rilasciato anche con geth su istanza AWS-EC2 (visto che Amazon Managed Blockchain non prevede rete di test, vedi sezione dedicata in questo README)
-  - In Ethereum (standard ERC20), uno smart contract (come il gioco) non può prelevare token dal tuo portafoglio senza il tuo esplicito permesso. La funzione dello script di interazione serve a chiamare approve sul contratto del Token, autorizzando il contratto del Gioco a spendere i tuoi NAO (per pagare le fee di avvio partita o di guess). È una misura di sicurezza fondamentale: senza approve, la transazione transferFrom nel gioco fallirebbe.
-  - Il file `NAO-TOKEN-ERC20.sol` è identico in tutti i progetti dove è presente (08, 09, 10, 12, 13)
-- **SoliditySmartContract09Staking**: Staking & Yield Farming.
-  - *Esempio in fase di sviluppo*
-- **SoliditySmartContract10DexAmm**: Decentralized Exchange (AMM).
-  - *Esempio in fase di sviluppo*
-- **SoliditySmartContract11DaoGovernanceToken**: DAO & Governance.
-  - *Esempio in fase di sviluppo*
-- **SoliditySmartContract12MarketplaceNFT**: NFT Marketplace con Royalties.
-  - *Esempio in fase di sviluppo*
-- **SoliditySmartContract13LotteryChainlink**: Lotteria con Chainlink VRF.
-  - *Esempio in fase di sviluppo*
+# Examples
+
+| Section | Name | Description |
+|-----|----|----|
+| <img src="https://img.shields.io/badge/Hardhat-302C53?logo=Hardhat&logoColor=white" height=32/> <img src="https://img.shields.io/badge/Solidity-000000?logo=Solidity&logoColor=white" height=32/>| [`📁`](./HardhatSolidity06VotationsV2/) **HardhatSolidity06VotationsV2** | progetto di smart-contract per sistema di votazione evoluto rispetto all'esempio `TruffleSmartContract05Votations` è stato sviluppato con HardHat con aggiunta della gestione delle candidature e un sistema migliorato delle votazioni. *Funzionante* con semplice frontend per la gestione delle candidature e delle votazioni. |
+| <img src="https://img.shields.io/badge/Hardhat-302C53?logo=Hardhat&logoColor=white" height=32/> <img src="https://img.shields.io/badge/Solidity-000000?logo=Solidity&logoColor=white" height=32/>| [`📁`](./HardhatSolidity07DocumentValidatorArbitrum/) **HardhatSolidity07DocumentValidatorArbitrum** | progetto di smart-contract per sistema di validazione documento onChain (i documenti vengono salvati da un emittende e chiunque può verificare la validità) con certificazione e verifica di documenti costruito su blockchain Ethereum compatibile con **Arbitrum**. L'esempio è *funzionante* con semplice frontend per la gestione dei documenti. Sviluppato con Hardhat. |
+| <img src="https://img.shields.io/badge/Hardhat-302C53?logo=Hardhat&logoColor=white" height=32/> <img src="https://img.shields.io/badge/Solidity-000000?logo=Solidity&logoColor=white" height=32/>| [`📁`](./HardhatSolidity08guessTheNumberGame/) **HardhatSolidity08guessTheNumberGame** | Un gioco blockchain "indovina il numero" multi-partita dove ogni utente può avviare la propria partita e chiunque può provare a indovinare su tutte le partite attive simultaneamente. Disponibile anche su **Testnet Sepolia** (vedi sezione dedicata in questo README) e rilasciato anche con geth su istanza AWS-EC2 (vedi sezione dedicata in questo README) |
+| <img src="https://img.shields.io/badge/Hardhat-302C53?logo=Hardhat&logoColor=white" height=32/> <img src="https://img.shields.io/badge/Solidity-000000?logo=Solidity&logoColor=white" height=32/>| [`📁`](./HardhatSolidity09Staking/) **HardhatSolidity09Staking** | progetto di smart-contract per un sistema di Staking & Yield Farming dove gli utenti possono bloccare i loro token ERC20 per guadagnare interessi nel tempo. Esempio *funzionante* con token implementato, completo di test e script di interazione. <br /> *Client ancora da sistemare perchè non funziona correttamente* |
+| <img src="https://img.shields.io/badge/Python-3766AB?logo=Python&logoColor=white" height=32/> | [`📁`](./PythonBlockChain/) **PythonBlockChain** | esempio *funzionante* di BlockChain in python con entrmabi i tipi: mono-node e multi-node, è basato sull'algoritmo del *proof-of-work* |
+| Truffle <br /> *deprecato* |  [`📁`](./TruffleFundraiserApplication/) **TruffleFundraiserApplication** | esempio *funzionante* di smart-contract che simula una raccolta fondi con metodi per donare e eventi, comprende anche una piccola applicazione React per eseguire le donazioni e gestire i fondi. Esempio preso dal capitolo 6 del libro "Hands-On Smart Contract Development with Solidity and Ethereum - 2020 - O'Reilly" |
+| Truffle <br /> *deprecato* | [`📁`](./TruffleFundraiserFactory/) **TruffleFundraiserFactory** | esempio *funzionante* di smart-contract, partendo  dal FundraiserApplication vengono aggiunti i componenti per gestire più progetti. Esempio preso dal capitolo 7 del libro "Hands-On Smart Contract Development with Solidity and Ethereum - 2020 - O'Reilly"
+| Truffle <br /> *deprecato* | [`📁`](./TruffleSmartContract01/) **TruffleSmartContract01** | esempio di smart-contract, esempio preso dal capitolo 4 del libro "Hands-On Smart Contract Development with Solidity and Ethereum - 2020 - O'Reilly", *non funzionante e nemmeno la IA riesce a capire il motivo!*
+| Truffle <br /> *deprecato* | [`📁`](./TruffleSmartContract02/) **TruffleSmartContract02** | progetto di un semplice smart-contract, progetto creato prendendo spunto dalla guida di [freecodecamp.org](https://www.freecodecamp.org/italian/news/la-guida-completa-allo-sviluppo-completo-di-ethereum/), *non funzionante*
+| Truffle <br /> *deprecato* | [`📁`](./TruffleSmartContract03/)  **TruffleSmartContract03**  | progetto di un semplice smart-contract, funzionante creato con l'aiuto di Claude partendo dai due punti precedenti, *funzionante* |
+| Truffle <br /> *deprecato* | [`📁`](./TruffleSmartContract04NFT/)  **TruffleSmartContract04NFT** | progetto di smart-contract per la gestione di NFT molto semplice con la possibliti di creare/mintare NFT e di trasferirli. L'esempio è *funzionante* con script di esempio |
+| Truffle <br /> *deprecato* | [`📁`](./TruffleSmartContract05Votations/) **TruffleSmartContract05Votations** | progetto di smart-contract per sistema di votazione (campagne e diritti al voto) con due web-app per la gestione delle campagne e i voti, *funzionante*. Presente uno script "invia-eth" per lo scambio di ETH, indispensabile perchè ogni chiamata allo smart consuma fee/gas e presente uno script per cambiare il presidente della campagna!
+| <img src="https://img.shields.io/badge/TypeScript-007ACC?logo=TypeScript&logoColor=white" height=32/> | [`📁`](./TypescriptBlockChain/) **TypescriptBlockChain** | esempio *funzionante* di BlockChain in typescript di tipo mono-node
+
+- Nota: gli esempi sviluppati con Truffle sono *abbandonati* visto che Truffle è considerato deprecato e sostituito da Hardhat, vedere sezione dedicata sotto
+- In Ethereum (standard ERC20), uno smart contract (come il gioco) non può prelevare token dal tuo portafoglio senza il tuo esplicito permesso. Presenti alcuni script per eseguire l'approvazione delle  fee necessarie per l'avvio delle partite e per i guess. E' una misura di sicurezza fondamentale: senza approve, la transazione transferFrom nel gioco fallirebbe.
+- Il file `NAO-TOKEN-ERC20.sol` implementa un bello smartcontract, è pensato per essere identico tra  i progetti dove è presente (08, 09, 10, 12, 13)
+
+
+## Coming soon 
+- **HardhatSolidity10DexAmm**: Decentralized Exchange (AMM), *Esempio in fase di sviluppo*
+- **HardhatSolidity11DaoGovernanceToken**: DAO & Governance, *Esempio in fase di sviluppo*
+- **HardhatSolidity12MarketplaceNFT**: NFT Marketplace con Royalties, *Esempio in fase di sviluppo*
+- **HardhatSolidity13LotteryChainlink**: Lotteria con Chainlink VRF, *Esempio in fase di sviluppo*
 - **Web3ProjectsExample1** 🏗️: esempio in fase di revisione
 
 
 
 ## Prerequisiti
 La maggior parte dei progetti di esempio hanno bisogno di alcuni software dedicati: 
-- Node.js (v14+) con installazione della libreria web3 con il comando:
+- Node.js (v22+) 
+  - su Debian 13 i comandi per aggiornare Node.js alla versione 22 sono:
+    ```bash
+    curl -fsSL https://deb.nodesource.com/setup_22.x | sudo bash -
+    apt install nodejs	-y
+    node -v
+    ```
+  - installazione della libreria web3 con il comando:
     - `npm install web3`
-- **Hardhat** è un ambiente di sviluppo moderno per smart contract Ethereum che offre un'esperienza di sviluppo completa e flessibile. È diventato lo standard de facto per lo sviluppo di DApps negli ultimi anni. *Molto meglio di Truffle* e non necessita di Ganache per funzionare in locale. 
+- **Hardhat** è un ambiente di sviluppo moderno per smart contract Ethereum che offre un'esperienza di sviluppo completa e flessibile. È diventato lo standard de facto per lo sviluppo di DApps negli ultimi anni. *Molto meglio di Ganache* 
 - Truffle Framework installato nel sistema con il comando:
+    - `npm install -g truffle`
     - `npm install @openzeppelin/test-helpers @truffle/hdwallet-provider dotenv`
-    - **Truffle** è uno dei primi e più maturi framework per sviluppo Ethereum, molto popolare fino a qualche anno fa.
+- **Truffle** è uno dei primi e più maturi framework per sviluppo Ethereum, molto popolare fino a qualche anno fa.
     - `npm install @openzeppelin/contracts @nomicfoundation/hardhat-ethers @nomicfoundation/hardhat-toolbox`
-- **Ganache** o un'altra blockchain Ethereum locale per lo sviluppo
-    - Ganache è una blockchain Ethereum locale pensata per lo sviluppo e il testing di smart contract in modo rapido e sicuro.
+    - Truffle è stato sostituito da Hardhat, molti esempi inizialmente previsti per Truffle sono stati adattati a Hardhat
+- **Ganache** è stata una blockchain Ethereum locale pensata per lo sviluppo e il testing di smart contract in modo rapido e sicuro.
     - ogni volta che si avvia Ganache bisogna prestare attenzione a quale file di configurazione `truffle-config.js` è configurato
     - ogni rete ha 10 account configurati automaticamente, è possibile importare gli account anche su Metamask copiando le chiavi private
+    - Ganache GUI usa spesso 1337 di default per l'RPC, anche se mostra 5777 nell'interfaccia
+    - Ganache è stato sostituito da Hardhat, molti esempi inizialmente previsti per Ganache sono stati adattati a Hardhat
 - **Metamask** o un altro wallet Ethereum per interagire con la blockchain
     - MetaMask è un wallet digitale che consente di gestire account Ethereum e interagire con dApp direttamente dal browser.
-    - se si usano più account su Metamask bisogna ricordarsi di autorizzare i successivi account: cliccando su tre icone al fianco dell'account, premere su voce "All permission", selezionare la rete corretta come "localhost:3000" e selezionare gli account da abilitare. Senza questa configurazione la libreria web3 non funziona correttamente e nei frontend viene caricata SOLO l'account principale configurato in Metamask! *Ho perso un sacco di tempo per questa stupida configurazione* 
+    - quando si esegue una rete in locale bisogna ricordarsi di censire su metamask la rete con i parametri
+      - Network Name: Ganache / Hardhat
+      - RPC URL: `http://127.0.0.1:7545`
+      - Chain ID: `1337` (Ganache GUI usa spesso 1337 di default per l'RPC, anche se mostra 5777 nell'interfaccia. Prova 1337 prima. Se fallisce, prova 5777). A volte Hardhat usa la 31337.
+      - Currency Symbol: ETH oppure NAO
+    - se si usano più account su Metamask bisogna ricordarsi di autorizzare i successivi account, 
+      - nelle vecchie versioni di metamask i passi da eseguire erano:
+        - tre icone al fianco dell'account
+        - voce "All permission"
+        - selezionare la rete corretta come "localhost:3000" e selezionare gli account da abilitare
+      - nella nuova versione di metamask i passi da seguire sono
+        - tre icone in alto a destra
+        - voce "siti connessi" / "Dapp Connections" e selezionare la rete `localhost:5173`
+        - selezionare gli account da abilitare!
+      - Senza questa configurazione la libreria web3 non funziona correttamente e nei frontend viene caricata SOLO l'account principale configurato in Metamask!
+        - *Ho perso un sacco di tempo per questa stupida configurazione* 
 - Per il rilascio su rete **Testnet Sepolia** è necessario un account nel sito `https://developer.metamask.io/`, per questi smartcontract di esempio è possibile usare senza problemi il profilo *free*
 - Per il corretto funzionamento di questi esempi è consigliato utilizzare un sistema GNU Linux ma è possibile usare anche altri sistemi oprativi se ben configurati
 
