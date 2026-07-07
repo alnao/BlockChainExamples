@@ -1,20 +1,29 @@
-# Node modules
-/node_modules
+# Node modules (root e sotto-progetti)
+node_modules
+**/node_modules
 
-# Compilation output
-/dist
+# Build output
+dist
+bundle
 
-# pnpm deploy output
-/bundle
-
-# Hardhat Build Artifacts
-/artifacts
-
-# Hardhat compilation (v2) support directory
-/cache
-
-# Typechain output
+# Hardhat artifacts e cache
+artifacts
+cache
+/coverage
 /types
 
-# Hardhat coverage reports
-/coverage
+# Hardhat Ignition deployments (opzionale: rimuovi se vuoi versionare gli indirizzi)
+# ignition/deployments
+
+# File sensibili
+.env
+.env.local
+*.env
+
+# Editor e OS
+.DS_Store
+.vscode
+*.log
+
+# Vecchio frontend CRA (sostituito da client-vite)
+client-app/node_modules

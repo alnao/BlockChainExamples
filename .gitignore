@@ -8,3 +8,5 @@ client3
 **/dist/
 SepoliaNotes.txt
 artifacts
+.VSCODE
+.vscode

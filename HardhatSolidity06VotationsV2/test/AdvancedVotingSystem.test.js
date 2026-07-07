@@ -1,413 +1,411 @@
-// test/AdvancedVotingSystem.test.js
-const AdvancedVotingSystem = artifacts.require("AdvancedVotingSystem");
-const truffleAssert = require('truffle-assertions');
-const { BN, expectRevert, time } = require('@openzeppelin/test-helpers');
+// test/AdvancedVotingSystem.test.js  (ESM — Hardhat v3 + viem node:test)
+import { describe, it, before } from "node:test";
+import assert from "node:assert/strict";
+import { network } from "hardhat";
+import { parseEther } from "viem";
 
-contract("AdvancedVotingSystem", function (accounts) {
-  const [admin, candidate1, candidate2, voter1, voter2, voter3] = accounts;
-  
-  // Commissioni per i test
-  const registrationFee = web3.utils.toWei("0.1", "ether");
-  const votingFee = web3.utils.toWei("0.01", "ether");
-  
-  // Stati del sistema
-  const VotingState = {
-    Inactive: "0",
-    Registration: "1",
-    Voting: "2",
-    Completed: "3"
-  };
-  
-  let votingInstance;
-  
-  beforeEach(async function () {
-    // Deploy di un nuovo contratto per ogni test
-    votingInstance = await AdvancedVotingSystem.new({ from: admin });
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Connette alla rete simulata e deploya un contratto fresco per ogni test.
+ */
+async function deployFreshContract() {
+  const { viem } = await network.connect();
+
+  const [admin, candidate1, candidate2, voter1, voter2, voter3, other] =
+    await viem.getWalletClients();
+
+  const contract = await viem.deployContract("AdvancedVotingSystem");
+
+  return { viem, contract, admin, candidate1, candidate2, voter1, voter2, voter3, other };
+}
+
+const REGISTRATION_FEE = parseEther("0.1");
+const VOTING_FEE = parseEther("0.01");
+
+const VotingState = {
+  Inactive: 0,
+  Registration: 1,
+  Voting: 2,
+  Completed: 3,
+};
+
+// ---------------------------------------------------------------------------
+// Helper per deployare + setup base (sessione + 2 candidati registrati)
+// ---------------------------------------------------------------------------
+async function deployWithTwoCandidates() {
+  const ctx = await deployFreshContract();
+  const { contract, admin, candidate1, candidate2 } = ctx;
+
+  await contract.write.createVotingSession(
+    ["Test Election", "Test Description", REGISTRATION_FEE, VOTING_FEE],
+    { account: admin.account }
+  );
+  await contract.write.registerCandidate(["Candidate 1", "Proposal 1"], {
+    account: candidate1.account,
+    value: REGISTRATION_FEE,
   });
-  
-  describe("Inizializzazione", function () {
-    it("dovrebbe impostare il deployer come admin", async function () {
-      const contractAdmin = await votingInstance.admin();
-      assert.equal(contractAdmin, admin, "L'admin non è stato impostato correttamente");
+  await contract.write.registerCandidate(["Candidate 2", "Proposal 2"], {
+    account: candidate2.account,
+    value: REGISTRATION_FEE,
+  });
+  return ctx;
+}
+
+async function deployWithVotingOpen(maxVotes = 3n) {
+  const ctx = await deployWithTwoCandidates();
+  await ctx.contract.write.closeRegistrationAndStartVoting([maxVotes], {
+    account: ctx.admin.account,
+  });
+  return { ...ctx, maxVotes };
+}
+
+// ---------------------------------------------------------------------------
+// Test suite
+// ---------------------------------------------------------------------------
+
+describe("AdvancedVotingSystem", () => {
+
+  // ---- 1. Inizializzazione ------------------------------------------------
+  describe("Inizializzazione", () => {
+    it("imposta il deployer come admin", async () => {
+      const { contract, admin } = await deployFreshContract();
+      const contractAdmin = await contract.read.admin();
+      assert.equal(contractAdmin.toLowerCase(), admin.account.address.toLowerCase());
     });
-    
-    it("dovrebbe iniziare nello stato inattivo", async function () {
-      const state = await votingInstance.currentState();
-      assert.equal(state, VotingState.Inactive, "Lo stato iniziale dovrebbe essere inattivo");
+
+    it("inizia nello stato Inactive", async () => {
+      const { contract } = await deployFreshContract();
+      const state = await contract.read.getCurrentState();
+      assert.equal(state, VotingState.Inactive);  // number 0
     });
   });
-  
-  describe("Creazione sessione di voto", function () {
-    it("dovrebbe permettere all'admin di creare una nuova sessione", async function () {
-      const result = await votingInstance.createVotingSession(
-        "Test Election", 
-        "Test Description", 
-        registrationFee, 
-        votingFee, 
-        { from: admin }
+
+  // ---- 2. Creazione sessione ----------------------------------------------
+  describe("Creazione sessione di voto", () => {
+    it("l'admin può creare una nuova sessione", async () => {
+      const { viem, contract, admin } = await deployFreshContract();
+
+      const hash = await contract.write.createVotingSession(
+        ["Test Election", "Test Description", REGISTRATION_FEE, VOTING_FEE],
+        { account: admin.account }
       );
-      
-      // Verifica evento emesso
-      truffleAssert.eventEmitted(result, 'VotingSessionCreated', (ev) => {
-        return ev.votingId.toString() === "1" && ev.title === "Test Election";
-      });
-      
-      // Verifica stato aggiornato
-      const state = await votingInstance.currentState();
-      assert.equal(state, VotingState.Registration, "Lo stato dovrebbe essere Registration");
-      
-      // Verifica ID votazione
-      const votingId = await votingInstance.getCurrentVotingId();
-      assert.equal(votingId, 1, "L'ID della votazione dovrebbe essere 1");
-    });
-    
-    it("dovrebbe impedire a non admin di creare una sessione", async function () {
-      await expectRevert(
-        votingInstance.createVotingSession(
-          "Test Election", 
-          "Test Description", 
-          registrationFee, 
-          votingFee, 
-          { from: candidate1 }
+      const publicClient = await viem.getPublicClient();
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+      assert.equal(receipt.status, "success");
+
+      const state = await contract.read.getCurrentState();
+      assert.equal(state, VotingState.Registration);
+
+      const votingId = await contract.read.getCurrentVotingId();
+      assert.equal(votingId, 1n);    });
+
+    it("rifiuta la creazione da account non-admin", async () => {
+      const { contract, candidate1 } = await deployFreshContract();
+      await assert.rejects(
+        () => contract.write.createVotingSession(
+          ["Test Election", "Test Description", REGISTRATION_FEE, VOTING_FEE],
+          { account: candidate1.account }
         ),
-        "Solo l'amministratore puo' eseguire questa funzione"
+        /Solo l.amministratore/
       );
     });
   });
-  
-  describe("Registrazione candidati", function () {
-    beforeEach(async function () {
-      // Crea una sessione di voto
-      await votingInstance.createVotingSession(
-        "Test Election", 
-        "Test Description", 
-        registrationFee, 
-        votingFee, 
-        { from: admin }
+
+  // ---- 3. Registrazione candidati ----------------------------------------
+  describe("Registrazione candidati", () => {
+    it("permette la registrazione con commissione corretta", async () => {
+      const { viem, contract, admin, candidate1 } = await deployFreshContract();
+      await contract.write.createVotingSession(
+        ["Test Election", "Test Description", REGISTRATION_FEE, VOTING_FEE],
+        { account: admin.account }
+      );
+
+      const hash = await contract.write.registerCandidate(
+        ["Candidate 1", "My Proposal"],
+        { account: candidate1.account, value: REGISTRATION_FEE }
+      );
+      const publicClient = await viem.getPublicClient();
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+      assert.equal(receipt.status, "success");
+
+      const details = await contract.read.getCandidateDetails([1n, candidate1.account.address]);
+      assert.equal(details[0], "Candidate 1");
+      assert.equal(details[1], "My Proposal");
+    });
+
+    it("rifiuta la registrazione con commissione insufficiente", async () => {
+      const { contract, admin, candidate1 } = await deployFreshContract();
+      await contract.write.createVotingSession(
+        ["Test Election", "Test Description", REGISTRATION_FEE, VOTING_FEE],
+        { account: admin.account }
+      );
+      await assert.rejects(
+        () => contract.write.registerCandidate(["Candidate 1", "My Proposal"], {
+          account: candidate1.account,
+          value: parseEther("0.05"),
+        }),
+        /Commissione di registrazione insufficiente/
       );
     });
-    
-    it("dovrebbe permettere la registrazione pagando la commissione", async function () {
-      const result = await votingInstance.registerCandidate(
-        "Candidate 1", 
-        "My Proposal", 
-        { from: candidate1, value: registrationFee }
+
+    it("impedisce la doppia registrazione dello stesso candidato", async () => {
+      const { contract, admin, candidate1 } = await deployFreshContract();
+      await contract.write.createVotingSession(
+        ["Test Election", "Test Description", REGISTRATION_FEE, VOTING_FEE],
+        { account: admin.account }
       );
-      
-      // Verifica evento emesso
-      truffleAssert.eventEmitted(result, 'CandidateRegistered', (ev) => {
-        return ev.candidate === candidate1 && ev.name === "Candidate 1";
+      await contract.write.registerCandidate(["Candidate 1", "My Proposal"], {
+        account: candidate1.account,
+        value: REGISTRATION_FEE,
       });
-      
-      // Verifica registrazione
-      const candidateDetails = await votingInstance.getCandidateDetails(1, candidate1);
-      assert.equal(candidateDetails.name, "Candidate 1", "Il nome del candidato non corrisponde");
-      assert.equal(candidateDetails.proposal, "My Proposal", "La proposta non corrisponde");
+      await assert.rejects(
+        () => contract.write.registerCandidate(["Candidate 1 Again", "Another Proposal"], {
+          account: candidate1.account,
+          value: REGISTRATION_FEE,
+        }),
+        /Candidato gia. registrato/
+      );
     });
-    
-    it("dovrebbe impedire la registrazione con commissione insufficiente", async function () {
-      const lowFee = web3.utils.toWei("0.05", "ether");
-      
-      await expectRevert(
-        votingInstance.registerCandidate(
-          "Candidate 1", 
-          "My Proposal", 
-          { from: candidate1, value: lowFee }
+  });
+
+  // ---- 4. Gestione fasi --------------------------------------------------
+  describe("Gestione fasi di votazione", () => {
+    it("l'admin può chiudere la registrazione e avviare la votazione", async () => {
+      const { contract, admin } = await deployWithTwoCandidates();
+      await contract.write.closeRegistrationAndStartVoting([5n], { account: admin.account });
+
+      const state = await contract.read.getCurrentState();
+      assert.equal(state, VotingState.Voting);
+
+      const details = await contract.read.getVotingSessionDetails([1n]);
+      assert.equal(details.maxVotesRequired, 5n);    });
+
+    it("richiede almeno 2 candidati per avviare la votazione", async () => {
+      const { contract, admin, candidate1 } = await deployFreshContract();
+      await contract.write.createVotingSession(
+        ["Election", "Desc", REGISTRATION_FEE, VOTING_FEE],
+        { account: admin.account }
+      );
+      await contract.write.registerCandidate(["Only Candidate", "Proposal"], {
+        account: candidate1.account,
+        value: REGISTRATION_FEE,
+      });
+      await assert.rejects(
+        () => contract.write.closeRegistrationAndStartVoting([5n], { account: admin.account }),
+        /Servono almeno due candidati/
+      );
+    });
+  });
+
+  // ---- 5. Votazione e completamento --------------------------------------
+  describe("Votazione e completamento", () => {
+    it("permette di votare pagando la commissione", async () => {
+      const { viem, contract, candidate1, voter1 } = await deployWithVotingOpen();
+
+      const hash = await contract.write.vote([candidate1.account.address], {
+        account: voter1.account,
+        value: VOTING_FEE,
+      });
+      const publicClient = await viem.getPublicClient();
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+      assert.equal(receipt.status, "success");
+
+      const details = await contract.read.getCandidateDetails([1n, candidate1.account.address]);
+      assert.equal(details[2], 1n);
+
+      const hasVoted = await contract.read.hasVoted([1n, voter1.account.address]);
+      assert.equal(hasVoted, true);
+    });
+
+    it("rifiuta il voto con commissione insufficiente", async () => {
+      const { contract, candidate1, voter1 } = await deployWithVotingOpen();
+      await assert.rejects(
+        () => contract.write.vote([candidate1.account.address], {
+          account: voter1.account,
+          value: parseEther("0.001"),
+        }),
+        /Commissione di voto insufficiente/
+      );
+    });
+
+    it("impedisce il doppio voto", async () => {
+      const { contract, candidate1, voter1 } = await deployWithVotingOpen();
+      await contract.write.vote([candidate1.account.address], {
+        account: voter1.account,
+        value: VOTING_FEE,
+      });
+      await assert.rejects(
+        () => contract.write.vote([candidate1.account.address], {
+          account: voter1.account,
+          value: VOTING_FEE,
+        }),
+        /Hai gia. votato/
+      );
+    });
+
+    it("completa automaticamente al raggiungimento del massimo di voti", async () => {
+      const { contract, candidate1, voter1, voter2, voter3, maxVotes } = await deployWithVotingOpen(3n);
+      await contract.write.vote([candidate1.account.address], { account: voter1.account, value: VOTING_FEE });
+      await contract.write.vote([candidate1.account.address], { account: voter2.account, value: VOTING_FEE });
+      await contract.write.vote([candidate1.account.address], { account: voter3.account, value: VOTING_FEE });
+
+      const state = await contract.read.getCurrentState();
+      assert.equal(state, VotingState.Inactive);
+
+      const results = await contract.read.getVotingResults([1n]);
+      assert.equal(results[2].toLowerCase(), candidate1.account.address.toLowerCase());
+      assert.equal(results[4], maxVotes);
+    });
+
+    it("l'admin può completare manualmente la votazione", async () => {
+      const { contract, admin, candidate1, voter1, voter2 } = await deployWithVotingOpen();
+      await contract.write.vote([candidate1.account.address], { account: voter1.account, value: VOTING_FEE });
+      await contract.write.vote([candidate1.account.address], { account: voter2.account, value: VOTING_FEE });
+
+      await contract.write.endVoting({ account: admin.account });
+
+      const state = await contract.read.getCurrentState();
+      assert.equal(state, VotingState.Inactive);
+    });
+
+    it("determina correttamente il vincitore per maggioranza", async () => {
+      const { contract, admin, candidate1, candidate2, voter1, voter2, voter3 } = await deployWithVotingOpen();
+      await contract.write.vote([candidate1.account.address], { account: voter1.account, value: VOTING_FEE });
+      await contract.write.vote([candidate1.account.address], { account: voter2.account, value: VOTING_FEE });
+      await contract.write.vote([candidate2.account.address], { account: voter3.account, value: VOTING_FEE });
+
+      await contract.write.endVoting({ account: admin.account });
+
+      const results = await contract.read.getVotingResults([1n]);
+      assert.equal(results[2].toLowerCase(), candidate1.account.address.toLowerCase());
+      assert.equal(results[4], 2n);
+    });
+  });
+
+  // ---- 6. Storico --------------------------------------------------------
+  describe("Storico e risultati", () => {
+    let ctx;
+
+    before(async () => {
+      ctx = await deployFreshContract();
+      const { contract, admin, candidate1, candidate2, voter1, voter2, voter3 } = ctx;
+
+      // Prima votazione
+      await contract.write.createVotingSession(["Election 1", "First", REGISTRATION_FEE, VOTING_FEE], { account: admin.account });
+      await contract.write.registerCandidate(["C1", "P1"], { account: candidate1.account, value: REGISTRATION_FEE });
+      await contract.write.registerCandidate(["C2", "P2"], { account: candidate2.account, value: REGISTRATION_FEE });
+      await contract.write.closeRegistrationAndStartVoting([5n], { account: admin.account });
+      await contract.write.vote([candidate1.account.address], { account: voter1.account, value: VOTING_FEE });
+      await contract.write.vote([candidate1.account.address], { account: voter2.account, value: VOTING_FEE });
+      await contract.write.endVoting({ account: admin.account });
+
+      // Seconda votazione
+      await contract.write.createVotingSession(["Election 2", "Second", REGISTRATION_FEE, VOTING_FEE], { account: admin.account });
+      await contract.write.registerCandidate(["CA", "PA"], { account: candidate1.account, value: REGISTRATION_FEE });
+      await contract.write.registerCandidate(["CB", "PB"], { account: candidate2.account, value: REGISTRATION_FEE });
+      await contract.write.closeRegistrationAndStartVoting([5n], { account: admin.account });
+      await contract.write.vote([candidate2.account.address], { account: voter1.account, value: VOTING_FEE });
+      await contract.write.vote([candidate2.account.address], { account: voter2.account, value: VOTING_FEE });
+      await contract.write.vote([candidate2.account.address], { account: voter3.account, value: VOTING_FEE });
+      await contract.write.endVoting({ account: admin.account });
+    });
+
+    it("mantiene l'elenco di tutte le votazioni passate", async () => {
+      const pastIds = await ctx.contract.read.getPastVotingSessions();
+      assert.equal(pastIds.length, 2);
+      assert.equal(pastIds[0], 1n);
+      assert.equal(pastIds[1], 2n);
+    });
+
+    it("restituisce i risultati di una votazione specifica", async () => {
+      // getVotingResults ritorna array posizionale: [title, totalVotes, winner, winnerName, voteCount]
+      const r1 = await ctx.contract.read.getVotingResults([1n]);
+      assert.equal(r1[0], "Election 1");
+      assert.equal(r1[2].toLowerCase(), ctx.candidate1.account.address.toLowerCase());
+      assert.equal(r1[4], 2n);
+
+      const r2 = await ctx.contract.read.getVotingResults([2n]);
+      assert.equal(r2[0], "Election 2");
+      assert.equal(r2[2].toLowerCase(), ctx.candidate2.account.address.toLowerCase());
+      assert.equal(r2[4], 3n);
+    });
+
+    it("restituisce tutti i risultati con getAllPastVotingResults", async () => {
+      // getAllPastVotingResults ritorna tuple: [votingIds[], titles[], winners[], winnerNames[], voteCounts[]]
+      const all = await ctx.contract.read.getAllPastVotingResults();
+      assert.equal(all[0].length, 2);            // votingIds
+      assert.equal(all[1][0], "Election 1");     // titles
+      assert.equal(all[1][1], "Election 2");
+      assert.equal(all[2][0].toLowerCase(), ctx.candidate1.account.address.toLowerCase()); // winners
+      assert.equal(all[2][1].toLowerCase(), ctx.candidate2.account.address.toLowerCase());
+      assert.equal(all[4][0], 2n);               // voteCounts
+      assert.equal(all[4][1], 3n);
+    });
+  });
+
+  // ---- 7. Gestione fondi -------------------------------------------------
+  describe("Gestione fondi", () => {
+    it("l'admin può prelevare i fondi raccolti", async () => {
+      const { viem, contract, admin, candidate1, candidate2 } = await deployFreshContract();
+      const publicClient = await viem.getPublicClient();
+
+      await contract.write.createVotingSession(
+        ["Test", "Desc", REGISTRATION_FEE, VOTING_FEE], { account: admin.account }
+      );
+      await contract.write.registerCandidate(["C1", "P1"], { account: candidate1.account, value: REGISTRATION_FEE });
+      await contract.write.registerCandidate(["C2", "P2"], { account: candidate2.account, value: REGISTRATION_FEE });
+
+      const totalFee = REGISTRATION_FEE * 2n;
+      const balanceBefore = await publicClient.getBalance({ address: admin.account.address });
+
+      const hash = await contract.write.withdrawFunds([totalFee], { account: admin.account });
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+      assert.equal(receipt.status, "success");
+
+      const balanceAfter = await publicClient.getBalance({ address: admin.account.address });
+      const gasCost = receipt.gasUsed * receipt.effectiveGasPrice;
+      // Netto ricevuto (escludendo gas) deve essere uguale a totalFee
+      const net = balanceAfter - balanceBefore + gasCost;
+      assert.equal(net, totalFee);
+    });
+
+    it("rifiuta il prelievo di un importo superiore al saldo", async () => {
+      const { contract, admin } = await deployFreshContract();
+      await assert.rejects(
+        () => contract.write.withdrawFunds([parseEther("10")], { account: admin.account }),
+        /Saldo insufficiente/
+      );
+    });
+  });
+
+  // ---- 8. Cambio admin ---------------------------------------------------
+  describe("Cambio amministratore", () => {
+    it("l'admin può trasferire il ruolo a un altro account", async () => {
+      const { contract, admin, other } = await deployFreshContract();
+      await contract.write.changeAdmin([other.account.address], { account: admin.account });
+      const newAdmin = await contract.read.admin();
+      assert.equal(newAdmin.toLowerCase(), other.account.address.toLowerCase());
+    });
+
+    it("rifiuta il cambio da un account non-admin", async () => {
+      const { contract, candidate1, other } = await deployFreshContract();
+      await assert.rejects(
+        () => contract.write.changeAdmin([other.account.address], { account: candidate1.account }),
+        /Solo l.amministratore/
+      );
+    });
+
+    it("rifiuta l'indirizzo zero come nuovo admin", async () => {
+      const { contract, admin } = await deployFreshContract();
+      await assert.rejects(
+        () => contract.write.changeAdmin(
+          ["0x0000000000000000000000000000000000000000"],
+          { account: admin.account }
         ),
-        "Commissione di registrazione insufficiente"
-      );
-    });
-    
-    it("dovrebbe impedire a un candidato di registrarsi due volte", async function () {
-      await votingInstance.registerCandidate(
-        "Candidate 1", 
-        "My Proposal", 
-        { from: candidate1, value: registrationFee }
-      );
-      
-      await expectRevert(
-        votingInstance.registerCandidate(
-          "Candidate 1 Again", 
-          "Another Proposal", 
-          { from: candidate1, value: registrationFee }
-        ),
-        "Candidato gia' registrato"
-      );
-    });
-  });
-  
-  describe("Gestione fasi di votazione", function () {
-    beforeEach(async function () {
-      // Crea una sessione di voto
-      await votingInstance.createVotingSession(
-        "Test Election", 
-        "Test Description", 
-        registrationFee, 
-        votingFee, 
-        { from: admin }
-      );
-      
-      // Registra due candidati
-      await votingInstance.registerCandidate(
-        "Candidate 1", 
-        "Proposal 1", 
-        { from: candidate1, value: registrationFee }
-      );
-      
-      await votingInstance.registerCandidate(
-        "Candidate 2", 
-        "Proposal 2", 
-        { from: candidate2, value: registrationFee }
-      );
-    });
-    
-    it("dovrebbe permettere all'admin di chiudere la registrazione e iniziare la votazione", async function () {
-      const maxVotes = 5;
-      
-      const result = await votingInstance.closeRegistrationAndStartVoting(maxVotes, { from: admin });
-      
-      // Verifica evento emesso
-      truffleAssert.eventEmitted(result, 'RegistrationClosed');
-      
-      // Verifica stato aggiornato
-      const state = await votingInstance.currentState();
-      assert.equal(state, VotingState.Voting, "Lo stato dovrebbe essere Voting");
-      
-      // Verifica maxVotesRequired
-      const sessionDetails = await votingInstance.getVotingSessionDetails(1);
-      assert.equal(sessionDetails.maxVotesRequired, maxVotes, "Il numero massimo di voti non è stato impostato correttamente");
-    });
-    
-    it("dovrebbe richiedere almeno due candidati per iniziare la votazione", async function () {
-      // Crea una nuova sessione
-      await votingInstance.cancelVoting({ from: admin });
-      await votingInstance.createVotingSession(
-        "Test Election 2", 
-        "Test Description", 
-        registrationFee, 
-        votingFee, 
-        { from: admin }
-      );
-      
-      // Registra un solo candidato
-      await votingInstance.registerCandidate(
-        "Only Candidate", 
-        "My Proposal", 
-        { from: candidate1, value: registrationFee }
-      );
-      
-      // Tenta di iniziare la votazione
-      await expectRevert(
-        votingInstance.closeRegistrationAndStartVoting(5, { from: admin }),
-        "Servono almeno due candidati"
-      );
-    });
-  });
-  
-  describe("Votazione e completamento", function () {
-    const maxVotes = 3;
-    
-    beforeEach(async function () {
-      // Crea una sessione di voto
-      await votingInstance.createVotingSession(
-        "Test Election", 
-        "Test Description", 
-        registrationFee, 
-        votingFee, 
-        { from: admin }
-      );
-      
-      // Registra due candidati
-      await votingInstance.registerCandidate(
-        "Candidate 1", 
-        "Proposal 1", 
-        { from: candidate1, value: registrationFee }
-      );
-      
-      await votingInstance.registerCandidate(
-        "Candidate 2", 
-        "Proposal 2", 
-        { from: candidate2, value: registrationFee }
-      );
-      
-      // Inizia la votazione
-      await votingInstance.closeRegistrationAndStartVoting(maxVotes, { from: admin });
-    });
-    
-    it("dovrebbe permettere agli utenti di votare pagando la commissione", async function () {
-      const result = await votingInstance.vote(candidate1, { from: voter1, value: votingFee });
-      
-      // Verifica evento emesso
-      truffleAssert.eventEmitted(result, 'VoteCast', (ev) => {
-        return ev.voter === voter1 && ev.candidate === candidate1;
-      });
-      
-      // Verifica conteggio voti
-      const candidateDetails = await votingInstance.getCandidateDetails(1, candidate1);
-      assert.equal(candidateDetails.voteCount, 1, "Il conteggio dei voti non è corretto");
-      
-      // Verifica che il votante risulti aver votato
-      const hasVoted = await votingInstance.hasVoted(1, voter1);
-      assert.equal(hasVoted, true, "Il votante dovrebbe risultare come votante");
-    });
-    
-    it("dovrebbe completare automaticamente la votazione quando un candidato raggiunge il numero massimo di voti", async function () {
-      // Il candidato1 riceve maxVotes voti
-      await votingInstance.vote(candidate1, { from: voter1, value: votingFee });
-      await votingInstance.vote(candidate1, { from: voter2, value: votingFee });
-      const result = await votingInstance.vote(candidate1, { from: voter3, value: votingFee });
-      
-      // Verifica evento VotingCompleted
-      truffleAssert.eventEmitted(result, 'VotingCompleted', (ev) => {
-        return ev.winner === candidate1 && ev.voteCount.toString() === maxVotes.toString();
-      });
-      
-      // Verifica stato aggiornato
-      const state = await votingInstance.currentState();
-      assert.equal(state, VotingState.Inactive, "Lo stato dovrebbe essere tornato a Inactive");
-      
-      // Verifica risultati
-      const votingResults = await votingInstance.getVotingResults(1);
-      assert.equal(votingResults.winner, candidate1, "Il vincitore non è corretto");
-      assert.equal(votingResults.voteCount, maxVotes, "Il conteggio dei voti del vincitore non è corretto");
-    });
-    
-    it("dovrebbe permettere all'admin di completare manualmente la votazione", async function () {
-      // Candidato1 riceve 2 voti (meno di maxVotes)
-      await votingInstance.vote(candidate1, { from: voter1, value: votingFee });
-      await votingInstance.vote(candidate1, { from: voter2, value: votingFee });
-      
-      // Admin completa manualmente
-      const result = await votingInstance.endVoting({ from: admin });
-      
-      // Verifica evento
-      truffleAssert.eventEmitted(result, 'VotingCompleted');
-      
-      // Verifica stato
-      const state = await votingInstance.currentState();
-      assert.equal(state, VotingState.Inactive, "Lo stato dovrebbe essere Inactive");
-    });
-    
-    it("dovrebbe determinare correttamente il vincitore tra più candidati", async function () {
-      // Candidato1 riceve 2 voti
-      await votingInstance.vote(candidate1, { from: voter1, value: votingFee });
-      await votingInstance.vote(candidate1, { from: voter2, value: votingFee });
-      
-      // Candidato2 riceve 1 voto
-      await votingInstance.vote(candidate2, { from: voter3, value: votingFee });
-      
-      // Admin completa
-      await votingInstance.endVoting({ from: admin });
-      
-      // Verifica risultati
-      const votingResults = await votingInstance.getVotingResults(1);
-      assert.equal(votingResults.winner, candidate1, "Il vincitore dovrebbe essere candidate1");
-      assert.equal(votingResults.voteCount, 2, "Il conteggio dei voti del vincitore dovrebbe essere 2");
-    });
-  });
-  
-  describe("Gestione storico e risultati", function () {
-    beforeEach(async function () {
-      // Crea e completa una prima votazione
-      await votingInstance.createVotingSession("Election 1", "First election", registrationFee, votingFee, { from: admin });
-      await votingInstance.registerCandidate("Candidate 1", "Proposal 1", { from: candidate1, value: registrationFee });
-      await votingInstance.registerCandidate("Candidate 2", "Proposal 2", { from: candidate2, value: registrationFee });
-      await votingInstance.closeRegistrationAndStartVoting(5, { from: admin });
-      await votingInstance.vote(candidate1, { from: voter1, value: votingFee });
-      await votingInstance.vote(candidate1, { from: voter2, value: votingFee });
-      await votingInstance.endVoting({ from: admin });
-      
-      // Crea e completa una seconda votazione
-      await votingInstance.createVotingSession("Election 2", "Second election", registrationFee, votingFee, { from: admin });
-      await votingInstance.registerCandidate("Candidate A", "Proposal A", { from: candidate1, value: registrationFee });
-      await votingInstance.registerCandidate("Candidate B", "Proposal B", { from: candidate2, value: registrationFee });
-      await votingInstance.closeRegistrationAndStartVoting(5, { from: admin });
-      await votingInstance.vote(candidate2, { from: voter1, value: votingFee });
-      await votingInstance.vote(candidate2, { from: voter2, value: votingFee });
-      await votingInstance.vote(candidate2, { from: voter3, value: votingFee });
-      await votingInstance.endVoting({ from: admin });
-    });
-    
-    it("dovrebbe mantenere un elenco di tutte le votazioni passate", async function () {
-      const pastVotingIds = await votingInstance.getPastVotingSessions();
-      
-      assert.equal(pastVotingIds.length, 2, "Dovrebbero esserci 2 votazioni passate");
-      assert.equal(pastVotingIds[0], 1, "Il primo ID dovrebbe essere 1");
-      assert.equal(pastVotingIds[1], 2, "Il secondo ID dovrebbe essere 2");
-    });
-    
-    it("dovrebbe permettere di ottenere i risultati di una votazione specifica", async function () {
-      const results1 = await votingInstance.getVotingResults(1);
-      const results2 = await votingInstance.getVotingResults(2);
-      
-      // Verifica prima votazione
-      assert.equal(results1.title, "Election 1", "Il titolo della prima votazione non è corretto");
-      assert.equal(results1.winner, candidate1, "Il vincitore della prima votazione non è corretto");
-      assert.equal(results1.voteCount, 2, "Il conteggio dei voti della prima votazione non è corretto");
-      
-      // Verifica seconda votazione
-      assert.equal(results2.title, "Election 2", "Il titolo della seconda votazione non è corretto");
-      assert.equal(results2.winner, candidate2, "Il vincitore della seconda votazione non è corretto");
-      assert.equal(results2.voteCount, 3, "Il conteggio dei voti della seconda votazione non è corretto");
-    });
-    
-    it("dovrebbe permettere di ottenere tutti i risultati delle votazioni passate", async function () {
-      const allResults = await votingInstance.getAllPastVotingResults();
-      
-      // Verifica IDs
-      assert.equal(allResults.votingIds.length, 2, "Dovrebbero esserci 2 votazioni");
-      assert.equal(allResults.votingIds[0], 1, "Il primo ID dovrebbe essere 1");
-      assert.equal(allResults.votingIds[1], 2, "Il secondo ID dovrebbe essere 2");
-      
-      // Verifica titoli
-      assert.equal(allResults.titles[0], "Election 1", "Il titolo della prima votazione non è corretto");
-      assert.equal(allResults.titles[1], "Election 2", "Il titolo della seconda votazione non è corretto");
-      
-      // Verifica vincitori
-      assert.equal(allResults.winners[0], candidate1, "Il vincitore della prima votazione non è corretto");
-      assert.equal(allResults.winners[1], candidate2, "Il vincitore della seconda votazione non è corretto");
-      
-      // Verifica conteggio voti
-      assert.equal(allResults.voteCounts[0], 2, "Il conteggio voti della prima votazione non è corretto");
-      assert.equal(allResults.voteCounts[1], 3, "Il conteggio voti della seconda votazione non è corretto");
-    });
-  });
-  
-  describe("Gestione fondi", function () {
-    it("dovrebbe permettere all'admin di prelevare i fondi", async function () {
-      // Crea una sessione e raccoglie commissioni
-      await votingInstance.createVotingSession("Test Election", "Description", registrationFee, votingFee, { from: admin });
-      await votingInstance.registerCandidate("Candidate 1", "Proposal", { from: candidate1, value: registrationFee });
-      await votingInstance.registerCandidate("Candidate 2", "Proposal", { from: candidate2, value: registrationFee });
-      
-      const initialBalance = new BN(await web3.eth.getBalance(admin));
-      
-      // Preleva i fondi
-      const totalFee = new BN(registrationFee).mul(new BN(2)); // 2 candidati
-      const tx = await votingInstance.withdrawFunds(totalFee, { from: admin });
-      
-      // Calcola il gas usato
-      const gasUsed = new BN(tx.receipt.gasUsed);
-      const txInfo = await web3.eth.getTransaction(tx.tx);
-      const gasPrice = new BN(txInfo.gasPrice);
-      const gasCost = gasUsed.mul(gasPrice);
-      
-      // Verifica il saldo aggiornato
-      const finalBalance = new BN(await web3.eth.getBalance(admin));
-      const expectedBalance = initialBalance.add(totalFee).sub(gasCost);
-      
-      // Tolleriamo una piccola differenza per le approssimazioni
-      const difference = expectedBalance.sub(finalBalance).abs();
-      assert(difference.lt(new BN(web3.utils.toWei("0.001", "ether"))), "Il saldo finale non corrisponde a quanto atteso");
-    });
-    
-    it("dovrebbe impedire il prelievo di fondi superiori al saldo", async function () {
-      // Tenta di prelevare più fondi di quanti ce ne siano
-      const tooMuch = web3.utils.toWei("10", "ether");
-      
-      await expectRevert(
-        votingInstance.withdrawFunds(tooMuch, { from: admin }),
-        "Saldo insufficiente"
+        /Indirizzo admin non valido/
       );
     });
   });

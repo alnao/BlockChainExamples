@@ -1,0 +1,19 @@
+/* AdminPanel.css */
+.admin-panel {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #fffbf0;
+  border-radius: 8px;
+  border-left: 4px solid var(--warning-color);
+}
+.admin-panel h3 { color: var(--warning-color); margin-bottom: 15px; }
+.admin-panel h4 { color: var(--dark-gray); margin-bottom: 15px; font-size: 16px; }
+.admin-form { display: flex; flex-direction: column; gap: 15px; }
+.admin-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 5px; }
+.tx-status { color: var(--primary-color); font-size: 14px; font-style: italic; margin: 5px 0; }
+.error-message { color: var(--danger-color); font-size: 14px; margin: 5px 0; }
+
+@media (max-width: 768px) {
+  .admin-actions { flex-direction: column; }
+  .admin-actions button { width: 100%; }
+}
