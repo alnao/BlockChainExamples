@@ -11,6 +11,9 @@
 # production
 /build
 
+# Generato automaticamente da scripts/deploy.js — non committare
+/src/deployed-contract.json
+
 # misc
 .DS_Store
 .env.local

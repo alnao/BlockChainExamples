@@ -1,82 +1,124 @@
 import { ethers } from 'ethers';
 
-// Configurazione del contratto
-export const CONTRACT_ADDRESS = "0xb1bFf47830DabEfF596c59b8D7dd37cD4c478e57"; // Sostituisci con l'address del tuo contratto
-export const RPC_URL = "http://127.0.0.1:8545";
-export const CHAIN_ID = 31337;
+// ---------------------------------------------------------------------------
+// Configurazione rete — letta da src/deployed-contract.json
+// Questo file viene aggiornato automaticamente da:
+//   npm run deploy:local            → localhost (chainId 31337)
+//   npm run deploy:arbitrum-sepolia → Arbitrum Sepolia (chainId 421614)
+// ---------------------------------------------------------------------------
+import deployedInfo from '../deployed-contract.json';
 
-// Configurazione del contratto
-//export const RPC_URL = "https://arb1.arbitrum.io/rpc"; // Cambiato per Arbitrum
-//export const CHAIN_ID = 42161; // Arbitrum One
+// ---------------------------------------------------------------------------
+// Configurazione rete
+// Modifica NETWORK per cambiare rete attiva:
+//   'localhost'         → Hardhat locale (chainId 31337)
+//   'arbitrumSepolia'   → Arbitrum Sepolia testnet (chainId 421614)
+//   'arbitrum'          → Arbitrum One mainnet (chainId 42161)
+// ---------------------------------------------------------------------------
+const NETWORK_CONFIG = {
+  localhost: {
+    chainId: 31337,
+    chainIdHex: '0x7a69',
+    rpcUrl: 'http://127.0.0.1:8545',
+    chainName: 'Hardhat Localhost',
+    blockExplorerUrls: null,
+    label: 'Locale (Hardhat)',
+  },
+  arbitrumSepolia: {
+    chainId: 421614,
+    chainIdHex: '0x66eee',
+    rpcUrl: 'https://sepolia-rollup.arbitrum.io/rpc',
+    chainName: 'Arbitrum Sepolia',
+    blockExplorerUrls: ['https://sepolia.arbiscan.io'],
+    label: 'Arbitrum Sepolia',
+  },
+  arbitrum: {
+    chainId: 42161,
+    chainIdHex: '0xa4b1',
+    rpcUrl: 'https://arb1.arbitrum.io/rpc',
+    chainName: 'Arbitrum One',
+    blockExplorerUrls: ['https://arbiscan.io'],
+    label: 'Arbitrum One',
+  },
+};
 
-// ABI del contratto (versione semplificata delle funzioni principali)
+// Rete attiva — viene letta dal file deployed-contract.json generato dal deploy
+// In questo modo basta fare npm run deploy:arbitrum-sepolia e il frontend
+// si aggiorna automaticamente senza modifiche manuali.
+const ACTIVE_NETWORK = NETWORK_CONFIG[deployedInfo.network] || NETWORK_CONFIG.localhost;
+
+export const CONTRACT_ADDRESS = deployedInfo.contractAddress;
+export const CHAIN_ID = ACTIVE_NETWORK.chainId;
+export const RPC_URL = ACTIVE_NETWORK.rpcUrl;
+export const NETWORK_LABEL = ACTIVE_NETWORK.label;
+
+// ABI del contratto
 export const CONTRACT_ABI = [
-  "function admin() view returns (address)",
-  "function isAuthorizedIssuer(address) view returns (bool)",
-  "function addIssuer(address issuer)",
-  "function removeIssuer(address issuer)",
-  "function addDocumentType(string documentType)",
-  "function removeDocumentType(string documentType)",
-  "function documentTypes(uint256) view returns (string)",
-  "function issueDocument(address recipient, bytes32 docHash, string metadataURI, string documentType)",
-  "function revokeDocument(bytes32 docHash)",
-  "function getDocument(bytes32 docHash) view returns (address issuer, address recipient, string metadataURI, uint256 issuedAt, bool revoked, string documentType)",
-  "function transferAdmin(address newAdmin)",
-  "event IssuerAdded(address indexed issuer)",
-  "event IssuerRemoved(address indexed issuer)",
-  "event DocumentTypeAdded(string documentType)",
-  "event DocumentTypeRemoved(string documentType)",
-  "event DocumentIssued(bytes32 indexed hash, address indexed issuer, address indexed recipient, string documentType)",
-  "event DocumentRevoked(bytes32 indexed hash)"
+  'function admin() view returns (address)',
+  'function isAuthorizedIssuer(address) view returns (bool)',
+  'function addIssuer(address issuer)',
+  'function removeIssuer(address issuer)',
+  'function addDocumentType(string documentType)',
+  'function removeDocumentType(string documentType)',
+  'function documentTypes(uint256) view returns (string)',
+  'function issueDocument(address recipient, bytes32 docHash, string metadataURI, string documentType)',
+  'function revokeDocument(bytes32 docHash)',
+  'function getDocument(bytes32 docHash) view returns (address issuer, address recipient, string metadataURI, uint256 issuedAt, bool revoked, string documentType)',
+  'function transferAdmin(address newAdmin)',
+  'event IssuerAdded(address indexed issuer)',
+  'event IssuerRemoved(address indexed issuer)',
+  'event DocumentTypeAdded(string documentType)',
+  'event DocumentTypeRemoved(string documentType)',
+  'event DocumentIssued(bytes32 indexed hash, address indexed issuer, address indexed recipient, string documentType)',
+  'event DocumentRevoked(bytes32 indexed hash)',
 ];
 
-// Funzione per creare un hash del documento
+// Crea un hash del contenuto del documento (keccak256)
 export const createDocumentHash = (content) => {
   return ethers.keccak256(ethers.toUtf8Bytes(content));
 };
 
-// Funzione per formattare l'indirizzo
+// Formatta un indirizzo Ethereum abbreviato
 export const formatAddress = (address) => {
   if (!address) return '';
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 };
 
-// Funzione per formattare la data
+// Formatta un timestamp Unix in data leggibile
 export const formatDate = (timestamp) => {
   if (!timestamp) return '';
-  return new Date(Number(timestamp) * 1000).toLocaleString();
+  return new Date(Number(timestamp) * 1000).toLocaleString('it-IT');
 };
 
-export const switchToArbitrum = async () => {
+/**
+ * Chiede a MetaMask di passare alla rete configurata.
+ * Se la rete non è presente nel wallet, la aggiunge automaticamente.
+ */
+export const switchToConfiguredNetwork = async () => {
   if (!window.ethereum) {
     alert('MetaMask non è installato!');
     return false;
   }
 
   try {
-    // Try to switch to the configured network
     await window.ethereum.request({
       method: 'wallet_switchEthereumChain',
-      params: [{ chainId: `0x${CHAIN_ID.toString(16)}` }],
+      params: [{ chainId: ACTIVE_NETWORK.chainIdHex }],
     });
     return true;
   } catch (switchError) {
-    // This error code indicates that the chain has not been added to MetaMask
+    // Errore 4902: la rete non è ancora nel wallet — la aggiungiamo
     if (switchError.code === 4902) {
       try {
         await window.ethereum.request({
           method: 'wallet_addEthereumChain',
           params: [
             {
-              chainId: `0x${CHAIN_ID.toString(16)}`,
-              chainName: CHAIN_ID === 42161 ? 'Arbitrum One' : 'Localhost 8545',
-              nativeCurrency: {
-                name: 'ETH',
-                symbol: 'ETH',
-                decimals: 18,
-              },
-              rpcUrls: [RPC_URL],
-              blockExplorerUrls: CHAIN_ID === 42161 ? ['https://arbiscan.io'] : null,
+              chainId: ACTIVE_NETWORK.chainIdHex,
+              chainName: ACTIVE_NETWORK.chainName,
+              nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+              rpcUrls: [ACTIVE_NETWORK.rpcUrl],
+              blockExplorerUrls: ACTIVE_NETWORK.blockExplorerUrls,
             },
           ],
         });
@@ -90,3 +132,6 @@ export const switchToArbitrum = async () => {
     return false;
   }
 };
+
+// Mantieni la compatibilità con il vecchio nome usato in App.js
+export const switchToArbitrum = switchToConfiguredNetwork;

@@ -1,56 +1,47 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ethers } from 'ethers';
 import { CONTRACT_ADDRESS, CONTRACT_ABI, RPC_URL } from '../utils/contract';
 
 export const useContract = () => {
   const [contract, setContract] = useState(null);
   const [signer, setSigner] = useState(null);
+  const [provider, setProvider] = useState(null);
   const [account, setAccount] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [isIssuer, setIsIssuer] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Funzione per verificare ruoli
-  const checkUserRoles = async (contractInstance, address) => {
+  const checkUserRoles = useCallback(async (contractInstance, address) => {
     try {
       const adminAddress = await contractInstance.admin();
       const issuerStatus = await contractInstance.isAuthorizedIssuer(address);
-      
       const adminCheck = adminAddress.toLowerCase() === address.toLowerCase();
-      
       setIsAdmin(adminCheck);
       setIsIssuer(issuerStatus);
-      
-      console.log('Ruoli utente:', { address, isAdmin: adminCheck, isIssuer: issuerStatus });
     } catch (error) {
       console.error('Errore verifica ruoli:', error);
       setIsAdmin(false);
       setIsIssuer(false);
     }
-  };
+  }, []);
 
-  // Connessione al provider
-  const connectWallet = async () => {
+  const connectWallet = useCallback(async () => {
     try {
       setLoading(true);
-      
-      let provider, signerInstance;
-      
+
+      let signerInstance;
+
       if (window.ethereum) {
-        // MetaMask è disponibile
         await window.ethereum.request({ method: 'eth_requestAccounts' });
-        provider = new ethers.BrowserProvider(window.ethereum);
-        signerInstance = await provider.getSigner();
+        const p = new ethers.BrowserProvider(window.ethereum);
+        setProvider(p);
+        signerInstance = await p.getSigner();
       } else {
-        // Fallback al provider locale
-        provider = new ethers.JsonRpcProvider(RPC_URL);
-        // Usa il primo account locale (per sviluppo)
+        // Fallback al nodo locale (solo sviluppo)
+        const provider = new ethers.JsonRpcProvider(RPC_URL);
         const accounts = await provider.listAccounts();
-        if (accounts.length > 0) {
-          signerInstance = accounts[0];
-        } else {
-          throw new Error('Nessun account disponibile');
-        }
+        if (accounts.length === 0) throw new Error('Nessun account disponibile');
+        signerInstance = accounts[0];
       }
 
       const contractInstance = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signerInstance);
@@ -59,8 +50,6 @@ export const useContract = () => {
       setContract(contractInstance);
       setSigner(signerInstance);
       setAccount(address);
-
-      // Verifica ruoli
       await checkUserRoles(contractInstance, address);
 
     } catch (error) {
@@ -69,79 +58,48 @@ export const useContract = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [checkUserRoles]);
 
-  // Listener per cambio account - SPOSTATO DOPO connectWallet
+  // Listener cambio account e rete
   useEffect(() => {
-    if (window.ethereum) {
-      const handleAccountsChanged = async (accounts) => {
-        console.log('Account cambiato:', accounts);
-        
-        if (accounts.length === 0) {
-          // Disconnesso
-          setContract(null);
-          setSigner(null);
-          setAccount('');
-          setIsAdmin(false);
-          setIsIssuer(false);
-        } else {
-          // Nuovo account - riconnetti
-          console.log('Riconnessione con nuovo account...');
-          await connectWallet();
-        }
-      };
+    if (!window.ethereum) return;
 
-      const handleChainChanged = (chainId) => {
-        console.log('Rete cambiata:', chainId);
-        // Ricarica la pagina per evitare problemi
-        window.location.reload();
-      };
-
-      // Rimuovi listener esistenti prima di aggiungerne di nuovi
-      if (window.ethereum.removeAllListeners) {
-        window.ethereum.removeAllListeners('accountsChanged');
-        window.ethereum.removeAllListeners('chainChanged');
-      }
-
-      // Aggiungi i listener
-      window.ethereum.on('accountsChanged', handleAccountsChanged);
-      window.ethereum.on('chainChanged', handleChainChanged);
-
-      // Cleanup
-      return () => {
-        if (window.ethereum.removeListener) {
-          window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
-          window.ethereum.removeListener('chainChanged', handleChainChanged);
-        }
-      };
-    }
-  }, []); // Dipendenza vuota per evitare loop infiniti
-
-  // Auto-connessione se già connesso
-  useEffect(() => {
-    const checkConnection = async () => {
-      if (window.ethereum) {
-        try {
-          const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-          if (accounts.length > 0) {
-            await connectWallet();
-          }
-        } catch (error) {
-          console.error('Errore controllo connessione:', error);
-        }
+    const handleAccountsChanged = async (accounts) => {
+      if (accounts.length === 0) {
+        setContract(null);
+        setSigner(null);
+        setAccount('');
+        setIsAdmin(false);
+        setIsIssuer(false);
+      } else {
+        await connectWallet();
       }
     };
 
-    checkConnection();
-  }, []);
+    const handleChainChanged = () => window.location.reload();
 
-  return {
-    contract,
-    signer,
-    account,
-    isAdmin,
-    isIssuer,
-    loading,
-    connectWallet
-  };
+    window.ethereum.on('accountsChanged', handleAccountsChanged);
+    window.ethereum.on('chainChanged', handleChainChanged);
+
+    return () => {
+      window.ethereum.removeListener?.('accountsChanged', handleAccountsChanged);
+      window.ethereum.removeListener?.('chainChanged', handleChainChanged);
+    };
+  }, [connectWallet]);
+
+  // Auto-connessione se MetaMask è già autorizzato
+  useEffect(() => {
+    const checkConnection = async () => {
+      if (!window.ethereum) return;
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+        if (accounts.length > 0) await connectWallet();
+      } catch (error) {
+        console.error('Errore controllo connessione:', error);
+      }
+    };
+    checkConnection();
+  }, [connectWallet]);
+
+  return { contract, signer, provider, account, isAdmin, isIssuer, loading, connectWallet };
 };

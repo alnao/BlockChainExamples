@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Nav, Navbar, Badge } from 'react-bootstrap';
+import { Container, Row, Col, Card, Nav, Navbar, Badge, Alert } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import { useContract } from './hooks/useContract';
-import { switchToArbitrum } from './utils/contract';
+import { switchToArbitrum, NETWORK_LABEL, CHAIN_ID } from './utils/contract';
 import ConnectWallet from './components/ConnectWallet';
 import AdminPanel from './components/AdminPanel';
 import IssuerPanel from './components/IssuerPanel';
 import VerifyDocument from './components/VerifyDocument';
 
 function App() {
-  const { contract, account, isAdmin, isIssuer, loading, connectWallet } = useContract();
+  const { contract, account, isAdmin, isIssuer, loading, connectWallet, provider } = useContract();
   const [activeTab, setActiveTab] = useState('verify');
   const [networkName, setNetworkName] = useState('');
+  const [currentChainId, setCurrentChainId] = useState(null);
 
   // Aggiungi questo useEffect in App.js per debug
   useEffect(() => {
@@ -25,23 +26,32 @@ function App() {
       if (window.ethereum) {
         try {
           const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-          switch (chainId) {
-            case '0xa4b1':
-              setNetworkName('Arbitrum One');
-              break;
-            case '0x7a69':
-              setNetworkName('Locale (Hardhat)');
-              break;
-            default:
-              setNetworkName('Rete sconosciuta');
+          const chainIdDecimal = parseInt(chainId, 16);
+          // Mappa chainId → nome rete leggibile
+          const NETWORK_NAMES = {
+            42161:  'Arbitrum One',
+            421614: 'Arbitrum Sepolia',
+            31337:  'Locale (Hardhat)',
+            11155111: 'Sepolia',
+            1: 'Ethereum Mainnet',
+          };
+          setNetworkName(NETWORK_NAMES[chainIdDecimal] || `ChainId ${chainIdDecimal}`);
+          setCurrentChainId(chainIdDecimal);
+          
+          // Avvisa se la rete non corrisponde a quella del contratto deployato
+          if (chainIdDecimal !== CHAIN_ID) {
+            console.warn(`Rete attiva (${chainIdDecimal}) diversa da quella configurata (${CHAIN_ID})`);
           }
         } catch (error) {
           console.error('Errore verifica rete:', error);
         }
       }
     };
-
     checkNetwork();
+    if (window.ethereum) {
+      window.ethereum.on('chainChanged', checkNetwork);
+      return () => window.ethereum.removeListener?.('chainChanged', checkNetwork);
+    }
   }, [account]);
 
   const handleConnect = async () => {
@@ -75,7 +85,16 @@ function App() {
         </Container>
       </Navbar>
 
-      <Container>
+      <Container fluid="md">
+        {account && currentChainId && currentChainId !== CHAIN_ID && (
+          <Alert variant="warning" className="mt-2">
+            ⚠️ Sei connesso alla rete <strong>{networkName}</strong> (chainId {currentChainId}), ma il contratto è deployato su <strong>{NETWORK_LABEL}</strong> (chainId {CHAIN_ID}).
+            {' '}
+            <Alert.Link href="#" onClick={(e) => { e.preventDefault(); switchToArbitrum(); }}>
+              Clicca qui per cambiare rete
+            </Alert.Link>
+          </Alert>
+        )}
         {!account ? (
           <Row className="justify-content-center">
             <Col md={6}>
@@ -109,10 +128,10 @@ function App() {
                       <VerifyDocument contract={contract} />
                     )}
                     {activeTab === 'issue' && isIssuer && (
-                      <IssuerPanel contract={contract} account={account} />
+                      <IssuerPanel contract={contract} account={account} provider={provider} />
                     )}
                     {activeTab === 'admin' && isAdmin && (
-                      <AdminPanel contract={contract} />
+                      <AdminPanel contract={contract} provider={provider} />
                     )}
                   </Card.Body>
                 </Card>

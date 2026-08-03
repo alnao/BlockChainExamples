@@ -1,235 +1,221 @@
-# Solidity SmartContract07 Document Validator Arbitrum
-Document Validator è un sistema per la certificazione e verifica di documenti costruito su blockchain Ethereum (compatibile con **Arbitrum**). Il sistema permette di emettere, verificare e revocare certificati digitali in modo sicuro e trasparente, garantendo l'integrità e l'autenticità dei documenti attraverso la tecnologia blockchain.
-- Gestione Ruoli: Sistema di autorizzazioni con Admin e Issuer
-- Emissione Documenti: Creazione di certificati digitali con hash univoci e categorizzazione dei documenti
-- Verifica Documenti: Controllo dell'autenticità e validità dei documenti
-- Revoca Documenti: Possibilità di invalidare certificati esistenti
-- Metadata Support: Supporto per informazioni aggiuntive tramite URI
-- Certificato: Il contenuto resta off-chain, ma il file è hashato e registrato on-chain per verificarne l'integrità.
-- Utente finale non amministratore: Può mostrare il PDF + verifica pubblica (via UI o contratto).
+
+# HardhatSolidity07 — Document Validator su Arbitrum
+
+Sistema di certificazione e verifica documenti costruito su **Arbitrum** (Layer 2 Ethereum).
+Il contenuto dei documenti resta off-chain (IPFS), l'hash SHA256 viene registrato on-chain per garantirne l'integrità e l'autenticità.
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Solidity-0.8.20-000000?logo=Solidity" height=28/>
+  <img src="https://img.shields.io/badge/Hardhat-2.x-302C53?logo=Hardhat" height=28/>
+  <img src="https://img.shields.io/badge/Arbitrum-Sepolia-2D374B?logo=Arbitrum" height=28/>
+  <img src="https://img.shields.io/badge/ethers.js-v6-purple" height=28/>
+</p>
+
+## Perché Arbitrum invece di Ethereum mainnet
+
+- **Fee bassissime**: una transazione costa centesimi invece di dollari
+- **Velocità**: conferma in pochi secondi
+- **Compatibilità totale**: il contratto Solidity gira identico, cambia solo il chainId e l'RPC
+- **Testnet gratuita**: Arbitrum Sepolia permette di testare senza costi reali
+
+---
+
+## Funzionalità del contratto
+
+- `addIssuer(address)` — l'admin abilita un ente emettitore
+- `removeIssuer(address)` — l'admin revoca un ente
+- `addDocumentType(string)` — l'admin definisce le categorie di documento
+- `issueDocument(recipient, hash, metadataURI, type)` — un issuer emette un certificato
+- `revokeDocument(hash)` — l'issuer o l'admin revoca un documento
+- `getDocument(hash)` — chiunque può verificare autenticità e stato di un documento
+- `transferAdmin(address)` — trasferimento del ruolo admin
+
+### Dati salvati on-chain
+- Hash SHA256 del file (bytes32)
+- URI dei metadati (es. IPFS JSON con nome corso, data, destinatario)
+- Timestamp di emissione
+- Indirizzo dell'ente emettitore
+- Flag di revoca
+- Tipo di documento
+
+---
+
+## Struttura del progetto
+
+```
+HardhatSolidity07DocumentValidatorArbitrum/
+├── contracts/
+│   └── DocumentCertifier.sol
+├── scripts/
+│   ├── deploy.js           # Deploy su qualsiasi rete
+│   ├── interact.js         # Test flusso completo
+│   ├── add-issuer.js       # Aggiunge un issuer (utile su testnet)
+│   └── generate-keys.js    # Genera chiavi locali (solo sviluppo)
+├── test/
+│   └── DocumentCertifier.test.js  # 15 test (ethers v6)
+├── .env                    # Chiavi private — NON committare
+├── hardhat.config.js
+└── package.json
+```
+
+---
+
+## Avvio rapido — rete locale
+
+```bash
+npm install
+npm run node              # terminale 1 — tienilo aperto
+npm run deploy:local      # terminale 2 — deploya e copia deployed-contract.json in frontend/src/
+npm run interact          # verifica il flusso completo da script
+npm test                  # 15 test
+
+# Avvia il frontend
+cd frontend && npm install && npm start
+```
+
+Apri `http://localhost:3000` — MetaMask deve puntare a `http://127.0.0.1:8545`, chainId `31337`.
+
+---
+
+## Deploy su Arbitrum Sepolia (testnet pubblica)
+
+### 1. Ottieni ETH Arbitrum Sepolia
+
+Vai su uno di questi faucet e inserisci il tuo indirizzo MetaMask:
+
+- [faucet.quicknode.com/arbitrum/sepolia](https://faucet.quicknode.com/arbitrum/sepolia) — 0.01 ETH, nessun requisito
+- [faucets.chain.link/arbitrum-sepolia](https://faucets.chain.link/arbitrum-sepolia) — login GitHub/Twitter
+
+> 0.01 ETH Arbitrum Sepolia è più che sufficiente per decine di deploy e centinaia di transazioni.
+> Le fee su Arbitrum sono ~0.0001 ETH per transazione.
+
+### 2. Configura il file `.env`
+
+Inserisci la tua chiave privata:
+
+```env
+PRIVATE_KEY=0x_LA_TUA_CHIAVE_PRIVATA
+
+# RPC già configurato di default (endpoint pubblico gratuito)
+ARBITRUM_SEPOLIA_RPC=https://sepolia-rollup.arbitrum.io/rpc
+```
+
+> **Come ottenere la chiave privata da MetaMask:**
+> tre puntini accanto all'account → "Account details" → "Show private key"
+>
+> 🟡 Non committare mai il file `.env` con la chiave reale. È già in `.gitignore`.
+
+### 3. Aggiungi Arbitrum Sepolia a MetaMask
+
+| Campo | Valore |
+|---|---|
+| Network name | Arbitrum Sepolia |
+| RPC URL | `https://sepolia-rollup.arbitrum.io/rpc` |
+| Chain ID | `421614` |
+| Symbol | ETH |
+| Block explorer | `https://sepolia.arbiscan.io` |
+
+### 4. Deploy
+
+```bash
+npm run deploy:arbitrum-sepolia
+```
+
+Output atteso:
+```
+=== Deploy DocumentCertifier ===
+Network: arbitrumSepolia
+Deployer: 0xTUO_INDIRIZZO
+Balance:  0.01 ETH
+
+✅ DocumentCertifier deployato a: 0xNUOVO_INDIRIZZO
+🔍 Block explorer: https://sepolia.arbiscan.io/address/0xNUOVO_INDIRIZZO
+
+ℹ️  Su rete pubblica gli issuer si aggiungono manualmente:
+   ISSUER=0x<indirizzo> npx hardhat run scripts/add-issuer.js --network arbitrumSepolia
+```
+
+### 5. Aggiungi issuer
+
+Su testnet puoi usare lo stesso account del deployer come issuer, oppure un secondo account:
+
+```bash
+ISSUER=0x_INDIRIZZO_ISSUER npm run add-issuer:arbitrum-sepolia
+```
+
+### 6. Avvia il frontend su Arbitrum Sepolia
+
+```bash
+cd frontend
+npm install   # solo la prima volta
+npm start     # apre http://localhost:3000
+```
+
+Il frontend legge automaticamente `frontend/src/deployed-contract.json` — aggiornato dal deploy — e si configura per Arbitrum Sepolia (chainId 421614).
+
+MetaMask deve essere su **Arbitrum Sepolia**. Se non è presente, il frontend mostra un banner con il link "Cambia rete" che la aggiunge automaticamente.
 
 
-Perché usare Arbitrum invece di Ethereum mainnet:
-- Costi di transazione molto più bassi: Le fee su Arbitrum sono una frazione di quelle su Ethereum mainnet.
-- Maggiore velocità: Le transazioni sono confermate più rapidamente.
-- Scalabilità: Arbitrum può gestire molte più transazioni al secondo.
-- Nessuna differenza nel linguaggio Solidity: I contratti scritti per Ethereum funzionano su Arbitrum senza modifiche.
-- Deployment: Cambia solo la rete su cui fai il deploy (endpoint RPC, chainId).
-- Limitazioni: Alcune opzioni avanzate (es. precompiles, gas estimation) possono comportarsi in modo leggermente diverso, ma per la maggior parte dei casi d’uso non ci sono differenze.
-- Bridge: Se vuoi trasferire asset tra Ethereum e Arbitrum, devi usare bridge specifici.
+### 6. Verifica il contratto su Arbiscan (opzionale)
+
+Permette di interagire con il contratto direttamente dal block explorer senza frontend.
+
+Registrati su [arbiscan.io](https://arbiscan.io) per ottenere una API key gratuita, poi:
+
+```bash
+# Aggiungi in .env:
+# ARBISCAN_API_KEY=LA_TUA_API_KEY
+
+npx hardhat verify 0xINDIRIZZO_CONTRATTO --network arbitrumSepolia
+```
+
+---
+
+## Differenza tra "fork locale" e testnet reale
+
+Il README originale menzionava `npx hardhat node --fork https://arb1.arbitrum.io/rpc` — questo crea un nodo locale che **simula** la mainnet di Arbitrum copiando il suo stato. È utile solo se il tuo contratto deve interagire con protocolli già esistenti su Arbitrum (Uniswap, ecc.). Per DocumentCertifier non serve.
+
+**Usa sempre Arbitrum Sepolia** per i test pubblici — è la testnet ufficiale, gratuita e supportata.
+
+---
+
+## Test
+
+```bash
+npm test
+```
+
+15 test coprono: gestione issuer, emissione documenti, duplicati, verifica, revoca, sicurezza, trasferimento admin.
+
+---
+
+## Reti supportate
+
+| Rete | ChainId | Comando | Note |
+|---|---|---|---|
+| Hardhat locale | 31337 | `npm run deploy:local` | Sviluppo, istantaneo |
+| Arbitrum Sepolia | 421614 | `npm run deploy:arbitrum-sepolia` | Testnet pubblica, ETH gratis |
+| Arbitrum One | 42161 | `npm run deploy:arbitrum` | Produzione reale |
+
+---
+
+## Note dello sviluppatore:
+Sono riuscito a testare tutto:
+- rilasciato su sepolia correttamente
+- funziona il frontend per aggiungere Issuer e Tipi documento
+- all'inizio mi ha dato errori in transazione perchè il Issuer deve avere ETH su TestNetSepolia e deve essere abiltiato dal admin 
+- sono riuscito ad emettere un documento e poi validarlo da altro utente.
+    - Stato: ✅ Documento valido
+- Ho finito i crediti su Kiro e quindi mi sono fermato!
 
 
-Smart contract – Funzioni principali
-- `addIssuer(address)`: L’admin abilita un ente
-- `removeIssuer(address)`: L’admin rimuove un ente
-- `issueDocument(address user, bytes32 hash, string metadataURI)`: Un ente emette un certificato con hash del PDF
-- `revokeDocument(bytes32 hash)`:Revoca un documento emesso (opzionale)
-- `verifyDocument(bytes32 hash)`: Ritorna validità e metadati di un documento
+### Prossimi sviluppi
 
+- **Lista documenti iterabile**: la `mapping(bytes32 => Document)` non è iterabile. Aggiungere un array di hash per permettere la paginazione on-chain.
+- **Frontend React + wagmi**: port del frontend CRA esistente a Vite + wagmi (come fatto per il progetto 06)
+- **Audit log on-chain**: registro consultabile di tutte le operazioni admin
+- **Multi-chain**: deploy parallelo su Optimism, zkSync, Base
 
-Dati salvati on-chain
-- PDF hash (SHA256 o keccak256 del file PDF)
-- URI dei metadati (es. IPFS con JSON: nome corso, data, nome utente, ecc.)
-- timestamp di emissione
-- ente emettitore
-- (opzionale) revocato: bool
-- tipo documento: ogni documento ha un tipo, l'elenco dei tipi è gestito dall'utente amministratore
-
-
-Flusso di utilizzo
-- Admin abilita ente A e crea tipi di documenti
-- Ente A carica un PDF, lo carica su IPFS, calcola l’hash
-- Chiama issueDocument(user, hash, uri) e viene registrato on-chain
-- Utente finale riceve URI + hash per verifica (es. via link)
-- Chiunque può verificare l’autenticità fornendo l’hash del PDF
-
-
-## 2. Struttura tecnica
-- Struttura del progetto
-    ```
-	/contracts
-	  └── DocumentCertifier.sol
-	/scripts
-      |   deploy.js
-      |   generate-keys.js
-	  └── interact.js
-    /test
-	  └── DocumentCertifier.test.js
-	.env
-	hardhat.config.js
-    ```
-- Installa Hardhat (se non già presente):
-    ```
-	npm init -y
-	npm install --save-dev hardhat  --legacy-peer-deps
-	npx hardhat
-	npm install --save-dev @nomiclabs/hardhat-ethers ethers dotenv  --legacy-peer-deps
-    ```
-- File `.env` per la chiave privata e l'RPC di Arbitrum:
-    ```
-    PRIVATE_KEY=0xyour_private_key
-    # testnet: 
-    ARBITRUM_RPC=https://sepolia-rollup.arbitrum.io/rpc
-    # Prodnet
-    ARBITRUM_RPC_PROD=https://arb1.arbitrum.io/rpc  
-    ```
-- File `hardhat.config.js`, aggiungere la rete specifica:
-    ```
-    require("@nomiclabs/hardhat-ethers");
-    require("dotenv").config();
-    module.exports = {
-        solidity: "0.8.20",
-        networks: {
-            arbitrum: {
-                url: process.env.ARBITRUM_RPC,
-                accounts: [process.env.PRIVATE_KEY],
-            },
-        },
-    };
-    ```
-- Script di deploy `scripts/deploy.js`: vedere il files
-- Esecuzione del deploy su Testnet (o su Arbitrum One):
-    ```
-    npm init -y
-    npm install --save-dev hardhat
-    npm install --save-dev @nomiclabs/hardhat-ethers ethers
-    npm install --save-dev dotenv
-    npm install --save-dev ethers hardhat @nomicfoundation/hardhat-toolbox --legacy-peer-deps
-    npm install --save-dev "@nomicfoundation/hardhat-chai-matchers@^2.0.0" "@nomicfoundation/hardhat-ethers@^3.0.0" "@nomicfoundation/hardhat-ignition-ethers@^0.15.0" "@nomicfoundation/hardhat-network-helpers@^1.0.0" "@nomicfoundation/hardhat-verify@^2.0.0" "@typechain/ethers-v6@^0.5.0" "@typechain/hardhat@^9.0.0" "@types/chai@^4.2.0" "@types/mocha@>=9.1.0" "chai@^4.2.0" "hardhat-gas-reporter@^2.3.0" "solidity-coverage@^0.8.1" "ts-node@>=8.0.0" "typechain@^8.3.0" "typescript@>=4.5.0" --legacy-peer-deps
-    npm install --save-dev "@nomicfoundation/hardhat-ignition@^0.15.12" "@nomicfoundation/ignition-core@^0.15.12" --force
-    npm install --save-dev hardhat@latest @nomicfoundation/hardhat-toolbox@latest
-    npm install ethers@^6.8.0
-- Generazione chiavi da eseguire solo la prima volta. 
-    ```
-    node scripts/generate-keys.js
-    ```
-    *il file non deve essere commitato e le chiavi NON devono mai essere condivise*
-- Avvia la rete locale (in un terminale separato)
-    ```
-    npx hardhat node
-    ```
-    - oppure per non fermare la console
-        ```
-        npx hardhat node --no-watch 
-        ```
-    - se errore `Error: ENOSPC: System limit for number of file watchers reached, watch`
-        ```
-        # Controlla il limite attuale
-        cat /proc/sys/fs/inotify/max_user_watches
-        # Aumenta temporaneamente il limite
-        sudo sysctl fs.inotify.max_user_watches=524288
-        # Per renderlo permanente, aggiungi al file di configurazione
-        echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf
-        # Ricarica la configurazione
-        sudo sysctl -p
-        ```
-- Deploy del contratto (in un altro terminale se non fermato)
-    ```
-    npx hardhat run scripts/deploy.js --network localhost
-
-    ```
-    Vedere nella ripsosta quali sono gli account admin e issuer
-    ```
-    Network: localhost
-    === Account disponibili ===
-    Admin/Deployer: 0x123ABC
-    Issuer 1: 0x123ABC
-    Issuer 2: 0x123ABC
-    Recipient 1: 0x123ABC
-    Recipient 2: 0x123ABC
-    Balance Admin: 10000.0 ETH
-    === Deploying DocumentCertifier ===
-    ✅ DocumentCertifier deployato!
-    Contract Address: 0x123ABC
-    Admin: 0x123ABC
-    === Setup iniziale ===
-    Aggiungendo issuer1 come autorizzato...
-    ✅ Issuer1 aggiunto - TX: 0x123ABC
-    Aggiungendo issuer2 come autorizzato...
-    ✅ Issuer2 aggiunto - TX: 0x123ABC
-    === Verifica autorizzazioni ===
-    Issuer1 autorizzato: true
-    Issuer2 autorizzato: true
-    📄 Informazioni salvate in deployed-contract.json
-    ```
-- Interazione con il contratto
-    ```
-    npx hardhat run scripts/interact.js --network localhost
-    ```
-    Vedere la risposta dove viene salvato l'endpoint
-- Esegui i test
-    ```
-    npm install --save-dev @nomicfoundation/hardhat-toolbox
-    npx hardhat test --network localhost
-    ```
-- Possibile configurare il fork di Arbitrum *mah non dire*
-    ```
-    npx hardhat node --fork https://arb1.arbitrum.io/rpc
-    modifica hardhat.config.js
-    npx hardhat run scripts/deploy.js --network arbitrumFork
-    ```
-    - Note: ottenere ETH testnet da: https://faucet.quicknode.com/arbitrum/sepolia
-- Frontend in react con grafica bootstrap:
-    - Creazione del progetto
-        ```
-        npx create-react-app frontend
-        cd frontend
-        npm install bootstrap
-        npm install bootstrap react-bootstrap ethers
-        index.js import 'bootstrap/dist/css/bootstrap.min.css';
-        npm build
-        ```
-    - Struttura progetto frontend
-        ```
-        frontend/
-        ├── src/
-        │   ├── components/
-        │   │   ├── AdminPanel.js
-        │   │   ├── IssuerPanel.js
-        │   │   ├── VerifyDocument.js
-        │   │   └── ConnectWallet.js
-        │   ├── hooks/
-        │   │   └── useContract.js
-        │   ├── utils/
-        │   │   └── contract.js
-        │   ├── App.js
-        │   └── index.js
-        ├── contracts/
-        ├── scripts/
-        ├── tests/
-        ├── hardhat.config.js
-        └── package.json
-        ```
-    - Prima di eseguie il progetto aggiornare il file `frontend/src/utils/contract.js` con l'indirizzo contratto restituito nel punto precedente!
-    - Configurazione metamask per prove in locale con frontend
-        - aggiungere rete "ArbitrumLH GoChain Testnet" -> "Arbitrum locale 127.0.0.1:8545", "simbolo GO", chainId 31337
-        - aggiungere indirizzi (chiavi) nel local-keys.json
-        - configurazione di sicurezza: panino (tre barrette) > "all permissions" > `localhost:3000` > 
-            - see accounts > "aggiungere path"
-            - see networks > "ArbitrumLH GoChain Testnet"
-    - Prove eseguite su frontend utilizzando gli address creati nel file `local-keys.json`:
-        - selezionare su metamask account "admin"
-            - rimuovi issuer (tra quelli che esiste già)
-        - selezionare su metamask account issuer appena rimosso
-            - notare che non può emettere documenti
-        - selezionare su metamask account "admin"
-            - aggiungere account appena tolto
-        - selezionare su metamask account issuer appena rimesso
-            - "emetti documento" in indirizzo e contenuto, segnarsi hash
-        - selezionare su metamask account utente normale
-            - verificare documento contenuto
-            - verificare documento hash
-        - selezionare su metamask account issuer
-            - revocare il documento
-        - selezionare su metamask account utente normale
-            - verificare che il documento è revocato
-        - selezionare utente admin e aggiungere un tipo documento e successivamente rimuovere un tipo documento
-- Prossimi passi da sviluppare     
-    - Arbitrum
-    - Elenco documenti validati: non c'è un metodo per recupeare tutti i documenti firmati, potrebbe essere utile sviluppare una lista di documenti ciclabile, attualmente nello smart-contract c'è solo la mappa `mapping(bytes32 => Document) public documents;` che non è iterabile.
-    - Audit log on-chain: Registra tutte le operazioni amministrative e di emissione/revoca in un log consultabile.
-    - Estensione a layer 2 multipli: Oltre Arbitrum, aggiungi compatibilità con altre soluzioni (Optimism, zkSync).
-    - Notifiche e webhook: Invia notifiche (email, webhook) agli utenti quando viene emesso o revocato un documento.
 
 
 # &lt; AlNao /&gt;

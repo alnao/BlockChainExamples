@@ -1,104 +1,113 @@
+// scripts/interact.js — ethers v6
+// Dimostra il flusso completo: addIssuer → issueDocument → getDocument → revokeDocument
+
 const hre = require("hardhat");
-const crypto = require('crypto');
+const crypto = require("crypto");
+const fs = require("fs");
 
 async function main() {
-    const documentType = "Certificate";
+  const deployInfo = JSON.parse(fs.readFileSync("deployed-contract.json", "utf8"));
+  const contractAddress = deployInfo.contractAddress;
 
-    // Carica le informazioni del contratto deployato
-    const deployInfo = JSON.parse(require('fs').readFileSync('deployed-contract.json', 'utf8'));
-    const contractAddress = deployInfo.contractAddress;
-    
-    console.log("=== Interazione con DocumentCertifier ===");
-    console.log("Contract Address:", contractAddress);
-    
-    const [admin, issuer1, issuer2, recipient1, recipient2] = await hre.ethers.getSigners();
-    
-    // Connetti al contratto
-    const DocumentCertifier = await hre.ethers.getContractFactory("DocumentCertifier");
-    const contract = DocumentCertifier.attach(contractAddress);
-    
-    console.log("\n=== Test emissione documenti ===");
-    
-    // Aggiungi i tipi di documento necessari
-    const documentTypesToAdd = [documentType, "Workshop"];
-    for (const type of documentTypesToAdd) {
-        try {
-            await contract.connect(admin).addDocumentType(type);
-            console.log(`Tipo documento aggiunto: ${type}`);
-        } catch (err) {
-            if (err.message.includes("Type already exists")) {
-                console.log(`Tipo documento già presente: ${type}`);
-            } else {
-                console.error(`Errore aggiunta tipo documento ${type}:`, err.message);
-            }
-        }
+  console.log("=== Interazione con DocumentCertifier ===");
+  console.log("Contract Address:", contractAddress);
+
+  const [admin, issuer1, issuer2, recipient1, recipient2] = await hre.ethers.getSigners();
+  const contract = await hre.ethers.getContractAt("DocumentCertifier", contractAddress);
+
+  // ---- 1. Aggiungi tipi di documento ------------------------------------
+  console.log("\n=== Setup tipi di documento ===");
+  for (const type of ["Certificate", "Workshop"]) {
+    try {
+      await (await contract.connect(admin).addDocumentType(type)).wait();
+      console.log(`✅ Tipo aggiunto: ${type}`);
+    } catch (err) {
+      if (err.message.includes("Type already exists")) {
+        console.log(`ℹ️  Tipo già presente: ${type}`);
+      } else throw err;
     }
+  }
 
-    // Crea un hash del documento (simula il contenuto di un documento)
-    const documentContent = "Certificato di completamento corso blockchain - " + Date.now();
-    const docHash = "0x" + crypto.createHash('sha256').update(documentContent).digest('hex');
-    const metadataURI = "https://ipfs.io/ipfs/QmExample123"; // Simula un URI IPFS
-    
-    console.log("Contenuto documento:", documentContent);
-    console.log("Hash documento:", docHash);
-    console.log("Metadata URI:", metadataURI);
-    
-    // Issuer1 emette un documento per recipient1
-    console.log("\n--- Issuer1 emette documento per Recipient1 ---");
-    const issueContract = contract.connect(issuer1);
-    // Specifica il tipo di documento (assicurati che sia stato aggiunto dall'admin)
-    
-    const issueTx = await issueContract.issueDocument(recipient1.address, docHash, metadataURI, documentType);
-    const issueReceipt = await issueTx.wait();
+  // ---- 2. Autorizza gli issuer ------------------------------------------
+  console.log("\n=== Autorizzazione issuer ===");
+  for (const [label, issuer] of [["issuer1", issuer1], ["issuer2", issuer2]]) {
+    try {
+      await (await contract.connect(admin).addIssuer(issuer.address)).wait();
+      console.log(`✅ ${label} autorizzato: ${issuer.address}`);
+    } catch (err) {
+      if (err.message.includes("Already authorized")) {
+        console.log(`ℹ️  ${label} già autorizzato`);
+      } else throw err;
+    }
+  }
 
-    console.log("✅ Documento emesso!");
-    console.log("Transaction hash:", issueReceipt.hash);
+  // ---- 3. Issuer1 emette documento per Recipient1 -----------------------
+  console.log("\n=== Emissione documento #1 ===");
+  const content1 = "Certificato blockchain - " + Date.now();
+  // ethers v6: ethers.keccak256 + ethers.toUtf8Bytes (oppure crypto SHA256)
+  // Usiamo lo stesso approccio del contratto per simulare l'hash del file
+  const docHash1 = "0x" + crypto.createHash("sha256").update(content1).digest("hex");
+  const uri1 = "https://ipfs.io/ipfs/QmExample123";
 
-    // Verifica il documento
-    console.log("\n--- Verifica documento ---");
-    const docInfo = await contract.getDocument(docHash);
-    console.log("Issuer:", docInfo[0]);
-    console.log("Recipient:", docInfo[1]);
-    console.log("Metadata URI:", docInfo[2]);
-    console.log("Issued At:", new Date(Number(docInfo[3]) * 1000).toLocaleString());
-    console.log("Revoked:", docInfo[4]);
-    console.log("Document Type:", docInfo[5]);
-    
-    // Test di revoca
-    console.log("\n--- Test revoca documento ---");
-    const revokeTx = await issueContract.revokeDocument(docHash);
-    await revokeTx.wait();
-    console.log("✅ Documento revocato!");
-    
-    // Verifica la revoca
-    const revokedDocInfo = await contract.getDocument(docHash);
-    console.log("Documento ora revocato:", revokedDocInfo[4]);
-    
-    // Test emissione di un secondo documento
-    console.log("\n--- Emissione secondo documento ---");
-    const docContent2 = "Certificato di partecipazione workshop - " + Date.now();
-    const docHash2 = "0x" + crypto.createHash('sha256').update(docContent2).digest('hex');
-    const metadataURI2 = "https://ipfs.io/ipfs/QmExample456";
-    const documentType2 = "Workshop";
+  console.log("Contenuto:", content1);
+  console.log("Hash:     ", docHash1);
 
-    const issuer2Contract = contract.connect(issuer2);
-    const issueTx2 = await issuer2Contract.issueDocument(recipient2.address, docHash2, metadataURI2, documentType2);
-    await issueTx2.wait();
+  await (await contract.connect(issuer1).issueDocument(
+    recipient1.address, docHash1, uri1, "Certificate"
+  )).wait();
+  console.log("✅ Documento emesso!");
 
-    console.log("✅ Secondo documento emesso da Issuer2!");
+  const doc1 = await contract.getDocument(docHash1);
+  console.log("  Issuer:      ", doc1.issuer);
+  console.log("  Recipient:   ", doc1.recipient);
+  console.log("  Type:        ", doc1.documentType);
+  console.log("  Issued At:   ", new Date(Number(doc1.issuedAt) * 1000).toLocaleString("it-IT"));
+  console.log("  Revoked:     ", doc1.revoked);
 
-    const docInfo2 = await contract.getDocument(docHash2);
-    console.log("Nuovo documento - Issuer:", docInfo2[0]);
-    console.log("Nuovo documento - Recipient:", docInfo2[1]);
-    console.log("Nuovo documento - Revoked:", docInfo2[4]);
-    console.log("Nuovo documento - Document Type:", docInfo2[5]);
-    
-    console.log("\n=== Test completati con successo! ===");
+  // ---- 4. Revoca documento -----------------------------------------------
+  console.log("\n=== Revoca documento #1 ===");
+  await (await contract.connect(issuer1).revokeDocument(docHash1)).wait();
+  console.log("✅ Documento revocato!");
+
+  const doc1Rev = await contract.getDocument(docHash1);
+  console.log("  Revoked ora:", doc1Rev.revoked);
+
+  // ---- 5. Issuer2 emette documento per Recipient2 -----------------------
+  console.log("\n=== Emissione documento #2 ===");
+  const content2 = "Workshop blockchain - " + Date.now();
+  const docHash2 = "0x" + crypto.createHash("sha256").update(content2).digest("hex");
+  const uri2 = "https://ipfs.io/ipfs/QmExample456";
+
+  await (await contract.connect(issuer2).issueDocument(
+    recipient2.address, docHash2, uri2, "Workshop"
+  )).wait();
+  console.log("✅ Secondo documento emesso da issuer2!");
+
+  const doc2 = await contract.getDocument(docHash2);
+  console.log("  Issuer:    ", doc2.issuer);
+  console.log("  Recipient: ", doc2.recipient);
+  console.log("  Type:      ", doc2.documentType);
+  console.log("  Revoked:   ", doc2.revoked);
+
+  // ---- 6. Verifica che un non-issuer non possa emettere -----------------
+  console.log("\n=== Test sicurezza ===");
+  const [,,,,, attacker] = await hre.ethers.getSigners();
+  const hashFake = "0x" + crypto.createHash("sha256").update("attacco").digest("hex");
+  try {
+    await contract.connect(attacker).issueDocument(
+      attacker.address, hashFake, "uri", "Certificate"
+    );
+    console.log("❌ ERRORE: l'attaccante ha emesso un documento!");
+  } catch {
+    console.log("✅ Non-issuer correttamente bloccato.");
+  }
+
+  console.log("\n=== Tutti i test completati con successo! ===");
 }
 
 main()
-    .then(() => process.exit(0))
-    .catch((error) => {
-        console.error("❌ Errore:", error);
-        process.exit(1);
-    });
+  .then(() => process.exit(0))
+  .catch((err) => {
+    console.error("❌ Errore fatale:", err.message);
+    process.exit(1);
+  });

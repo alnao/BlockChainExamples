@@ -1,100 +1,77 @@
-require("@nomiclabs/hardhat-ethers");
-require("dotenv").config();
 require("@nomicfoundation/hardhat-toolbox");
-const fs = require('fs');
+require("dotenv").config();
 
-// Funzione per caricare le chiavi in modo sicuro
-function loadLocalKeys() {
-  try {
-    if (fs.existsSync('./local-keys.json')) {
-      const keysData = JSON.parse(fs.readFileSync('./local-keys.json', 'utf8'));
-      return keysData.keys.map(key => ({
-        privateKey: key.privateKey,
-        balance: "10000000000000000000000"
-      }));
-    }
-  } catch (error) {
-    console.log("Nessun file local-keys.json trovato, usando account predefiniti");
-  }
-  
-  return [];
-}
+// Carica la chiave privata in modo sicuro — se non configurata, usa una chiave dummy
+// per permettere compilazione e test locali senza errori
+const PRIVATE_KEY = process.env.PRIVATE_KEY &&
+  process.env.PRIVATE_KEY !== "0xyour_private_key_here"
+  ? process.env.PRIVATE_KEY
+  : "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"; // Hardhat default #0
 
+/** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   solidity: {
     version: "0.8.20",
     settings: {
-      optimizer: {
-        enabled: true,
-        runs: 200
-      }
-    }
+      optimizer: { enabled: true, runs: 200 },
+    },
   },
+
   networks: {
+    // -----------------------------------------------------------------------
+    // Rete locale (sviluppo)
+    // -----------------------------------------------------------------------
     hardhat: {
       chainId: 31337,
-      accounts: loadLocalKeys()
     },
     localhost: {
       url: "http://127.0.0.1:8545",
       chainId: 31337,
-      timeout: 60000
+      timeout: 60000,
     },
-    arbitrumFork: {
-      url: "http://127.0.0.1:8545",
-      chainId: 42161
-    }/*,
+
+    // -----------------------------------------------------------------------
+    // Arbitrum Sepolia testnet — chainId 421614
+    // RPC pubblico: https://sepolia-rollup.arbitrum.io/rpc
+    // Block explorer: https://sepolia.arbiscan.io
+    // Faucet: https://faucet.quicknode.com/arbitrum/sepolia
+    //         https://faucets.chain.link/arbitrum-sepolia
+    // -----------------------------------------------------------------------
+    arbitrumSepolia: {
+      url: process.env.ARBITRUM_SEPOLIA_RPC || "https://sepolia-rollup.arbitrum.io/rpc",
+      chainId: 421614,
+      accounts: [PRIVATE_KEY],
+    },
+
+    // -----------------------------------------------------------------------
+    // Arbitrum One mainnet — solo per produzione
+    // -----------------------------------------------------------------------
     arbitrum: {
-        url: process.env.ARBITRUM_RPC,
-        accounts: [process.env.PRIVATE_KEY],
-    }*/
+      url: process.env.ARBITRUM_RPC || "https://arb1.arbitrum.io/rpc",
+      chainId: 42161,
+      accounts: [PRIVATE_KEY],
+    },
   },
-    // Configura il watcher per ridurre i file monitorati
-    watchPaths: ["./contracts"],
-    // Ignora cartelle problematiche
+
+  // Etherscan / Arbiscan per la verifica del contratto
+  etherscan: {
+    apiKey: {
+      arbitrumOne: process.env.ARBISCAN_API_KEY || "",
+      arbitrumSepolia: process.env.ARBISCAN_API_KEY || "",
+    },
+    customChains: [
+      {
+        network: "arbitrumSepolia",
+        chainId: 421614,
+        urls: {
+          apiURL: "https://api-sepolia.arbiscan.io/api",
+          browserURL: "https://sepolia.arbiscan.io",
+        },
+      },
+    ],
+  },
+
   paths: {
-    sources: "./contracts"//,    tests: "./test"
-  }
+    sources: "./contracts",
+  },
 };
-
-/*
-const { version } = require("hardhat");
-
-require("@nomiclabs/hardhat-ethers");
-require("dotenv").config();
-module.exports = {
-    solidity: {
-        version: "0.8.20",
-        settings: {
-            optimizer: {
-                enabled: true,
-                runs: 200
-            }
-        }
-    },
-    networks: {
-        hardhat: {
-            chainId: 31337,
-            accounts: keys.keys.map(key => ({
-                privateKey: key.privateKey,
-                balance: "10000000000000000000000"
-            }))
-        },
-        // Fork di Arbitrum per test più realistici
-        arbitrumFork: {
-            url: "http://127.0.0.1:8545",
-            chainId: 42161,
-            forking: {
-                url: "https://arb1.arbitrum.io/rpc",
-                blockNumber: undefined
-            }
-        },
-        arbitrum: {
-            url: process.env.ARBITRUM_RPC,
-            accounts: [process.env.PRIVATE_KEY],
-        },
-
-    },
-    
-};
-*/

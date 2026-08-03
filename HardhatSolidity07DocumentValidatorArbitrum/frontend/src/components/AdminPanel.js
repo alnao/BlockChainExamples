@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Button, Alert, Card, Row, Col } from 'react-bootstrap';
+import { getTxOverrides } from '../utils/gasHelper';
 
-const AdminPanel = ({ contract }) => {
+const AdminPanel = ({ contract, provider }) => {
   const [issuerAddress, setIssuerAddress] = useState('');
   const [removeIssuerAddress, setRemoveIssuerAddress] = useState('');
   const [newAdminAddress, setNewAdminAddress] = useState('');
@@ -37,126 +38,88 @@ const AdminPanel = ({ contract }) => {
   const handleAddDocumentType = async (e) => {
     e.preventDefault();
     if (!contract || !documentType) return;
-    setLoading(true);
-    setError('');
-    setSuccess('');
+    setLoading(true); setError(''); setSuccess('');
     try {
-      const tx = await contract.addDocumentType(documentType);
+      const overrides = await getTxOverrides(provider);
+      const tx = await contract.addDocumentType(documentType, overrides);
       await tx.wait();
       setSuccess(`Tipo di documento aggiunto: ${documentType}`);
       setDocumentType('');
     } catch (err) {
-      setError('Errore aggiunta tipo: ' + err.message);
-    } finally {
-      setLoading(false);
-    }
+      setError('Errore aggiunta tipo: ' + (err.shortMessage ?? err.message));
+    } finally { setLoading(false); }
   };
 
   const handleRemoveDocumentType = async (e) => {
     e.preventDefault();
     if (!contract || !removeDocumentType) return;
-    setLoading(true);
-    setError('');
-    setSuccess('');
+    setLoading(true); setError(''); setSuccess('');
     try {
-      const tx = await contract.removeDocumentType(removeDocumentType);
+      const overrides = await getTxOverrides(provider);
+      const tx = await contract.removeDocumentType(removeDocumentType, overrides);
       await tx.wait();
       setSuccess(`Tipo di documento rimosso: ${removeDocumentType}`);
       setRemoveDocumentType('');
     } catch (err) {
-      setError('Errore rimozione tipo: ' + err.message);
-    } finally {
-      setLoading(false);
-    }
+      setError('Errore rimozione tipo: ' + (err.shortMessage ?? err.message));
+    } finally { setLoading(false); }
   };
 
   const handleAddIssuer = async (e) => {
     e.preventDefault();
     if (!contract || !issuerAddress) return;
-
-    setLoading(true);
-    setError('');
-    setSuccess('');
-
+    setLoading(true); setError(''); setSuccess('');
     try {
-      const tx = await contract.addIssuer(issuerAddress);
+      const overrides = await getTxOverrides(provider);
+      const tx = await contract.addIssuer(issuerAddress, overrides);
       const receipt = await tx.wait();
-
-      setSuccess(`Issuer aggiunto con successo: ${issuerAddress}`);
+      setSuccess(`Issuer aggiunto: ${issuerAddress}`);
       setIssuerAddress('');
-      
-      console.log('Add issuer transaction:', receipt.hash);
-
+      console.log('Add issuer tx:', receipt.hash);
     } catch (err) {
-      console.error('Errore aggiunta issuer:', err);
       if (err.message.includes('Already authorized')) {
         setError('Questo indirizzo è già un issuer autorizzato.');
       } else {
-        setError('Errore durante l\'aggiunta: ' + err.message);
+        setError('Errore aggiunta issuer: ' + (err.shortMessage ?? err.message));
       }
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   const handleRemoveIssuer = async (e) => {
     e.preventDefault();
     if (!contract || !removeIssuerAddress) return;
-
-    setLoading(true);
-    setError('');
-    setSuccess('');
-
+    setLoading(true); setError(''); setSuccess('');
     try {
-      const tx = await contract.removeIssuer(removeIssuerAddress);
+      const overrides = await getTxOverrides(provider);
+      const tx = await contract.removeIssuer(removeIssuerAddress, overrides);
       const receipt = await tx.wait();
-
-      setSuccess(`Issuer rimosso con successo: ${removeIssuerAddress}`);
+      setSuccess(`Issuer rimosso: ${removeIssuerAddress}`);
       setRemoveIssuerAddress('');
-      
-      console.log('Remove issuer transaction:', receipt.hash);
-
+      console.log('Remove issuer tx:', receipt.hash);
     } catch (err) {
-      console.error('Errore rimozione issuer:', err);
       if (err.message.includes('Not an issuer')) {
         setError('Questo indirizzo non è un issuer autorizzato.');
       } else {
-        setError('Errore durante la rimozione: ' + err.message);
+        setError('Errore rimozione issuer: ' + (err.shortMessage ?? err.message));
       }
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   const handleTransferAdmin = async (e) => {
     e.preventDefault();
     if (!contract || !newAdminAddress) return;
-
-    const confirmed = window.confirm(
-      `Sei sicuro di voler trasferire i privilegi di admin a ${newAdminAddress}? Questa azione è irreversibile!`
-    );
-    
-    if (!confirmed) return;
-
-    setLoading(true);
-    setError('');
-    setSuccess('');
-
+    if (!window.confirm(`Trasferire i privilegi admin a ${newAdminAddress}? Irreversibile!`)) return;
+    setLoading(true); setError(''); setSuccess('');
     try {
-      const tx = await contract.transferAdmin(newAdminAddress);
+      const overrides = await getTxOverrides(provider);
+      const tx = await contract.transferAdmin(newAdminAddress, overrides);
       const receipt = await tx.wait();
-
-      setSuccess(`Admin trasferito con successo a: ${newAdminAddress}`);
+      setSuccess(`Admin trasferito a: ${newAdminAddress}`);
       setNewAdminAddress('');
-      
-      console.log('Transfer admin transaction:', receipt.hash);
-
+      console.log('Transfer admin tx:', receipt.hash);
     } catch (err) {
-      console.error('Errore trasferimento admin:', err);
-      setError('Errore durante il trasferimento: ' + err.message);
-    } finally {
-      setLoading(false);
-    }
+      setError('Errore trasferimento admin: ' + (err.shortMessage ?? err.message));
+    } finally { setLoading(false); }
   };
 
   return (
