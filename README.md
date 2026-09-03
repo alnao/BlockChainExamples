@@ -24,7 +24,7 @@ Questo repository raccoglie una serie di progetti e implementazioni relativi all
 |-----|----|----|
 | <img src="https://img.shields.io/badge/Hardhat-302C53?logo=Hardhat&logoColor=white" height=32/> <img src="https://img.shields.io/badge/Solidity-000000?logo=Solidity&logoColor=white" height=32/>| [`📁`](./HardhatSolidity06VotationsV2/) **HardhatSolidity06VotationsV2** | progetto di smart-contract per sistema di votazione evoluto rispetto all'esempio `TruffleSmartContract05Votations` è stato sviluppato con HardHat con aggiunta della gestione delle candidature e un sistema migliorato delle votazioni. *Funzionante* con semplice frontend per la gestione delle candidature e delle votazioni.<br/>Revisionato in luglio 2026 |
 | <img src="https://img.shields.io/badge/Hardhat-302C53?logo=Hardhat&logoColor=white" height=32/> <img src="https://img.shields.io/badge/Solidity-000000?logo=Solidity&logoColor=white" height=32/>| [`📁`](./HardhatSolidity07DocumentValidatorArbitrum/) **HardhatSolidity07DocumentValidatorArbitrum** | progetto di smart-contract per sistema di validazione documento onChain: il contenuto di un documento viene salvato come hash on chain da un address emittende e chiunque può verificare la validità del contenuto. Con certificazione e verifica di documenti costruito su blockchain Ethereum compatibile con **Arbitrum**. L'esempio è *funzionante* con semplice frontend per la gestione dei documenti. Sviluppato con Hardhat e rilasciato su TestNet Sepolia. <br/>Revisionato in agosto 2026 |
-| <img src="https://img.shields.io/badge/Hardhat-302C53?logo=Hardhat&logoColor=white" height=32/> <img src="https://img.shields.io/badge/Solidity-000000?logo=Solidity&logoColor=white" height=32/>| [`📁`](./HardhatSolidity08guessTheNumberGame/) **HardhatSolidity08guessTheNumberGame** | Un gioco blockchain "indovina il numero" multi-partita dove ogni utente può avviare la propria partita e chiunque può provare a indovinare su tutte le partite attive simultaneamente. Disponibile anche su **Testnet Sepolia** (vedi sezione dedicata in questo README) e rilasciato anche con geth su istanza AWS-EC2 (vedi sezione dedicata in questo README) |
+| <img src="https://img.shields.io/badge/Hardhat-302C53?logo=Hardhat&logoColor=white" height=32/> <img src="https://img.shields.io/badge/Solidity-000000?logo=Solidity&logoColor=white" height=32/>| [`📁`](./HardhatSolidity08guessTheNumberGame/) **HardhatSolidity08guessTheNumberGame** | Un gioco blockchain "indovina il numero" multi-partita dove ogni utente può avviare la propria partita e chiunque può provare a indovinare su tutte le partite attive simultaneamente. Disponibile anche su **Testnet Sepolia** (vedi sezione dedicata in questo README) e rilasciato anche con geth su istanza AWS-EC2 con **geth** (vedi sezione dedicata in questo README) <br />Revisionato in settembre 2026|
 | <img src="https://img.shields.io/badge/Hardhat-302C53?logo=Hardhat&logoColor=white" height=32/> <img src="https://img.shields.io/badge/Solidity-000000?logo=Solidity&logoColor=white" height=32/>| [`📁`](./HardhatSolidity09Staking/) **HardhatSolidity09Staking** | progetto di smart-contract per un sistema di Staking & Yield Farming dove gli utenti possono bloccare i loro token ERC20 per guadagnare interessi nel tempo. Esempio *funzionante* con token implementato, completo di test e script di interazione. <br /> *Client ancora da sistemare perchè non funziona correttamente* |
 | <img src="https://img.shields.io/badge/Python-3766AB?logo=Python&logoColor=white" height=32/> | [`📁`](./PythonBlockChain/) **PythonBlockChain** | esempio *funzionante* di BlockChain in python con entrmabi i tipi: mono-node e multi-node, è basato sull'algoritmo del *proof-of-work* |
 | Truffle <br /> *deprecato* |  [`📁`](./TruffleFundraiserApplication/) **TruffleFundraiserApplication** | esempio *funzionante* di smart-contract che simula una raccolta fondi con metodi per donare e eventi, comprende anche una piccola applicazione React per eseguire le donazioni e gestire i fondi. Esempio preso dal capitolo 6 del libro "Hands-On Smart Contract Development with Solidity and Ethereum - 2020 - O'Reilly" |
@@ -96,80 +96,77 @@ La maggior parte dei progetti di esempio hanno bisogno di alcuni software dedica
 
 
 ## Esecuzione su Testnet Sepolia
-**Sepolia** è una delle principali testnet pubbliche di Ethereum, progettata per testare smart contract e DApp in un ambiente sicuro e gratuito, senza usare ETH reale. Per usarla, è possibile configurare il tuo progetto con un endpoint RPC Sepolia (ad esempio Infura o Alchemy) e importando la chiave privata di un account con ETH di test ottenuto da un faucet. Puoi è possibile deployare e interagire con i tuoi smart contract su Sepolia come faresti su mainnet, ma *senza rischi economici oppure con pochissimi euro/dollari di costo*.
+**Sepolia** è una delle principali testnet pubbliche di Ethereum, progettata per testare smart contract e DApp in un ambiente sicuro e gratuito, senza usare ETH reale. È possibile configurare il tuo progetto con un endpoint RPC Sepolia (ad esempio Infura o Alchemy) e importare la chiave privata di un account con ETH di test ottenuto da un faucet. Puoi deployare e interagire con i tuoi smart contract su Sepolia come faresti su mainnet, ma *senza rischi economici o a costo zero*.
 
 
 I passi per eseguire il rilascio del progetto di esempio "08 Guess the number" su rete Sepolia tramite Infura sono: 
 
-1. Registrarsi su Infura nel sito `https://developer.metamask.io/`, per le prove di un semlice SmartContract è possibile selezionare il piano gratuito che prevede un "api key" e un numero limitato di richieste. In fase di creazione della key viene generato un KeyId e un KeySecret che serviranno. Nelle pagine di configurazione `https://developer.metamask.io/key/settings` è possibile recuperare il "AccountId", questo è utile per determinare l'endpoint della rete che sarà del tipo
+1. Registrarsi su Infura nel sito `https://developer.metamask.io/`. Per le prove di un semplice SmartContract è possibile selezionare il piano gratuito che prevede una API Key e un numero limitato di richieste. In fase di creazione della key vengono generati un KeyId e un KeySecret. Nelle pagine di configurazione `https://developer.metamask.io/key/settings` è possibile recuperare l'AccountId, utile per determinare l'endpoint della rete che sarà del tipo:
     ```
     https://sepolia.infura.io/v3/<account_id>
     ```
-    la lista di tutti gli endpoint a disposizione da infura è disponibile nella videata "Active Endpoints" nel dettaglio delle API.
-2. Testare la rete creata con una chiamata alle API, per esempio usando il comando curl
+    La lista di tutti gli endpoint a disposizione su Infura è disponibile nella sezione "Active Endpoints" nel dettaglio delle API.
+
+2. Testare la rete creata con una chiamata alle API, per esempio usando il comando `curl`:
     ```bash
     curl --user :<YOUR-API-KEY-SECRET> \
-      https://mainnet.infura.io/v3/<YOUR-API-KEY> \
+      https://sepolia.infura.io/v3/<YOUR-API-KEY> \
       -d '{"jsonrpc": "2.0", "method": "eth_blockNumber", "params": [], "id": 1}'  
+    ```
 
-    curl --user :vHBn8DtzBcyNazQe3LdxtXrjEYHXVQXQIREgXW++aw8f6kOC8j3N7w \
-      https://mainnet.infura.io/v3/6a468662cc6d4562ab9d4aa1ea876354 \
-      -d '{"jsonrpc": "2.0", "method": "eth_blockNumber", "params": [], "id": 1}'  
+3. **Monitoraggio Limiti**: Utilizzare questo servizio richiede di monitorare l'utilizzo per rimanere entro i limiti previsti dal profilo *free* di Infura; per un uso intensivo è necessario effettuare l'[upgrade a un piano a pagamento](https://docs.metamask.io/developer-tools/dashboard/how-to/upgrade-your-plan/) che offre limiti più elevati rispetto a quelli gratuiti. Tutti i dettagli sono descritti nella [Documentazione ufficiale](https://docs.metamask.io/developer-tools/dashboard/how-to/secure-an-api/set-rate-limits/).
 
-    ```
-2. Utilizzare questo servizio richiede monitorare costantemente l'utilizzo per rimanere entro i limiti previsti dal profilo *free* di Infura; per un uso intensivo è necessario effettuare l'[upgrade a un piano a pagamento](https://docs.metamask.io/developer-tools/dashboard/how-to/upgrade-your-plan/) che offre limiti più elevati rispetto a quelli gratuiti. Tutti i dettagli sono ben descritti nella [Documentazione ufficiale](https://docs.metamask.io/developer-tools/dashboard/how-to/secure-an-api/set-rate-limits/)
-3. Procurarsi la chiave privata di un account testnet con ETH di test (puoi usare faucet pubblici).
-    🟡 TODO: non ricordo come ho generato la chiave primaria, sicuramente è stata generata da Sepolia/infura o da Metamask ma non ricordo come
-4. Nel progetto installare le dipendenze mancanti con il comando
-    ```
-    npm install --save-dev @nomiclabs/hardhat-ethers ethers @nomiclabs/hardhat-etherscan --legacy-peer-deps
-    ```
-5. Configurare il file `hardhat.config.js` aggiungendo la riga di configurazione `.env` per la rete specifica
-    ```
-      PRIVATE_KEY=0xAAAAAAAAAAA
-      PUBLICK_KEY=0xBBBBBBBBBBB
-      SECOND_PRIVATE_KEY=0xCCCCCCCCCCCCCC
-      INFURA_PROJECT_ID=DDDDDDDDDDD
+4. Procurarsi la chiave privata di un account testnet con ETH di test (puoi usare faucet pubblici):
+    - **Nota sulla Chiave Privata**: La chiave privata non viene generata da Infura (che fornisce solo i nodi RPC), ma dal proprio wallet Ethereum (ad esempio **MetaMask**: *Dettagli Account* $\rightarrow$ *Mostra chiave privata*).
 
+5. Nel progetto installare le dipendenze dichiarate nel `package.json`:
+    ```bash
+    npm install --legacy-peer-deps
     ```
-    nel file è necessario indicare la KEY_ID creata da infura, una o più chiavi primarie, come prima chiave bisogna indicare l'owner del contratto che è generato al passo 3, le successive chiavi saranno usate dallo script interact
 
-    🟡 Attenzione: non rilasciare mai nei repository le chiavi private, è facile incappare nell'errore di eseguire commit/push del file di configurazione con le chiavi private inserite. 
-6. Deploy sulla testnet: avviare il deploy nella rete sepolia (o quella configurata):
+6. Configurare il file `.env` (e `hardhat.config.js`) per la rete specifica:
+    ```env
+    PRIVATE_KEY=0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    PUBLIC_KEY=0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+    SECOND_PRIVATE_KEY=0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+    INFURA_PROJECT_ID=DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
     ```
+    Nel file `.env` è necessario indicare la PROJECT_ID/KEY_ID creata su Infura e le chiavi private. La prima chiave sarà usata come owner/deployer del contratto, mentre le successive saranno utilizzate dallo script `interact.js`.
+
+    🟡 **Attenzione**: Non rilasciare mai nei repository le chiavi private! Inserire sempre il file `.env` all'interno di `.gitignore` per evitare di pubblicarle accidentalmente.
+
+7. Deploy sulla testnet Sepolia: avviare lo script di deploy puntando alla rete `sepolia`:
+    ```bash
     npx hardhat run scripts/deploy.js --network sepolia
     ```
-7. Gestione errore *insufficient funds*: al deploy nella rete Sepolia è necessario avere a disposizione degli Sepolia-ETH token per eseguire il deploy, in caso di mancanza di questi token l'errore sarà `ProviderError: insufficient funds for gas * price + value: balance 0, tx cost xxxxxx, overshot xxxxxxx`. Per ovviare a questo problema è possibile richiedere i token tramite i siti faucet (che di solito hanno sistemi anti-bot come captcha). Il sistema più semplice è usare
-    ```
-    https://www.alchemy.com/faucets/ethereum-sepolia
-    ```
-    che permette di inviare 0.1 Sepolia ETH ogni 72 ore ma alla condizione che nell'indirizzo di destinazione, nella rete pubblica reale ci siano almeno 0.001 ETH reali. 
-    
-    🟡 Nota: gli ETH richiesti non vengono consumati/bruciati e nemmeno sequestrati ma servono solo per verifica antispam/antibot, comunque devono essere token reali di produzione.
-8. Una volta rilasciato lo smart contract comparira un messaggio del tipo
+
+8. Gestione errore *insufficient funds*: al deploy nella rete Sepolia è necessario avere a disposizione degli Sepolia-ETH token per coprire il gas della transazione, altrimenti l'errore sarà `ProviderError: insufficient funds for gas * price + value: balance 0, tx cost xxxxxx`. Per ovviare a questo problema è possibile richiedere i token tramite i siti faucet (ad esempio `https://cloud.google.com/application/web3/faucet/ethereum/sepolia`). Dopo aver ricevuto i fondi, verifica il balance su Etherscan `https://sepolia.etherscan.io/address/0xACCA51187901f1caC30aFa57A2Ce5beA5151Ea78`
+
+9. Una volta rilasciato lo smart contract comparirà un messaggio del tipo:
     ```
     Deploying contracts with the account: 0x1234567890ABCDEF1
     MockToken deployed to: 0x1234567890ABCDEF2
     GuessTheNumberMulti deployed to: 0x1234567890ABCDEF3
-    Indirizzi salvati in: /mnt/Dati/Workspace/BlockChainExamples/SoliditySmartContract08guessTheNumberGame/deployed-addresses.json
+    Indirizzi salvati in: HardhatSolidity08guessTheNumberGame/deployed-addresses.json
     Deployment completed!
     Token address: 0x1234567890ABCDEF4
     Game address: 0x1234567890ABCDEF5
     ```
-9. Infine sarà possibile interagire con lo smart contract manualmente con lo script
-    ```
+
+10. Infine sarà possibile interagire con lo smart contract manualmente tramite lo script:
+    ```bash
     npx hardhat run scripts/interact.js --network sepolia
     ```
-    tramite Metamask è possibile monitorare gli spostamenti dei token Sepolia ETH e dei token NAO (se correttamente configurato come token su Metamsk). In aggiunta è possibile verificare transazioni e funzionamento tramite **Etherscan Sepolia** e/o **Remix IDE** come descritto nei prossimi punti.
+    Tramite MetaMask è possibile monitorare gli spostamenti dei token Sepolia ETH e dei token NAO (se l'indirizzo del token viene aggiunto a MetaMask). In aggiunta è possibile verificare transazioni ed eventi su **Etherscan Sepolia**.
 
 ### Etherscan Sepolia
 *Etherscan Sepolia* è un block explorer dedicato alla testnet Sepolia di Ethereum, che permette di visualizzare in tempo reale transazioni, blocchi, indirizzi, smart contract e i loro eventi sulla rete Sepolia. Offre strumenti per verificare e interagire con smart contract (funzioni "Read/Write Contract") direttamente dal browser, purché il contratto sia stato verificato pubblicamente. È accessibile all’indirizzo https://sepolia.etherscan.io/.
 
-Per esempio all'indirizzo
+Per esempio all'indirizzo:
 ```
 https://sepolia.etherscan.io/address/0xAAAAAAAAAAAAAAA
 ```
-è possibile monitorare i movimento e lo stato di un contratto.
+è possibile monitorare i movimenti e lo stato del contratto.
 
 
 ## AWS Managed Blockchain
@@ -211,7 +208,7 @@ In sintesi: Cosa puoi fare per testare i tuoi smart contract:
 
 
 ## Esecuzione su EC2 con geth
-Una possibilità è eseguire **Geth** su un’istanza AWS-EC2 per rilasciare uno smart contract ed eseguire operazioni. Nell’esempio viene usato *SoliditySmartContract08guessTheNumberGame*. I passi da seguire sono:
+Una possibilità è eseguire **Geth** su un’istanza AWS-EC2 per rilasciare uno smart contract ed eseguire operazioni. Nell’esempio viene usato *HardhatSolidity08guessTheNumberGame*. I passi da seguire sono:
 
 1. Avviare una nuova istanza EC2
     - Andare su **EC2** → **Launch Instance**
@@ -223,7 +220,7 @@ Una possibilità è eseguire **Geth** su un’istanza AWS-EC2 per rilasciare uno
           - Autorizzare le porte **30303** (TCP/UDP) e **8545** (RPC, opzionale, solo per IP sicuri)
           - Nota sicurezza: non esporre la porta 8545 pubblicamente in produzione! Usare VPN o limitare l’accesso agli IP sicuri. Questo è solo un esempio/prototipo a titolo di 
       - Avviare l’istanza e annotare l’IP pubblico
-    - Nell'esempio `SoliditySmartContract08guessTheNumberGame` è stato creato lo script `./create_ec2_node.sh` che salva anche l'ip nel file `.env` locale, poi è disponibile anche il `destroy_ec2_node.sh` per distruggere la EC2 e il security group!
+    - Nell'esempio `HardhatSolidity08guessTheNumberGame` è stato creato lo script `./create_ec2_node.sh` che salva anche l'ip nel file `.env` locale, poi è disponibile anche il `destroy_ec2_node.sh` per distruggere la EC2 e il security group!
 2. Connettersi via SSH
     ```bash
     ssh -i /percorso/chiave.pem ubuntu@<IP_EC2>
@@ -242,12 +239,9 @@ Una possibilità è eseguire **Geth** su un’istanza AWS-EC2 per rilasciare uno
     geth -version
     ```
     - La versione dovrebbe essere la `1.13.15-stable-c5ba367e`
-    - Nota: esistono versioni più recenti installabili con 
-      ```
-      sudo add-apt-repository -y ppa:ethereum/ethereum
-      sudo apt install -y ethereum
-      ```
-      - ma la versione dovrebbe essere `geth version 1.16.7-stable-b9f3a3d9` (a settembre 2025) che non è compatibile con il proof-of-work usato in questo esempio! L'errore è `ERROR[12-09|17:38:27.279] Geth only supports PoS networks. Please transition legacy networks using Geth v1.13.x. Fatal: Failed to register the Ethereum service: 'terminalTotalDifficulty' is not set in genesis block`
+    - **Nota sulle versioni recenti**: esistono versioni più recenti installabili tramite il repository ufficiale (es. `ppa:ethereum/ethereum`), ma dalla versione 1.14 in poi Geth ha rimosso o fortemente limitato il supporto alle reti locali legacy (Proof of Work e Proof of Authority/Clique). Installando versioni recenti si incapperà nell'errore:
+      `ERROR: Geth only supports PoS networks. Please transition legacy networks using Geth v1.13.x. Fatal: Failed to register the Ethereum service: 'terminalTotalDifficulty' is not set in genesis block`.
+      Pertanto, **è necessario utilizzare la versione 1.13.15** per questo setup basato su Proof of Authority (Clique).
 
 4. Inizializzare la rete privata
     - Creare una cartella per la blockchain:
@@ -294,7 +288,7 @@ Una possibilità è eseguire **Geth** su un’istanza AWS-EC2 per rilasciare uno
     ```
     - Viene chiesto di inserire una password (scegline una e ricordala!).
     - Annotare l’indirizzo pubblico del nuovo account
-      - A me non mostra l'account di risposta e il secondo comando ritorna la lista degli account con il file di riferimento da annotare per il prossimo passo
+      - *Nota*: Se il primo comando non mostra l'indirizzo in chiaro, il secondo comando (`account list`) restituirà la lista degli account insieme al percorso del file keystore da utilizzare nel passo successivo.
 
 7. Recuperare la chiave privata dalla password tramite uno script Node.js:
     - Installare nodejs, npm e web3:
@@ -383,17 +377,40 @@ Una possibilità è eseguire **Geth** su un’istanza AWS-EC2 per rilasciare uno
         --unlock $ADDR --password password.txt \
         --allow-insecure-unlock
       ```
-    - Note aggiuntive: 
-      - Clique (Proof-of-Authority) è l'unica modalità supportata per reti private su Geth moderno. Non richiede mining intensivo e i blocchi vengono firmati automaticamente. Geth only supports PoS networks. Please transition legacy networks using Geth v1.13.x. Fatal: Failed to register the Ethereum service: 'terminalTotalDifficulty' is not set in genesis block
-      - Aggiungere `--http.corsdomain "*"` e `--http.vhosts "*"` per test da remoto (solo in ambienti sicuri)
-      - Con le versioni più recenti di Geth, rimuovendo il `terminalTotalDifficulty` mi da l'errore `Geth only supports PoS networks. Please transition legacy networks using Geth v1.13.x`
+    - **Note aggiuntive**: 
+      - **Clique (Proof-of-Authority)** è la modalità utilizzata in questo esempio per la rete privata. Non richiede mining intensivo e i blocchi vengono firmati automaticamente dall'account "sealer" configurato.
+      - Aggiungere `--http.corsdomain "*"` e `--http.vhosts "*"` per test da remoto (da fare **solo in ambienti sicuri/VPN**, mai esporre RPC pubblicamente senza protezioni).
+      - Come già detto, è imperativo rimanere sulla versione `1.13.x` per evitare conflitti con la rimozione del supporto legacy nelle versioni più recenti di Geth.
 9. Deployare lo smart contract nella rete corretta usando l’endpoint `http://<PUBLIC_IP_EC2>:8545` come RPC endpoint nel file di configurazione Hardhat modificando il file `.env` locale 
     - In ogni caso bisogna modificare il file impostando "PUBLICK_KEY" e "PRIVATE_KEY" restituita al punto 7 ma se è stato usato lo script `create_ec2_node.sh` non serve eseguire l'aggiornamento del file
-    - Verifica del contratto
+    - Configuare il file `addresses.js` con il nome della rete corretto `ec2geth`
+    - Aggiornare il file `.env` con l'indirizzo ip del server
+    - Configurazione IP server
       ```
-      curl -X POST --data '{"jsonrpc":"2.0","method":"eth_getBalance","params":["0x<public-key>", "latest"],"id":1}' -H "Content-Type: application/json" http://<IP_EC2>:8545
+      IP_EC2="<IP_EC2>"
+      PUBLIC_KEY="<PUBLIC_KEY_CON_0x>"
+      curl -X POST --data '{"jsonrpc":"2.0","method":"eth_getBalance","params":["<0xADDRESS-CHIAVE-PUBBLICA>", "latest"],"id":1}' -H "Content-Type: application/json" http://$IP_EC2:8545
       ```
       - Se la risposta contiene "result":"0x0", significa che il genesis non è stato caricato. Se invece vedi un valore esadecimale grande (es. 0x123456789), allora i fondi ci sono.
+    - Eseguire transazione dall'indirizzo main ad un indirizzo (indirizzo indicato come `Deploying contracts with the account`)
+      ```
+      curl -s -X POST -H "Content-Type: application/json" \
+        --data '{"jsonrpc":"2.0","method":"eth_sendTransaction","params":[{
+          "from":"0xSORGENTE",
+          "to":"0xDESTINAZIONE",
+          "value":"0x56bc75e2d63100000"
+        }],"id":1}' \
+        http://$IP_EC2:8545
+      # stato della transazione: "status":"0x1" = riuscita
+      curl -s -X POST -H "Content-Type: application/json" \
+        --data '{"jsonrpc":"2.0","method":"eth_getTransactionReceipt","params":["<TX_HASH>"],"id":1}' \
+        http://$IP_EC2:8545
+
+      # saldo del destinatario
+      curl -s -X POST -H "Content-Type: application/json" \
+        --data '{"jsonrpc":"2.0","method":"eth_getBalance","params":["0xDESTINAZIONE","latest"],"id":1}' \
+        http://$IP_EC2:8545
+      ```  
     - Eseguire il deploy:
       ```bash
       npx hardhat run scripts/deploy.js --network ec2geth
@@ -412,14 +429,42 @@ Una possibilità è eseguire **Geth** su un’istanza AWS-EC2 per rilasciare uno
     - Annotare gli indirizzi dei contratti e verificare il contenuto del file `deployed-addresses.json`
 
 10. Interagire con il contratto:
-    - Aprire la console Hardhat:
+    - Aprire la console Hardhat (opzionale):
       ```bash
+      IP_EC2="<IP_EC2>"
+      PUBLIC_KEY="<PUBLIC_KEY_CON_0x>"
       npx hardhat console --network ec2geth
       ```
-    - Eseguire lo script di interazione:
+    - Eseguire lo script di interazione CLI interattiva:
       ```bash
       npx hardhat run scripts/interact.js --network ec2geth
       ```
+
+11. **Esecuzione dei Test (in Locale e su Nodo EC2 / Remote Network)**:
+    - **Esecuzione dei Test Unitari in Locale (Hardhat Network In-Memory)**:
+      Per verificare la correttezza della logica di business, prevenzione DoS, reentrancy e rate limiting senza consumare gas reale:
+      ```bash
+      cd HardhatSolidity08guessTheNumberGame
+      npm test
+      # Oppure
+      npx hardhat test
+      ```
+    - **Esecuzione dei Test/Interazione contro Nodo EC2 (Geth Privato)**:
+      - Quando il nodo Geth su EC2 è in esecuzione ed ha aperto la porta `8545` (`--http.addr "0.0.0.0"` e `--http.corsdomain "*"`):
+      1. Verificare che l'indirizzo IP del nodo EC2 sia configurato nel file `.env`:
+         ```env
+         EC2_URL=http://<IP_EC2>:8545
+         PRIVATE_KEY=0x<CHIAVE_PRIVATA_ACCOUNT_EC2>
+         ```
+      2. Eseguire il deploy dei contratti sulla rete EC2:
+         ```bash
+         npx hardhat run scripts/deploy.js --network ec2geth
+         ```
+      3. Verificare la connettività e lo stato dei contratti rilasciati avviando lo script di interazione:
+         ```bash
+         npx hardhat run scripts/interact.js --network ec2geth
+         ```
+      4. In caso di test automatici su rete live o locale Hardhat, è consigliato utilizzare il network helper `evm_increaseTime` ed `evm_mine` forniti da Hardhat Network Helpers per simulare il passaggio del tempo (es. scadenze di 30 giorni per `cancelGame` o finestre di 7 ore per il rate limit).
 
 
 # &lt; AlNao /&gt;

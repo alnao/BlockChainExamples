@@ -1,188 +1,172 @@
 # Solidity SmartContract08 – GuessTheNumberMulti Game
 
-Un gioco blockchain "indovina il numero" multi-partita dove ogni utente può avviare la propria partita e chiunque può provare a indovinare su tutte le partite attive simultaneamente.
+Un gioco blockchain **"indovina il numero" multi-partita** sviluppato con **Solidity (v0.8.20)** e **Hardhat**, in cui ogni utente può avviare la propria partita e chiunque può provare a indovinare su tutte le partite attive simultaneamente.
 
-Questo esempio utilizza **hardhat** al posto di **truffle**: Hardhat è un ambiente di sviluppo moderno per smart contract Ethereum che offre un'esperienza di sviluppo completa e flessibile. È diventato lo standard de facto per lo sviluppo di DApps negli ultimi anni. Truffle è uno dei primi e più maturi framework per sviluppo Ethereum, molto popolare fino a qualche anno fa.
+Il progetto include protezioni avanzate contro **Denial of Service (DoS)**, **Mempool Front-Running (MEV)** via pattern **Commit-Reveal**, gestione automatica dei **Dust Token**, **Timeout e Cancellazione** delle partite inattive, ed errori personalizzati (**Custom Errors**) per massimizzare l'efficienza del gas.
 
+---
 
-Nota: vedere il README generale per il rilascio di questo Smart Contract nella rete Testnet Sepolia e/o esecuzione con Geth su AWS-EC2.
+## 🎯 Caratteristiche Principali & Architettura
 
+- **Multi-Partita Simultanea**: Ogni utente (*setter*) può avviare la propria partita definendo un numero segreto a 20 cifre ($\ge 10^{19}$).
+- **Integrazione Token ERC20 (`NAOTOKENERC20`)**:
+  - `setFee`: Fee pagata dal setter per avviare o aggiornare il proprio numero (va ad alimentare il montepremi `prizePool` della propria partita).
+  - `guessFee`: Fee pagata dai giocatori ad ogni tentativo di indovinare.
+- **Protezione Anti Front-Running (Commit-Reveal Pattern)**:
+  - **Fase 1 (`commitGuess`)**: Il giocatore invia l'hash del tentativo `keccak256(abi.encodePacked(msg.sender, guessNum, salt))` e paga la `guessFee`.
+  - **Fase 2 (`revealGuess`)**: In un blocco successivo, il giocatore rivela `guessNum` e `salt`. Questo impedisce ai bot MEV di intercettare il numero nella mempool e rubare la vincita.
+  - **Tentativo Diretto (`guessAny`)**: Rimane disponibile per un'interazione rapida in ambienti di test privi di miner MEV malevoli.
+- **Prevenzione DoS con `EnumerableSet`**:
+  - Utilizza `EnumerableSet.AddressSet` di OpenZeppelin per tracciare **solo i setter attivi**.
+  - Quando una partita viene vinta o cancellata, il setter viene rimosso dal set in $O(1)$, evitando cicli infiniti ed errori di superamento del Gas Limit.
+- **Timeout e Cancellazione (`cancelGame`)**:
+  - Se una partita rimane inattiva/non indovinata per **30 giorni**, il setter può annullarla e recuperare l'intero `prizePool` accumulato.
+- **Gestione Resti (Dust Handling)**:
+  - In caso di tentativo errato, la metà della `guessFee` viene suddivisa equamente tra le partite attive. Eventuali resti della divisione intera (`half % activeCount`) non vanno persi ma vengono accreditati in modo sicuro al bilancio `adminBalance`.
+- **Rate Limiting**:
+  - Limite di **massimo 4 tentativi ogni 7 ore** per indirizzo utente per prevenire lo spam.
 
-## 🎯 Caratteristiche Principali
-- L'amministratore deploya il contratto impostando due fee: `setFee` e `guessFee`
-- Il contratto viene deployato con un token ERC20Mock per i pagamenti
-- Ogni utente ("setter") può avviare la propria partita scegliendo un **numero di esattamente 20 cifre**
-- Il setter paga la `setFee` che costituisce il montepremi iniziale della sua partita. Il setter può aggiornare il proprio numero pagando nuovamente la `setFee`. Il numero viene salvato come hash keccak256 (non visibile in chiaro). Ogni aggiornamento aumenta il montepremi della partita
-- Chiunque può provare a indovinare su **tutte le partite attive** tramite `guessAny`
-	- **Se indovina**: vince il montepremi + la propria guessFee della partita indovinata (che termina)
-	- **Se sbaglia**: la guessFee viene divisa: 50% distribuito tra tutti i montepremi attivi (in parti uguali) e 50% va al bilancio dell'amministratore
-- L'amministratore può prelevare il proprio bilancio accumulato e l'amministratore può aggiornare le fee del gioco
-
+---
 
 ## 🛠️ Struttura del Progetto
+
 ```
-SoliditySmartContract08guessTheNumberGame/
+HardhatSolidity08guessTheNumberGame/
 ├── contracts/
-│   ├── GuessTheNumber.sol         # Contratto principale del gioco
-│   └── NAO-TOKEN-ERC20.sol        # Token per i pagamenti
+│   ├── GuessTheNumber.sol         # Smart contract principale (GuessTheNumberMulti)
+│   └── NAO-TOKEN-ERC20.sol        # Smart contract del Token ERC20 (NAOTOKENERC20)
 ├── scripts/
-│   ├── deploy.js                  # Script di deployment
-│   ├── interact.js                # CLI interattiva completa
-│   └── addresses.js               # Gestione indirizzi deployed
+│   ├── addresses.js               # Utility per salvare/caricare gli indirizzi dei contratti
+│   ├── deploy.js                  # Script di deployment per Hardhat/Sepolia/EC2
+│   └── interact.js                # CLI interattiva completa (Commit-Reveal, Status, Admin)
 ├── test/
-│   └── GuessTheNumber.test.js     # Test completi
-├── create_ec2_node.sh			   # Creazione di una EC2 per eseguire il contratto con geth
-├── destroy_ec2_node.sh			   # Distruzione della EC2
-├── hardhat.config.js              # Configurazione Hardhat
-├── package.json                   # Dipendenze del progetto
+│   └── GuessTheNumber.test.js     # Suite completa di test unitari Chai/Ethers
+├── create_ec2_node.sh             # Script per il provisioning automatico di un nodo EC2
+├── destroy_ec2_node.sh            # Script per la distruzione del nodo EC2
+├── hardhat.config.js              # Configurazione del framework Hardhat
+├── package.json                   # Dipendenze Node.js
 └── README.md                      # Questa documentazione
 ```
 
-## 🚀 Setup e Installazione
+---
 
-- Prerequisiti
-	- Node.js v16+ (LTS consigliato)
-  	- npm o yarn
-- Installazione Dipendenze
-	```bash
-	npm install --legacy-peer-deps
-	```
-- Creazione del file `.env` con le configurazioni
-	```bash
-	PRIVATE_KEY=0xYOUR_PRIVATE_KEY_HERE
-	SECOND_PRIVATE_KEY=0xYOUR_SECOND_PRIVATE_KEY_HERE
-	INFURA_PROJECT_ID=YOUR_INFURA_PROJECT_ID_HERE
-	EC2_URL=http://1.2.3.4:8545
-	```
-- Compilazione Contratti
-	```bash
-	npx hardhat compile
-	```
-- Esecuzione Test
-	```bash
-	npm test
-	```
+## 🚀 Setup e Installazione Locale
 
-## 📊 Deploy e Utilizzo
+### 1. Prerequisiti
+- **Node.js**: v18+ o v20+ (LTS consigliata)
+- **npm** o **yarn**
 
-1. Avvia la Rete Locale
-	```bash
-	npx hardhat node
-	```
-	Questo comando avvia una blockchain locale su `http://127.0.0.1:8545` con 20 account di test precaricati.
-2. Deploy dei Contratti
-	```bash
-	npx hardhat run scripts/deploy.js --network localhost
-	```
+### 2. Installazione Dipendenze
+Dalla cartella del progetto (`HardhatSolidity08guessTheNumberGame`), eseguire:
+```bash
+npm install --legacy-peer-deps
+```
 
-	Output di esempio:
-	```
-	Deploying contracts with the account: 0xAAAAAAAAAAAA
-	MockToken deployed to: 0xBBBBBBBBB
-	GuessTheNumberMulti deployed to: 0xCCCCCCCCCCC
+### 3. Configurazione File `.env` (Opzionale per reti esterne/EC2)
+Creare un file `.env` nella radice della cartella:
+```env
+PRIVATE_KEY=0xIL_TUO_PRIVATE_KEY_PRIMARIO
+SECOND_PRIVATE_KEY=0xIL_TUO_PRIVATE_KEY_SECONDARIO
+INFURA_PROJECT_ID=IL_TUO_INFURA_PROJECT_ID
+EC2_URL=http://<IP_PUBLICO_EC2>:8545
+```
 
-	Deployment completed!
-	Token address: 0xDDDDDDDDD
-	Game address: 0xEEEEEEEEE
-	```
-3. Interazione con i Contratti
-	```bash
-	npx hardhat run scripts/interact.js --network localhost
-	```
-4. Lo script `interact.js` fornisce un'interfaccia completa per:
-	- **🎮 Avviare partita**: Crea una nuova partita con numero segreto
-	- **🔄 Aggiornare numero**: Modifica il numero della tua partita attiva
-	- **🎯 Indovinare**: Prova a indovinare su tutte le partite attive
-	- **🏦 Admin preleva**: Prelievo fondi amministratore
-	- **📊 Stato contratto**: Visualizza informazioni complete
-	- **🪙 Gestione token**: Balance, allowance, approvazioni
-	- **🎁 Trasferimenti**: Sposta token tra account
-	- **🔄 Cambiare account**: Passa tra i diversi account disponibili
-5. Note:
-	- In Ethereum (standard ERC20), uno smart contract (come il gioco) non può prelevare token dal tuo portafoglio senza il tuo esplicito permesso. La funzione 6 dello script di interazione serve a chiamare approve sul contratto del Token, autorizzando il contratto del Gioco a spendere i tuoi NAO (per pagare le fee di avvio partita o di guess). È una misura di sicurezza fondamentale: senza approve, la transazione transferFrom nel gioco fallirebbe.
+### 4. Compilazione dei Contratti
+```bash
+npx hardhat compile
+```
 
-## 🧪 Test
+---
 
-Il progetto include test completi che verificano:
-- Creazione e gestione di partite multiple
-- Meccanismo di indovinare con premi e distribuzioni
-- Gestione delle fee e del bilancio admin
-- Rate limiting per i tentativi
-- Sicurezza e controlli di accesso
+## 🧪 Esecuzione dei Test in Locale
 
-Esegui i test con:
+La suite di test verifica la corretta esecuzione di tutte le funzionalità e delle condizioni di errore custom:
+
 ```bash
 npm test
+# oppure
+npx hardhat test
 ```
 
-Output di esempio:
+### Copertura dei Test (`GuessTheNumber.test.js`):
+1. **Avvio e Aggiornamento Partite**: Verifica `startGame`, `updateNumber` e il tracciamento dei setter attivi.
+2. **Guess Diretto (`guessAny`)**: Verifica l'erogazione automatica del montepremi e la contestuale rimozione del setter dal set attivo.
+3. **Distribuzione Fee ed Errori**: Verifica che i tentativi errati dividano la fee tra i prize pool attivi e l'admin senza perdite di token (dust handling).
+4. **Pattern Commit-Reveal**: Verifica che il giocatore possa fare il `commit`, che il reveal nello stesso blocco fallisca (`CommitmentTooEarly`), e che il reveal in un blocco successivo eroghi la vincita.
+5. **Timeout e Cancel Game**: Verifica che `cancelGame` rimborsi il setter dopo 30 giorni e fallisca prima del tempo (`GameNotExpired`).
+6. **Rate Limit & Custom Errors**: Verifica il blocco dopo 4 tentativi in 7 ore e i controlli sui permessi admin/parametri.
+
+---
+
+## 📊 Deployment e CLI Interattiva
+
+### 1. Avviare la Blockchain Locale Hardhat
+Aprire un terminale e avviare il nodo locale:
+```bash
+npx hardhat node
 ```
-  GuessTheNumberMulti (NAO token)
-    ✔ più utenti possono avviare partite e aggiornarle
-    ✔ guessAny indovina la partita giusta e paga il premio in NAO
-    ✔ guessAny sbagliato divide la fee NAO tra tutti i prizePool attivi e admin
-    ✔ admin può prelevare il saldo NAO
-  4 passing (768ms)
+
+### 2. Eseguire il Deploy dei Contratti
+In un secondo terminale, eseguire lo script di deploy:
+```bash
+npx hardhat run scripts/deploy.js --network localhost
+```
+Il deploy rilascerà sia il token `NAOTOKENERC20` che il gioco `GuessTheNumberMulti`, salvando gli indirizzi in `deployed-addresses.json`.
+
+### 3. Avviare l'Interfaccia CLI Interattiva (`interact.js`)
+```bash
+npx hardhat run scripts/interact.js --network localhost
 ```
 
-## ⚙️ Configurazione base di partenza
+### Opzioni della CLI:
+- `1. 🎮 Avvia partita (startGame)`: Inserisci un numero di 20 cifre e paga la `setFee`.
+- `2. 🔄 Aggiorna numero (updateNumber)`: Modifica il numero segreto incrementando il montepremi.
+- `3. 🎯 Prova a indovinare diretto (guessAny)`: Invia un tentativo immediato in una singola transazione.
+- `4. 🔒 Commit tentativo (commitGuess)`: Invia l'hash segreto `(guess + salt)` per proteggerti da MEV.
+- `5. 🔓 Reveal tentativo (revealGuess)`: Rivela il numero e il salt nel blocco successivo per ritirare il premio.
+- `6. 🚫 Cancella partita (cancelGame)`: Recupera i fondi se la tua partita è inattiva da oltre 30 giorni.
+- `7. 🏦 Admin preleva (adminWithdraw)`: Consente all'admin di ritirare le fee accumulate.
+- `8. 📊 Stato contratto e partite attive`: Visualizza il bilancio admin, le fee correnti e le info sulla tua partita.
+- `9. 🪙 Info token e approve`: Gestisci la balance e la *allowance* necessaria per giocare.
+- `10. 🎁 Trasferisci token`: Invia token ad altri account di test.
+- `11. 🔄 Cambia account`: Passa tra gli account precaricati nel nodo Hardhat.
 
-- Fee Predefinite
-	- **setFee**: 10 token TEST (per avviare/aggiornare partita)
-	- **guessFee**: 1 token TEST (per tentativo di indovinare)
-- Rate Limiting
-	- Massimo 4 tentativi `guessAny` ogni 7 ore per indirizzo
-	- Finestra temporale si resetta automaticamente
-- Validazione Numeri
-	- I numeri devono essere di esattamente **20 cifre**
-	- Devono essere >= 10^19 (non possono iniziare con 0)
-	- Esempi validi: `12345678901234567890`, `99999999999999999999`
-	- Esempi non validi: `01234567890123456789`, `123456789`
+---
 
-## 🔒 Sicurezza
+## 🌐 Deployment su Nodo EC2 / Sepolia Testnet
 
-- **ReentrancyGuard**: Protezione contro attacchi di rientranza
-- **Hash Storage**: I numeri sono salvati come hash keccak256
-- **Access Control**: Funzioni admin protette
-- **Rate Limiting**: Prevenzione spam di tentativi
-- **Input Validation**: Controlli rigorosi sui parametri
+Per eseguire il deploy su una rete Ethereum privata con Geth avviata su istanza AWS EC2 (oppure su testnet Sepolia):
 
+1. Configurare `EC2_URL` e `PRIVATE_KEY` nel file `.env`.
+2. Eseguire il deploy puntando alla rete `ec2geth` o `sepolia`:
+   ```bash
+   npx hardhat run scripts/deploy.js --network ec2geth
+   ```
+3. Avviare lo script di interazione specificando la rete:
+   ```bash
+   npx hardhat run scripts/interact.js --network ec2geth
+   ```
 
-### ⚠️ Avvertenze Importanti
-- **Solo a scopo didattico**: Non utilizzare per giochi con premi reali
-- **Privacy limitata**: Gli hash possono essere vulnerabili a attacchi brute-force
-- **Fairness non garantita**: L'amministratore ha privilegi speciali
-- **Testnet only**: Testare solo su reti di sviluppo
+---
 
+## 🔒 Sicurezza & Best Practices
 
-## 🔗 Collegamenti Utili
+- **ReentrancyGuard**: Estende l'implementazione OpenZeppelin per prevenire attacchi di rientrata sulle funzioni con trasferimento token (`cancelGame`, `adminWithdraw`, `revealGuess`, `guessAny`).
+- **Storage Scalabile O(1)**: `EnumerableSet` previene il blocco delle transazioni per limite di gas.
+- **Custom Errors**: Utilizzo esclusivo di Custom Errors Solidity 0.8 per la riduzione dei costi di gas rispetto alle stringhe di `require`.
+- **Commit-Reveal Hash Scheme**:
+  $$\text{commitment} = \text{keccak256}(\text{abi.encodePacked}(\text{msg.sender}, \text{guessNum}, \text{salt}))$$
 
-- [Hardhat Documentation](https://hardhat.org/docs)
-- [OpenZeppelin Contracts](https://docs.openzeppelin.com/contracts/)
-- [Solidity Documentation](https://docs.soliditylang.org/)
-
-
-
+---
 
 # &lt; AlNao /&gt;
 Tutti i codici sorgente e le informazioni presenti in questo repository sono frutto di un attento e paziente lavoro di sviluppo da parte di AlNao, che si è impegnato a verificarne la correttezza nella misura massima possibile. Qualora parte del codice o dei contenuti sia stato tratto da fonti esterne, la relativa provenienza viene sempre citata, nel rispetto della trasparenza e della proprietà intellettuale. 
 
-
 Alcuni contenuti e porzioni di codice presenti in questo repository sono stati realizzati anche grazie al supporto di strumenti di intelligenza artificiale, il cui contributo ha permesso di arricchire e velocizzare la produzione del materiale. Ogni informazione e frammento di codice è stato comunque attentamente verificato e validato, con l’obiettivo di garantire la massima qualità e affidabilità dei contenuti offerti. 
-
 
 Per ulteriori dettagli, approfondimenti o richieste di chiarimento, si invita a consultare il sito [AlNao.it](https://www.alnao.it/).
 
-
 ## License
-Made with ❤️ by <a href="https://www.alnao.it">AlNao</a>
-&bull; 
-Public projects 
-<a href="https://www.gnu.org/licenses/gpl-3.0"  valign="middle"> <img src="https://img.shields.io/badge/License-GPL%20v3-blue?style=plastic" alt="GPL v3" valign="middle" /></a>
-*Free Software!*
-
+Made with ❤️ by <a href="https://www.alnao.it">AlNao</a> &bull; Public projects <a href="https://www.gnu.org/licenses/gpl-3.0"><img src="https://img.shields.io/badge/License-GPL%20v3-blue?style=plastic" alt="GPL v3" /></a> *Free Software!*
 
 Il software è distribuito secondo i termini della GNU General Public License v3.0. L'uso, la modifica e la ridistribuzione sono consentiti, a condizione che ogni copia o lavoro derivato sia rilasciato con la stessa licenza. Il contenuto è fornito "così com'è", senza alcuna garanzia, esplicita o implicita.
-
-
-The software is distributed under the terms of the GNU General Public License v3.0. Use, modification, and redistribution are permitted, provided that any copy or derivative work is released under the same license. The content is provided "as is", without any warranty, express or implied.

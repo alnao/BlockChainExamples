@@ -88,7 +88,7 @@ export EC2_IP=$EC2_IP
 # Aggiorna il file .env se esiste
 if [ -f .env ]; then
     # Se EC2_IP esiste già, lo sostituisce, altrimenti lo aggiunge
-    if grep -q "EC2_IP=" .env; then
+    if grep -q "^EC2_IP=" .env; then
         sed -i "s/^EC2_IP=.*/EC2_IP=$EC2_IP/" .env
     else
         echo "EC2_IP=$EC2_IP" >> .env
@@ -96,7 +96,7 @@ if [ -f .env ]; then
     
     # Aggiorna anche EC2_URL per comodità
     NEW_URL="http://$EC2_IP:8545"
-    if grep -q "EC2_URL=" .env; then
+    if grep -q "^EC2_URL=" .env; then
         # Usa un delimitatore diverso per sed (es. |) perché l'URL contiene /
         sed -i "s|^EC2_URL=.*|EC2_URL=$NEW_URL|" .env
     else

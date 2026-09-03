@@ -8,6 +8,26 @@ async function prompt(question) {
   return new Promise((resolve) => rl.question(question, (ans) => { rl.close(); resolve(ans); }));
 }
 
+async function promptNumber(question) {
+  while (true) {
+    const input = await prompt(question);
+    const trimmed = input.trim();
+    if (!/^[0-9]{1,20}$/.test(trimmed)) {
+      console.log("❌ Inserisci solo cifre numeriche (massimo 20 cifre)!");
+      continue;
+    }
+    const padded = trimmed.padEnd(20, '0');
+    if (BigInt(padded) < 10n ** 19n) {
+      console.log("❌ Il numero non può iniziare per 0 (deve essere >= 10^19 dopo il padding)!");
+      continue;
+    }
+    if (padded !== trimmed) {
+      console.log(`💡 Numero completato a 20 cifre (zeri a destra): ${padded}`);
+    }
+    return padded;
+  }
+}
+
 async function ensureAllowance(token, user, spender, amount, promptFunc) {
   const allowance = await token.allowance(user.address, spender);
   if (allowance < amount) {
@@ -31,7 +51,6 @@ async function main() {
   let running = true;
   try {
     console.clear();
-    // Carica automaticamente gli indirizzi dall'ultimo deploy
     addresses = loadDeployedAddresses();
     console.log("📍 Indirizzi caricati dall'ultimo deploy:");
     console.log("   Token:", addresses.token);
@@ -45,18 +64,16 @@ async function main() {
     contract = await ethers.getContractAt("GuessTheNumberMulti", addresses.game);
     token = await ethers.getContractAt("NAOTOKENERC20", addresses.token);
     
-    // Controlla balance token
     const balance = await token.balanceOf(user.address);
     console.log("💰 Token balance:", ethers.formatEther(balance), "NAO");
     
-    // Controlla le fee
     const setFee = await contract.setFee();
     const guessFee = await contract.guessFee();
     console.log("💳 Set fee:", ethers.formatEther(setFee), "NAO");
     console.log("💳 Guess fee:", ethers.formatEther(guessFee), "NAO");
     
     console.log("\n⚠️  IMPORTANTE: Prima di giocare devi fare approve del contratto per l'importo richiesto!");
-    console.log("📝 Il numero target è salvato come hash keccak256.");
+    console.log("📝 I numeri inseriti vengono automaticamente completati a 20 cifre aggiungendo zeri a destra se inserite meno cifre.");
     
   } catch (error) {
     console.error("❌ Errore nel caricamento degli indirizzi:", error.message);
@@ -74,22 +91,26 @@ async function main() {
     }
     const user = signers[userIndex];
     const userBalance = await token.balanceOf(user.address);
+    const activeCount = await contract.getActiveSettersCount();
     console.log("\n🎯 Azioni disponibili:");
-    console.log(`👤 Account corrente: ${user.address} [${userIndex}] | 💰 Balance: ${ethers.formatEther(userBalance)} NAO`);
+    console.log(`👤 Account corrente: ${user.address} [${userIndex}] | 💰 Balance: ${ethers.formatEther(userBalance)} NAO | Partite attive: ${activeCount}`);
     console.log("1. 🎮 Avvia partita (startGame)");
     console.log("2. 🔄 Aggiorna numero (updateNumber)");
-    console.log("3. 🎯 Prova a indovinare su tutti i game (guessAny)");
-    console.log("4. 🏦 Admin preleva (adminWithdraw)");
-    console.log("5. 📊 Stato contratto e partite attive");
-    console.log("6. 🪙 Mostra info token e approva");
-    console.log("7. 🎁 Trasferisci token ad altri account");
-    console.log("8. 🔄 Cambia account");
+    console.log("3. 🎯 Prova a indovinare diretto (guessAny)");
+    console.log("4. 🔒 Commit tentativo indovinare (commitGuess)");
+    console.log("5. 🔓 Reveal tentativo indovinare (revealGuess)");
+    console.log("6. 🚫 Cancella partita inattiva dopo 30 giorni (cancelGame)");
+    console.log("7. 🏦 Admin preleva (adminWithdraw)");
+    console.log("8. 📊 Stato contratto e partite attive");
+    console.log("9. 🪙 Mostra info token e approva");
+    console.log("10. 🎁 Trasferisci token ad altri account");
+    console.log("11. 🔄 Cambia account");
     console.log("0. 🚪 Esci");
     
-    const choice = await prompt("Scegli azione [0-8]: ");
+    const choice = await prompt("Scegli azione [0-11]: ");
     console.log("-------------------------------");
     try {
-      if (choice === "8") {
+      if (choice === "11") {
         console.log("\n🔄 Seleziona account:");
         console.log("⏳ Recupero dati account...");
         const accountsData = await Promise.all(signers.map(async (s, i) => {
@@ -118,21 +139,12 @@ async function main() {
         continue;
       }
       if (choice === "1") {
-        let number;
-        while (true) {
-          number = await prompt("🔢 Numero da impostare (esattamente 20 cifre): ");
-          if (!/^[0-9]{20}$/.test(number)) {
-            console.log("❌ Il numero deve essere di 20 cifre decimali!");
-            continue;
-          }
-          break;
-        }
+        const number = await promptNumber("🔢 Numero da impostare (es. 42 o fino a 20 cifre): ");
         console.log("⏳ Controllando allowance...");
         const setFee = await contract.setFee();
         if (!(await ensureAllowance(token, user, addresses.game, setFee, prompt))) continue;
         console.log("✅ Avviando partita...");
         try {
-          // Connetti il contratto all'account corrente selezionato
           const userContract = contract.connect(user);
           const tx = await userContract.startGame(BigInt(number));
           await tx.wait();
@@ -141,21 +153,12 @@ async function main() {
           console.log("❌ Errore: ", err.message);
         }
       } else if (choice === "2") {
-        let number;
-        while (true) {
-          number = await prompt("🔢 Nuovo numero (esattamente 20 cifre): ");
-          if (!/^[0-9]{20}$/.test(number)) {
-            console.log("❌ Il numero deve essere di 20 cifre decimali!");
-            continue;
-          }
-          break;
-        }
+        const number = await promptNumber("🔢 Nuovo numero (es. 42 o fino a 20 cifre): ");
         console.log("⏳ Controllando allowance...");
         const setFee = await contract.setFee();
         if (!(await ensureAllowance(token, user, addresses.game, setFee, prompt))) continue;
         console.log("✅ Aggiornando numero...");
         try {
-          // Connetti il contratto all'account corrente selezionato
           const userContract = contract.connect(user);
           const tx = await userContract.updateNumber(BigInt(number));
           await tx.wait();
@@ -164,21 +167,12 @@ async function main() {
           console.log("❌ Errore: ", err.message);
         }
       } else if (choice === "3") {
-        let guess;
-        while (true) {
-          guess = await prompt("🎯 Numero da indovinare (esattamente 20 cifre): ");
-          if (!/^[0-9]{20}$/.test(guess)) {
-            console.log("❌ Il numero deve essere di 20 cifre decimali!");
-            continue;
-          }
-          break;
-        }
+        const guess = await promptNumber("🎯 Numero da indovinare (es. 42 o fino a 20 cifre): ");
         console.log("⏳ Controllando allowance...");
         const guessFee = await contract.guessFee();
         if (!(await ensureAllowance(token, user, addresses.game, guessFee, prompt))) continue;
         console.log("✅ Tentando su tutti i game...");
         try {
-          // Connetti il contratto all'account corrente selezionato
           const userContract = contract.connect(user);
           const tx = await userContract.guessAny(BigInt(guess));
           const receipt = await tx.wait();
@@ -191,7 +185,7 @@ async function main() {
                 break;
               }
             } catch {
-              // Ignora log che non sono del nostro contratto
+              // Ignora log non pertinenti
             }
           }
           if (hasWon) {
@@ -203,35 +197,91 @@ async function main() {
           console.log("❌ Errore: ", err.message);
         }
       } else if (choice === "4") {
+        const guessStr = await promptNumber("🎯 Numero ipotizzato (es. 42 o fino a 20 cifre): ");
+        const saltStr = await prompt("🔑 Salt segreto (stringa): ");
+        const salt = ethers.keccak256(ethers.toUtf8Bytes(saltStr));
+        const commitmentHash = ethers.solidityPackedKeccak256(
+          ["address", "uint256", "bytes32"],
+          [user.address, BigInt(guessStr), salt]
+        );
+        const guessFee = await contract.guessFee();
+        if (!(await ensureAllowance(token, user, addresses.game, guessFee, prompt))) continue;
+        console.log("✅ Inviando commitment...");
+        const userContract = contract.connect(user);
+        const tx = await userContract.commitGuess(commitmentHash);
+        await tx.wait();
+        console.log("🎉 Commitment inviato! Attendi almeno 1 blocco prima di fare il reveal.");
+      } else if (choice === "5") {
+        const guessStr = await promptNumber("🎯 Numero ipotizzato (es. 42 o fino a 20 cifre): ");
+        const saltStr = await prompt("🔑 Salt segreto usato nel commit: ");
+        const salt = ethers.keccak256(ethers.toUtf8Bytes(saltStr));
+        console.log("✅ Rivelando tentativo...");
+        try {
+          const userContract = contract.connect(user);
+          const tx = await userContract.revealGuess(BigInt(guessStr), salt);
+          const receipt = await tx.wait();
+          let hasWon = false;
+          for (const log of receipt.logs) {
+            try {
+              const parsed = contract.interface.parseLog(log);
+              if (parsed && parsed.name === "Won") {
+                hasWon = true;
+                break;
+              }
+            } catch { }
+          }
+          if (hasWon) {
+            console.log("🎉🎉🎉 HAI VINTO (Reveal)! 🎉🎉🎉");
+          } else {
+            console.log("😔 Tentativo errato (Reveal)");
+          }
+        } catch (err) {
+          console.log("❌ Errore reveal: ", err.message);
+        }
+      } else if (choice === "6") {
+        console.log("✅ Tentativo di cancellazione partita inattiva...");
+        try {
+          const userContract = contract.connect(user);
+          const tx = await userContract.cancelGame();
+          await tx.wait();
+          console.log("🎉 Partita cancellata e prize pool rimborsato!");
+        } catch (err) {
+          console.log("❌ Errore cancellazione: ", err.message);
+        }
+      } else if (choice === "7") {
         const to = await prompt("💼 Indirizzo destinatario: ");
         const amount = await prompt("💰 Importo da prelevare: ");
         console.log("✅ Prelevando fondi admin...");
-        const tx = await contract.adminWithdraw(to, ethers.parseEther(amount));
+        const userContract = contract.connect(user);
+        const tx = await userContract.adminWithdraw(to, ethers.parseEther(amount));
         await tx.wait();
         console.log("🎉 Prelievo admin completato!");
-      } else if (choice === "5") {
+      } else if (choice === "8") {
         console.log("\n📊 STATO CONTRATTO:");
         const admin = await contract.admin();
         const adminBalance = await contract.adminBalance();
         const setFee = await contract.setFee();
         const guessFee = await contract.guessFee();
+        const activeCount = await contract.getActiveSettersCount();
         console.log("👑 Admin:", admin);
         console.log("💰 Admin balance:", ethers.formatEther(adminBalance), "NAO");
         console.log("💳 Set fee:", ethers.formatEther(setFee), "NAO");
         console.log("💳 Guess fee:", ethers.formatEther(guessFee), "NAO");
+        console.log("🎮 Partite attive totali:", activeCount.toString());
         try {
           const gameInfo = await contract.games(user.address);
           if (gameInfo.active) {
             console.log("\n🎮 TUA PARTITA ATTIVA:");
             console.log("🎯 Target hash:", gameInfo.target);
             console.log("💰 Prize pool:", ethers.formatEther(gameInfo.prizePool), "NAO");
+            console.log("📅 Creata il:", new Date(Number(gameInfo.createdAt) * 1000).toLocaleString());
           } else {
             console.log("\n🚫 Non hai partite attive");
           }
         } catch (error) {
           console.log("\n❌ Errore nel controllare la tua partita:", error.message);
         }
-      } else if (choice === "6") {
+      } else if (choice === "9") {
         console.log("\n🪙 INFORMAZIONI TOKEN:");
         const balance = await token.balanceOf(user.address);
         let allowance = await token.allowance(user.address, addresses.game);
@@ -242,7 +292,6 @@ async function main() {
           const amount = await prompt("💰 Quantità da approvare (in NAO): ");
           console.log("✅ Approvando token...");
           try {
-            // Connetti il token all'account corrente selezionato
             const userToken = token.connect(user);
             const tx = await userToken.approve(addresses.game, ethers.parseEther(amount));
             await tx.wait();
@@ -253,12 +302,11 @@ async function main() {
           allowance = await token.allowance(user.address, addresses.game);
           console.log("✅ Allowance aggiornata:", ethers.formatEther(allowance), "NAO");
         }
-      } else if (choice === "7") {
+      } else if (choice === "10") {
         console.log("\n🎁 TRASFERIMENTO TOKEN:");
         const to = await prompt("📬 Indirizzo destinatario: ");
         const amount = await prompt("💰 Quantità da trasferire (in NAO): ");
         console.log("✅ Trasferendo token...");
-        // Connetti il token all'account corrente selezionato
         const userToken = token.connect(user);
         const tx = await userToken.transfer(to, ethers.parseEther(amount));
         await tx.wait();
@@ -272,14 +320,6 @@ async function main() {
       }
     } catch (error) {
       console.error("❌ Errore:", error.message);
-      if (error.message.includes("NotSetter")) {
-        console.log("💡 Solo il setter può aggiornare il proprio numero");
-      } else if (error.message.includes("NoActiveGame")) {
-        console.log("💡 Non hai partite attive");
-      } else if (error.message.includes("NotAdmin")) {
-        console.log("💡 Solo l'admin può eseguire questa operazione");
-      }
-
     }
   }
 }
