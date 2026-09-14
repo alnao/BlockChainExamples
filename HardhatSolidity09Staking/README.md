@@ -31,6 +31,12 @@ Per lanciare la suite di test ed assicurarti che i contratti funzionino corretta
 npx hardhat test
 ```
 
+Opzionale: per esportare in un file gli stessi 20 account (indirizzo e chiave privata) che `npx hardhat node` mette a disposizione, ad esempio per importarli in MetaMask:
+```bash
+npm run generate-keys
+```
+Lo script `scripts/generate-keys.js` deriva le chiavi dal mnemonic configurato in `hardhat.config.js` (di default quello standard di Hardhat, quindi gli indirizzi coincidono con quelli stampati dal nodo locale) e le salva in `local-keys.json`, file escluso dal versionamento tramite `.gitignore`. **Queste chiavi sono pubbliche e note a tutti: usale solo sul nodo locale, mai su mainnet.**
+
 ### 2. Esecuzione del Nodo Locale
 Per simulare una vera blockchain sul tuo computer, puoi avviare il nodo locale di Hardhat. In un terminale dedicato esegui:
 ```bash
@@ -43,13 +49,15 @@ In un **nuovo terminale** (mantenendo sempre aperto quello con il nodo in esecuz
 ```bash
 npx hardhat run scripts/deploy.js --network localhost
 ```
-Una volta terminato, il terminale mostrerà gli indirizzi dei contratti "NAO Token" e "Staking Contract". **Prendi nota di questi indirizzi.**
-Per esempio
+Una volta terminato, il terminale mostrerà gli indirizzi dei contratti "NAO Token" e "Staking Contract". **Lo script esporterà automaticamente gli indirizzi e gli ABI aggiornati nella cartella `client/src/contracts/` per il frontend React.**
+
+Per esempio:
 ```
 Deploying contracts with the account: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
 NAO Token deployed to: 0x5FbDB2315678afecb367f032d93F642f64180aa3
 Staking Contract deployed to: 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
-Deposited 1000 NAO into Staking contract for rewards
+Deposited 100000 NAO into Staking contract for rewards
+Exported contract addresses & ABIs to client/src/contracts/
 ```
 
 ### 4. Interagire con i Contratti
@@ -69,6 +77,25 @@ Lo script si occuperà automaticamente di:
 4. Mostrare le ricompense accumulate tramite `calculateReward`.
 5. Reclamare le ricompense (*claimReward*).
 6. Ritirare i token precedentemente messi in stake (*withdraw*).
+
+### 5. Distribuire token NAO agli altri account (`fund.js`)
+Dopo il deploy **tutti i NAO sono nelle mani dell'account #0** (il deployer, che ha ricevuto il *mint* iniziale di 1.000.000 di token); gli altri account Hardhat hanno solo ETH e un eventuale wallet MetaMask esterno non ha nulla, nemmeno ETH per il gas. Lo script `scripts/fund.js` serve a distribuire i token per poter provare lo staking da account diversi.
+
+Senza parametri invia **1000 NAO** a ciascuno degli account Hardhat #1, #2, #3 e #4:
+```bash
+npx hardhat run scripts/fund.js --network localhost
+```
+
+Con le variabili d'ambiente `TO` e `AMOUNT` invia un importo a piacere a un indirizzo specifico, ad esempio quello del tuo wallet MetaMask:
+```bash
+TO=0xTuoIndirizzoMetamask AMOUNT=500 npx hardhat run scripts/fund.js --network localhost
+```
+
+Lo script:
+1. Legge l'indirizzo del token da `client/src/contracts/config.js` (generato da `deploy.js`) e verifica che il contratto sia effettivamente deployato sul nodo; in caso contrario si ferma con un messaggio che invita a rifare il deploy.
+2. Trasferisce i NAO dall'account #0 a ogni destinatario.
+3. Se il destinatario ha meno di 1 ETH gli invia anche **10 ETH** per pagare il gas: è il caso tipico di un wallet MetaMask, che sulla rete locale parte con saldo zero.
+4. Stampa il saldo NAO di ogni destinatario dopo il trasferimento.
 
 ### 🖥️ Client React
 È presente un frontend moderno in `/client` per interagire graficamente con lo smart contract.
@@ -90,8 +117,10 @@ Lo script si occuperà automaticamente di:
 
 #### Configurazione MetaMask
 - Assicurati di aver configurato la rete **Hardhat Localhost** (`http://127.0.0.1:8545`, Chain ID `31337`).
-- Importa uno degli account generati da Hardhat (copiando la chiave privata dal terminale dove gira `npx hardhat node`) per avere dei token NAO e degli ETH di test.
-- Nota: Ricordati di aggiornare gli indirizzi in `client/src/contracts/config.js` se effettui un nuovo deploy dei contratti.
+- Importa uno degli account generati da Hardhat (copiando la chiave privata dal terminale dove gira `npx hardhat node`, oppure da `local-keys.json` generato con `npm run generate-keys`) per avere degli ETH di test. Tieni presente che solo l'account #0 possiede NAO dopo il deploy: per gli altri account usa `fund.js` (vedi punto 5).
+- Se preferisci usare un tuo wallet MetaMask già esistente, finanzialo con `TO=0xTuoIndirizzo npx hardhat run scripts/fund.js --network localhost`: riceverà sia NAO sia ETH per il gas.
+- Nota: gli indirizzi in `client/src/contracts/config.js` vengono riscritti automaticamente da `deploy.js` a ogni deploy; se riavvii il nodo Hardhat ricordati di rifare il deploy e ricaricare la pagina del client.
+- Se dopo un riavvio del nodo MetaMask resta bloccato su una transazione, vai in *Impostazioni → Avanzate → Cancella dati della scheda attività*: azzera il nonce memorizzato localmente, che altrimenti non coincide più con quello della chain ripartita da zero.
 
 
 

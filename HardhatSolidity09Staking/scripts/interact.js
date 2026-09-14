@@ -1,16 +1,28 @@
 const { ethers } = require("hardhat");
 const fs = require("fs");
+const path = require("path");
 
 async function main() {
   const [user1] = await ethers.getSigners();
   console.log("Interacting with contracts using the account:", user1.address);
 
-  // Address of the deployed contracts (replace if needed or load from a json, here we assume manual update or standard deployment)
-  // For the sake of the script, we can deploy them on the fly if not on localhost, but typically you'd run this against localhost
+  // Carica gli indirizzi esportati da scripts/deploy.js in client/src/contracts/config.js
+  const configPath = path.join(__dirname, "..", "client", "src", "contracts", "config.js");
+  if (!fs.existsSync(configPath)) {
+    throw new Error("config.js non trovato: esegui prima `npx hardhat run scripts/deploy.js --network localhost`");
+  }
+  const configContent = fs.readFileSync(configPath, "utf8");
+  const tokenAddress = configContent.match(/TOKEN_ADDRESS = "(0x[0-9a-fA-F]{40})"/)[1];
+  const stakingAddress = configContent.match(/STAKING_ADDRESS = "(0x[0-9a-fA-F]{40})"/)[1];
+  console.log("Token address:", tokenAddress);
+  console.log("Staking address:", stakingAddress);
 
-  // Here we are simply putting placeholders or requiring the user to edit the addresses
-  const tokenAddress = "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853"; // Example localhost address
-  const stakingAddress = "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6"; // Example localhost address
+  // Verifica che i contratti siano effettivamente deployati (una tx verso un indirizzo vuoto "riesce" ma non fa nulla)
+  for (const [name, addr] of [["Token", tokenAddress], ["Staking", stakingAddress]]) {
+    if ((await ethers.provider.getCode(addr)) === "0x") {
+      throw new Error(`${name} non deployato all'indirizzo ${addr}: riavvia il nodo e riesegui deploy.js`);
+    }
+  }
 
   const naoToken = await ethers.getContractAt("NAOTOKENERC20", tokenAddress);
   const staking = await ethers.getContractAt("Staking", stakingAddress);

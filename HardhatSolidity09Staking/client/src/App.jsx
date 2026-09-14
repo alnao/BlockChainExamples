@@ -188,6 +188,24 @@ function App() {
     }
   };
 
+  const handleEmergencyWithdraw = async () => {
+    try {
+      setLoading(true);
+      setStatus('Esecuzione Unstake d\'emergenza...');
+      const tx = await stakingContract.emergencyWithdraw();
+      await tx.wait();
+      
+      setStatus('Unstake d\'emergenza completato!');
+      updateBalances();
+    } catch (err) {
+      console.error(err);
+      setError('Unstake d\'emergenza fallito: ' + (err.reason || err.message));
+    } finally {
+      setLoading(false);
+      setTimeout(() => setStatus(''), 5000);
+    }
+  };
+
   return (
     <div className="App">
       <header>
@@ -260,13 +278,16 @@ function App() {
                   />
                 </div>
 
-                <div style={{display: 'flex', gap: '1rem'}}>
+                <div style={{display: 'flex', gap: '1rem', flexWrap: 'wrap'}}>
                   <button className="action-btn" onClick={handleStake} disabled={loading || !amountInput}>
                     {loading && <span className="loading-spinner"></span>}
                     Stake
                   </button>
                   <button className="action-btn secondary-btn" onClick={handleWithdraw} disabled={loading || !amountInput}>
                     Unstake
+                  </button>
+                  <button className="action-btn secondary-btn" onClick={handleEmergencyWithdraw} disabled={loading || parseFloat(stakedBalance) <= 0} style={{backgroundColor: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', border: '1px solid #ef4444'}}>
+                    Emergenza Unstake
                   </button>
                 </div>
               </div>

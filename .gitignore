@@ -8,5 +8,11 @@ client3
 **/dist/
 SepoliaNotes.txt
 artifacts
+cache
+coverage
+.env
+.env.*
+*.log
+.DS_Store
 .VSCODE
 .vscode

@@ -268,8 +268,8 @@
       ]
     },
     "/mnt/Dati4/Workspace/BlockChainExamples/HardhatSolidity09Staking/contracts/Staking.sol": {
-      "lastModificationDate": 1774882318269,
-      "contentHash": "9abbfd69df809b0ca333ff67f0b6def5",
+      "lastModificationDate": 1789136032963,
+      "contentHash": "5e7431227387947f5a28dc3cc7b57dfd",
       "sourceName": "contracts/Staking.sol",
       "solcConfig": {
         "version": "0.8.24",
