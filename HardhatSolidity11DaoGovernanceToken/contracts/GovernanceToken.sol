@@ -3,10 +3,9 @@ pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract GovernanceToken is ERC20Votes, ERC20Permit, Ownable {
-    constructor() ERC20("NAO Governance Token", "NAO") ERC20Permit("NAO Governance Token") Ownable(msg.sender) {
+contract GovernanceToken is ERC20Votes, ERC20Permit {
+    constructor() ERC20("NAO Governance Token", "NAO") ERC20Permit("NAO Governance Token") {
         _mint(msg.sender, 1000000 * 10 ** decimals());
     }
 

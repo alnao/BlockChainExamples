@@ -11,13 +11,17 @@ import "@openzeppelin/contracts/governance/extensions/GovernorTimelockControl.so
 contract MyGovernor is Governor, GovernorSettings, GovernorCountingSimple, GovernorVotes, GovernorVotesQuorumFraction, GovernorTimelockControl {
     constructor(IVotes _token, TimelockController _timelock)
         Governor("MyGovernor")
-        GovernorSettings(1 /* 1 block voting delay */, 50400 /* 1 week voting period */, 0)
+        GovernorSettings(1 /* 1 block voting delay */, 5 /* 5 blocks voting period (~1 min) */, 0)
         GovernorVotes(_token)
         GovernorVotesQuorumFraction(4)
         GovernorTimelockControl(_timelock)
     {}
 
     // The following functions are overrides required by Solidity.
+
+    function proposalThreshold() public view override(Governor, GovernorSettings) returns (uint256) {
+        return super.proposalThreshold();
+    }
 
     function votingDelay() public view override(Governor, GovernorSettings) returns (uint256) {
         return super.votingDelay();
