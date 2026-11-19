@@ -6,13 +6,15 @@
   <img src="https://img.shields.io/badge/TypeScript-007ACC?logo=TypeScript&logoColor=white" height=32/>
   <img src="https://img.shields.io/badge/Solidity-000000?logo=Solidity&logoColor=white" height=32/>
   <img src="https://img.shields.io/badge/React-61DAFB?logo=React&logoColor=white" height=32/>
+  <img src="https://img.shields.io/badge/Rust-000000?logo=Rust&logoColor=white" height=32/>
   <br />
   <img src="https://img.shields.io/badge/Hardhat-302C53?logo=Hardhat&logoColor=white" height=32/>
   <img src="https://img.shields.io/badge/Ethereum-000000?logo=Ethereum&logoColor=white" height=32/>
   <img src="https://img.shields.io/badge/Arbitrum-000000?logo=Arbitrum&logoColor=white" height=32/>
+  <img src="https://img.shields.io/badge/Solana-9945FF?logo=Solana&logoColor=white" height=32/>
 </p>
 
-Questo repository raccoglie una serie di progetti e implementazioni relativi alla tecnologia blockchain, con particolare attenzione allo sviluppo di smart-contract su Ethereum e all'integrazione con applicazioni client. I progetti inclusi coprono diversi casi d'uso, tra cui sistemi di votazione 🗳️, gestione di NFT 🖼️, raccolte fondi 💰, validazione documentale on-chain 📄 e semplici blockchain didattiche in Python 🐍 e TypeScript 🟦. Ogni esempio è strutturato per favorire la comprensione delle principali tecniche di sviluppo, test e deployment di soluzioni decentralizzate, fornendo codice sorgente, script di migrazione, test automatici e, ove presente, interfacce utente per l'interazione con la blockchain.
+Questo repository raccoglie una serie di progetti e implementazioni relativi alla tecnologia blockchain, con particolare attenzione allo sviluppo di smart-contract su Ethereum (e di program su Solana) e all'integrazione con applicazioni client. I progetti inclusi coprono diversi casi d'uso, tra cui sistemi di votazione 🗳️, gestione di NFT 🖼️, raccolte fondi 💰, validazione documentale on-chain 📄 e semplici blockchain didattiche in Python 🐍 e TypeScript 🟦. Ogni esempio è strutturato per favorire la comprensione delle principali tecniche di sviluppo, test e deployment di soluzioni decentralizzate, fornendo codice sorgente, script di migrazione, test automatici e, ove presente, interfacce utente per l'interazione con la blockchain.
 
 
 🟡 Non divulgare mai le chiavi private associate ai tuoi account blockchain: custodirle con la massima attenzione è fondamentale per la sicurezza dei tuoi fondi e dei tuoi smart contract. Condividere o esporre accidentalmente una chiave privata può portare alla perdita irreversibile di tutti i tuoi asset digitali. 🟡
@@ -22,6 +24,7 @@ Questo repository raccoglie una serie di progetti e implementazioni relativi all
 
 | Section | Name | Description |
 |-----|----|----|
+| <img src="https://img.shields.io/badge/Rust-000000?logo=Rust&logoColor=white" height=32/> <img src="https://img.shields.io/badge/Solana-9945FF?logo=Solana&logoColor=white" height=32/> | [`📁`](./Anchor01VotationsSolana/) **Anchor<br />01 - VotationsSolana** | sistema di votazione su **Solana** scritto in Rust con il framework **Anchor**, stesso use case di `HardhatSolidity06VotationsV2` su una blockchain completamente diversa: modello ad account, PDA come storage deterministico, anti-doppio voto tramite il PDA `VoteRecord`, fee in lamports tramite CPI al System Program. *Funzionante* con test TypeScript e frontend React+Vite con wallet **Phantom** (candidature, voto, comandi admin e storico). <br />*Revisionato e testato in novembre 2026* |
 | <img src="https://img.shields.io/badge/Hardhat-302C53?logo=Hardhat&logoColor=white" height=32/> <img src="https://img.shields.io/badge/Solidity-000000?logo=Solidity&logoColor=white" height=32/> | [`📁`](./HardhatSolidity06VotationsV2/) **HardhatSolidity<br />06 - VotationsV2** | progetto di smart-contract per sistema di votazione evoluto rispetto all'esempio `TruffleSmartContract05Votations` è stato sviluppato con HardHat con aggiunta della gestione delle candidature e un sistema migliorato delle votazioni. *Funzionante* con semplice frontend per la gestione delle candidature e delle votazioni.<br/>*Revisionato e testato in luglio 2026* |
 | <img src="https://img.shields.io/badge/Hardhat-302C53?logo=Hardhat&logoColor=white" height=32/> <img src="https://img.shields.io/badge/Solidity-000000?logo=Solidity&logoColor=white" height=32/>| [`📁`](./HardhatSolidity07DocumentValidatorArbitrum/) **HardhatSolidity<br />07 - DocumentValidatorArbitrum** | progetto di smart-contract per sistema di validazione documento onChain: il contenuto di un documento viene salvato come hash on chain da un address emittende e chiunque può verificare la validità del contenuto. Con certificazione e verifica di documenti costruito su blockchain Ethereum compatibile con **Arbitrum**. L'esempio è *funzionante* con semplice frontend per la gestione dei documenti. Sviluppato con Hardhat e rilasciato su TestNet Sepolia. <br/>*Revisionato e testato in agosto 2026* |
 | <img src="https://img.shields.io/badge/Hardhat-302C53?logo=Hardhat&logoColor=white" height=32/> <img src="https://img.shields.io/badge/Solidity-000000?logo=Solidity&logoColor=white" height=32/>| [`📁`](./HardhatSolidity08guessTheNumberGame/) **HardhatSolidity<br />08 - GuessTheNumberGame** | Un gioco blockchain "indovina il numero" multi-partita dove ogni utente può avviare la propria partita e chiunque può provare a indovinare su tutte le partite attive simultaneamente. Disponibile anche su **Testnet Sepolia** (vedi sezione dedicata in questo README) e rilasciato anche con geth su istanza AWS-EC2 con **geth** (vedi sezione dedicata in questo README) <br />*Revisionato e testato in settembre 2026* |
@@ -470,6 +473,46 @@ Una possibilità è eseguire **Geth** su un’istanza AWS-EC2 per rilasciare uno
          npx hardhat run scripts/interact.js --network ec2geth
          ```
       4. In caso di test automatici su rete live o locale Hardhat, è consigliato utilizzare il network helper `evm_increaseTime` ed `evm_mine` forniti da Hardhat Network Helpers per simulare il passaggio del tempo (es. scadenze di 30 giorni per `cancelGame` o finestre di 7 ore per il rate limit).
+
+
+## Changelog
+
+| Data | Descrizione |
+|------|-------------|
+| 2022-10-09 | Creazione repository e migrazione primi esempi |
+| 2024-06-14 | Inizio SoliditySmartContract01, cartella PythonBlockChain rinominata |
+| 2024-07-03 | SmartContract01: installazione OpenZeppelin |
+| 2024-07-14 | SmartContract01: esecuzione su Ganache |
+| 2024-08-30 | SmartContract01: test con Ganache e Parity |
+| 2024-09-11 | Aggiunti SoliditySmartContract02 e SoliditySmartContract03 |
+| 2024-09-18 | Avanzamento sviluppo SoliditySmartContract03 |
+| 2024-11-24 | SoliditySmartContract03 funzionante |
+| 2025-01-28 | Aggiunto FundraiserApplication completo e funzionante |
+| 2025-01-31 | FundraiserApplication: aggiornamento client e test finali |
+| 2025-02-19 | Inizio FundraiserFactory con test completi |
+| 2025-02-26 | FundraiserFactory: client funzionante |
+| 2025-03-15 | Aggiunto SoliditySmartContract04NFT funzionante |
+| 2025-03-21 | Aggiunto SoliditySmartContract05Votations |
+| 2025-03-26 | Aggiunto SoliditySmartContract06VotationsV2 |
+| 2025-04-09 | Aggiunto esempio JavascriptBlockChain mono-nodo |
+| 2025-06-27 | Inizio SoliditySmartContract07 DocumentValidator Arbitrum |
+| 2025-09-08 | Aggiornamento licenza, SmartContract07 funzionante |
+| 2025-09-15 | Aggiunto SoliditySmartContract08 GuessTheNumber multi-partita |
+| 2025-09-29 | Tentativo esecuzione su AWS EC2 geth e Managed Blockchain |
+| 2025-09-29 | Esecuzione su AWS EC2 con geth e Managed Blockchain |
+| 2025-10-06 | GuessTheNumber: primo rilascio su Testnet Sepolia |
+| 2025-12-09 | GuessTheNumber su AWS geth, bozze progetti 09-13 |
+| 2026-01-12 | Migrazione a Debian 13 e dismissione Ganache |
+| 2026-03-30 | Cartelle riorganizzate tra Hardhat e Truffle, inizio Staking |
+| 2026-07-07 | HardhatSolidity06VotationsV2 revisionato e funzionante |
+| 2026-08-03 | HardhatSolidity07DocumentValidatorArbitrum revisionato e funzionante |
+| 2026-09-03 | HardhatSolidity08guessTheNumberGame revisionato |
+| 2026-09-14 | HardhatSolidity09Staking revisionato e testato |
+| 2026-09-24 | HardhatSolidity10DexAmm revisionato e testato |
+| 2026-10-01 | HardhatSolidity11DaoGovernanceToken revisionato e testato |
+| 2026-10-22 | HardhatSolidity12MarketplaceNFT revisionato e testato |
+| 2026-10-29 | HardhatSolidity13LotteryChainlink revisionato e testato |
+| 2026-11-19 | Anchor01VotationsSolana revisionato e testato, CLAUDE.md, changelog README |
 
 
 # &lt; AlNao /&gt;
