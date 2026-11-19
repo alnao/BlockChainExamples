@@ -37,6 +37,15 @@ Per interagire con uno smart contract, puoi aggiungere il codice JavaScript per:
 - Chiamare funzioni di lettura/scrittura e mostrare i risultati nella pagina.
 
 
+## Changelog
+
+| Data | Descrizione |
+|------|-------------|
+| 2022-10-09 | Prima versione esempio Web3 in pagina HTML |
+| 2024-07-14 | Aggiornamento pagina di test Web3 |
+| 2024-11-24 | Aggiornamento dipendenze npm |
+| 2025-09-08 | Aggiornamento licenza nel README |
+
 
 # &lt; AlNao /&gt;
 Tutti i codici sorgente e le informazioni presenti in questo repository sono frutto di un attento e paziente lavoro di sviluppo da parte di AlNao, che si è impegnato a verificarne la correttezza nella misura massima possibile. Qualora parte del codice o dei contenuti sia stato tratto da fonti esterne, la relativa provenienza viene sempre citata, nel rispetto della trasparenza e della proprietà intellettuale. 

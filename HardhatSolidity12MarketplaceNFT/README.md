@@ -441,6 +441,16 @@ Account #0 (Owner)   → Admin: Aggiorna fee, Pausa/Riprendi
 - `SimpleNFTNoRoyalty.sol` è un helper solo per i test, non va deployato in produzione.
 
 
+## Changelog
+
+| Data | Descrizione |
+|------|-------------|
+| 2025-12-09 | Prima bozza: contratti, test e script di deploy |
+| 2026-03-30 | Cartella rinominata in HardhatSolidity12MarketplaceNFT (riorganizzazione repository) |
+| 2026-10-22 | Revisione completa: progetto funzionante e testato |
+| 2026-10-29 | Aggiornamento README |
+
+
 # &lt; AlNao /&gt;
 Tutti i codici sorgente e le informazioni presenti in questo repository sono frutto di un attento e paziente lavoro di sviluppo da parte di AlNao, che si è impegnato a verificarne la correttezza nella misura massima possibile. Qualora parte del codice o dei contenuti sia stato tratto da fonti esterne, la relativa provenienza viene sempre citata, nel rispetto della trasparenza e della proprietà intellettuale. 
 

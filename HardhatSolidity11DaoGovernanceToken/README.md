@@ -114,8 +114,13 @@ Il progetto include una DApp moderna in `client/` con interfaccia dark glassmorp
    Apri il browser su [http://localhost:5174](http://localhost:5174), connetti MetaMask alla rete locale (RPC `http://127.0.0.1:8545`, Chain ID `31337`) e inizia a governare la DAO!
 
 
+## Changelog
 
-
+| Data | Descrizione |
+|------|-------------|
+| 2025-12-09 | Prima bozza: contratti, test e script di deploy |
+| 2026-03-30 | Cartella rinominata in HardhatSolidity11DaoGovernanceToken (riorganizzazione repository) |
+| 2026-10-01 | Revisione completa: progetto funzionante e testato |
 
 
 # &lt; AlNao /&gt;

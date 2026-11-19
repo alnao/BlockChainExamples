@@ -20,6 +20,15 @@ Note:
     - funziona correttamente
 
 
+## Changelog
+
+| Data | Descrizione |
+|------|-------------|
+| 2025-02-19 | Inizio sviluppo smart contract factory con test completi |
+| 2025-02-26 | Client funzionante |
+| 2025-09-08 | Aggiornamento licenza nel README |
+| 2026-03-30 | Cartella rinominata in TruffleFundraiserFactory (riorganizzazione repository) |
+
 
 # &lt; AlNao /&gt;
 Tutti i codici sorgente e le informazioni presenti in questo repository sono frutto di un attento e paziente lavoro di sviluppo da parte di AlNao, che si è impegnato a verificarne la correttezza nella misura massima possibile. Qualora parte del codice o dei contenuti sia stato tratto da fonti esterne, la relativa provenienza viene sempre citata, nel rispetto della trasparenza e della proprietà intellettuale. 
@@ -43,9 +52,3 @@ Il software è distribuito secondo i termini della GNU General Public License v3
 
 
 The software is distributed under the terms of the GNU General Public License v3.0. Use, modification, and redistribution are permitted, provided that any copy or derivative work is released under the same license. The content is provided "as is", without any warranty, express or implied.
-
-
-
-
-
-

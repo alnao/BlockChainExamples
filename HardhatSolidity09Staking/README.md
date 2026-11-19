@@ -123,6 +123,13 @@ Lo script:
 - Se dopo un riavvio del nodo MetaMask resta bloccato su una transazione, vai in *Impostazioni → Avanzate → Cancella dati della scheda attività*: azzera il nonce memorizzato localmente, che altrimenti non coincide più con quello della chain ripartita da zero.
 
 
+## Changelog
+
+| Data | Descrizione |
+|------|-------------|
+| 2025-12-09 | Prima bozza: contratti, test e script di deploy |
+| 2026-03-30 | Cartella rinominata in HardhatSolidity09Staking (riorganizzazione repository) |
+| 2026-09-14 | Revisione completa: progetto funzionante e testato |
 
 
 # &lt; AlNao /&gt;

@@ -100,6 +100,16 @@ Questo progetto è solo a scopo dimostrativo. In un ambiente di produzione:
 - Implementa una gestione più robusta degli errori
 
 
+## Changelog
+
+| Data | Descrizione |
+|------|-------------|
+| 2025-04-09 | Prima versione blockchain mono-nodo con server Express |
+| 2025-04-09 | Aggiornamento collection Postman |
+| 2025-09-08 | Aggiornamento licenza nel README |
+| 2026-03-30 | Cartella rinominata da JavascriptBlockChain (riorganizzazione repository) |
+| 2026-09-11 | Rimossa dipendenza npm crypto (modulo built-in Node) |
+
 
 # &lt; AlNao /&gt;
 Tutti i codici sorgente e le informazioni presenti in questo repository sono frutto di un attento e paziente lavoro di sviluppo da parte di AlNao, che si è impegnato a verificarne la correttezza nella misura massima possibile. Qualora parte del codice o dei contenuti sia stato tratto da fonti esterne, la relativa provenienza viene sempre citata, nel rispetto della trasparenza e della proprietà intellettuale. 

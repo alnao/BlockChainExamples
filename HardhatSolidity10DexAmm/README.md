@@ -142,7 +142,13 @@ Apri l'indirizzo mostrato (solitamente `http://localhost:5173`) nel browser.
 - Se dopo un riavvio del nodo MetaMask resta bloccato su una transazione, vai in *Impostazioni → Avanzate → Cancella dati della scheda attività* per azzerare il nonce memorizzato.
 
 
+## Changelog
 
+| Data | Descrizione |
+|------|-------------|
+| 2025-12-09 | Prima bozza: contratti, test e script di deploy |
+| 2026-03-30 | Cartella rinominata in HardhatSolidity10DexAmm (riorganizzazione repository) |
+| 2026-09-24 | Revisione completa: progetto funzionante e testato |
 
 
 # &lt; AlNao /&gt;

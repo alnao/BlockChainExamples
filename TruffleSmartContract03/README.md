@@ -314,6 +314,16 @@ Il progetto è creato con un contratto (nella cartella contracts), script di cre
     React https://www.youtube.com/watch?v=-ubPPwlUlVk
 
 
+## Changelog
+
+| Data | Descrizione |
+|------|-------------|
+| 2024-09-11 | Prima versione dello smart contract |
+| 2024-09-18 | Avanzamento sviluppo |
+| 2024-11-24 | Progetto funzionante |
+| 2025-09-08 | Aggiornamento licenza nel README |
+| 2026-03-30 | Cartella rinominata in TruffleSmartContract03 (riorganizzazione repository) |
+
 
 # &lt; AlNao /&gt;
 Tutti i codici sorgente e le informazioni presenti in questo repository sono frutto di un attento e paziente lavoro di sviluppo da parte di AlNao, che si è impegnato a verificarne la correttezza nella misura massima possibile. Qualora parte del codice o dei contenuti sia stato tratto da fonti esterne, la relativa provenienza viene sempre citata, nel rispetto della trasparenza e della proprietà intellettuale. 

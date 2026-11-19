@@ -328,6 +328,14 @@ npm run copy-abi
 | Reti supportate | Hardhat local, Sepolia | Configurabile in `wagmi.js` |
 
 
+## Changelog
+
+| Data | Descrizione |
+|------|-------------|
+| 2025-03-26 | Prima versione VotationsV2 con candidature e votazioni avanzate |
+| 2025-09-08 | Aggiornamento licenza nel README |
+| 2026-03-30 | Cartella rinominata in HardhatSolidity06VotationsV2 (riorganizzazione repository) |
+| 2026-07-07 | Revisione completa: progetto funzionante e testato |
 
 
 # &lt; AlNao /&gt;

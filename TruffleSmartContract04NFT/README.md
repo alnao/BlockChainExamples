@@ -60,6 +60,15 @@ Esempio misto creato con l'aiuto di Claude.ia
         ```
 
 
+## Changelog
+
+| Data | Descrizione |
+|------|-------------|
+| 2025-03-15 | Prima versione gestione NFT funzionante |
+| 2025-03-21 | Aggiornamento README |
+| 2025-09-08 | Aggiornamento licenza nel README |
+| 2026-03-30 | Cartella rinominata in TruffleSmartContract04NFT (riorganizzazione repository) |
+
 
 # &lt; AlNao /&gt;
 Tutti i codici sorgente e le informazioni presenti in questo repository sono frutto di un attento e paziente lavoro di sviluppo da parte di AlNao, che si è impegnato a verificarne la correttezza nella misura massima possibile. Qualora parte del codice o dei contenuti sia stato tratto da fonti esterne, la relativa provenienza viene sempre citata, nel rispetto della trasparenza e della proprietà intellettuale. 

@@ -103,6 +103,15 @@ From there, follow the instructions on the hosted React app. It will walk you th
   This Box is a sweet combo of [Truffle](https://trufflesuite.com) and [Webpack](https://webpack.js.org). Either one would be a great place to start!
 
 
+## Changelog
+
+| Data | Descrizione |
+|------|-------------|
+| 2025-01-28 | Prima versione raccolta fondi completa e funzionante |
+| 2025-01-31 | Aggiornamento client e test finali |
+| 2025-09-08 | Aggiornamento licenza nel README |
+| 2026-03-30 | Cartella rinominata in TruffleFundraiserApplication (riorganizzazione repository) |
+
 
 # &lt; AlNao /&gt;
 Tutti i codici sorgente e le informazioni presenti in questo repository sono frutto di un attento e paziente lavoro di sviluppo da parte di AlNao, che si è impegnato a verificarne la correttezza nella misura massima possibile. Qualora parte del codice o dei contenuti sia stato tratto da fonti esterne, la relativa provenienza viene sempre citata, nel rispetto della trasparenza e della proprietà intellettuale. 

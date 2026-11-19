@@ -159,14 +159,40 @@ Per eseguire il deploy su una rete Ethereum privata con Geth avviata su istanza 
 
 ---
 
+
+## Changelog
+
+| Data | Descrizione |
+|------|-------------|
+| 2025-09-15 | Prima versione gioco GuessTheNumber multi-partita |
+| 2025-09-29 | Configurazione rete geth su AWS EC2 (primo tentativo) |
+| 2025-09-29 | Esecuzione su AWS EC2 con geth |
+| 2025-10-06 | Primo rilascio su Testnet Sepolia |
+| 2025-12-09 | Modifica file token e test su AWS geth |
+| 2026-01-12 | Dipendenze aggiornate dopo migrazione Debian 13, senza Ganache |
+| 2026-03-30 | Cartella rinominata in HardhatSolidity08guessTheNumberGame (riorganizzazione repository) |
+| 2026-09-03 | Revisione completa del progetto |
+
+
 # &lt; AlNao /&gt;
 Tutti i codici sorgente e le informazioni presenti in questo repository sono frutto di un attento e paziente lavoro di sviluppo da parte di AlNao, che si è impegnato a verificarne la correttezza nella misura massima possibile. Qualora parte del codice o dei contenuti sia stato tratto da fonti esterne, la relativa provenienza viene sempre citata, nel rispetto della trasparenza e della proprietà intellettuale. 
 
+
 Alcuni contenuti e porzioni di codice presenti in questo repository sono stati realizzati anche grazie al supporto di strumenti di intelligenza artificiale, il cui contributo ha permesso di arricchire e velocizzare la produzione del materiale. Ogni informazione e frammento di codice è stato comunque attentamente verificato e validato, con l’obiettivo di garantire la massima qualità e affidabilità dei contenuti offerti. 
+
 
 Per ulteriori dettagli, approfondimenti o richieste di chiarimento, si invita a consultare il sito [AlNao.it](https://www.alnao.it/).
 
+
 ## License
-Made with ❤️ by <a href="https://www.alnao.it">AlNao</a> &bull; Public projects <a href="https://www.gnu.org/licenses/gpl-3.0"><img src="https://img.shields.io/badge/License-GPL%20v3-blue?style=plastic" alt="GPL v3" /></a> *Free Software!*
+Made with ❤️ by <a href="https://www.alnao.it">AlNao</a>
+&bull; 
+Public projects 
+<a href="https://www.gnu.org/licenses/gpl-3.0"  valign="middle"> <img src="https://img.shields.io/badge/License-GPL%20v3-blue?style=plastic" alt="GPL v3" valign="middle" /></a>
+*Free Software!*
+
 
 Il software è distribuito secondo i termini della GNU General Public License v3.0. L'uso, la modifica e la ridistribuzione sono consentiti, a condizione che ogni copia o lavoro derivato sia rilasciato con la stessa licenza. Il contenuto è fornito "così com'è", senza alcuna garanzia, esplicita o implicita.
+
+
+The software is distributed under the terms of the GNU General Public License v3.0. Use, modification, and redistribution are permitted, provided that any copy or derivative work is released under the same license. The content is provided "as is", without any warranty, express or implied.

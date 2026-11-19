@@ -108,6 +108,15 @@ npm start
 ```
 
 
+## Changelog
+
+| Data | Descrizione |
+|------|-------------|
+| 2025-03-21 | Prima versione votazioni con campagne e diritti di voto |
+| 2025-09-08 | Aggiornamento licenza nel README |
+| 2026-03-30 | Cartella rinominata in TruffleSmartContract05Votations (riorganizzazione repository) |
+
+
 # &lt; AlNao /&gt;
 Tutti i codici sorgente e le informazioni presenti in questo repository sono frutto di un attento e paziente lavoro di sviluppo da parte di AlNao, che si è impegnato a verificarne la correttezza nella misura massima possibile. Qualora parte del codice o dei contenuti sia stato tratto da fonti esterne, la relativa provenienza viene sempre citata, nel rispetto della trasparenza e della proprietà intellettuale. 
 

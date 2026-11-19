@@ -164,7 +164,18 @@ Ispirato al capitolo 4 del libro "Hands-On Smart Contract Development with Solid
 	truffle migrate --network goerli
 	```
 	*error*
-	
+
+
+## Changelog
+
+| Data | Descrizione |
+|------|-------------|
+| 2024-06-14 | Inizio sviluppo primo smart contract Greeter |
+| 2024-07-03 | Installazione OpenZeppelin |
+| 2024-07-14 | Esecuzione su Ganache |
+| 2024-08-30 | Test con Ganache e Parity |
+| 2025-09-08 | Aggiornamento licenza nel README |
+| 2026-03-30 | Cartella rinominata in TruffleSmartContract01 (riorganizzazione repository) |
 
 
 # &lt; AlNao /&gt;

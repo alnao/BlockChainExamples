@@ -1,30 +1,88 @@
-# SolidityFlask1example
-SolidityFlask1example
+# Python Blockchain
 
-## BlockchainUnSoloNodo.py
-esempio con un solo blocco, only a server, not centralized
+Implementazione didattica di una blockchain in Python con Proof of Work, REST API (Flask) e supporto multi-nodo.
 
-### TO run
-```
-$ py blockchain.py 5000
+## 📁 Struttura
+
+| File | Descrizione |
+|------|-------------|
+| `blockchain.py` | Blockchain multi-nodo completa con PoW, transazioni, mining e sincronizzazione tra nodi |
+| `blockchainUnSoloNodo.py` | Versione semplificata mono-nodo |
+| `test_blockchain.py` | Test unitari per la classe Blockchain |
+| `requirements.txt` | Dipendenze Python |
+
+## 🚀 Guida rapida
+
+```bash
+# Installare le dipendenze
+pip install -r requirements.txt
+
+# Avviare il nodo (porta 5000)
+python3 blockchain.py 5000
+
+# Avviare un secondo nodo (porta 5001) per testare il multi-nodo
+python3 blockchain.py 5001
 ```
 
-Per usare
-```
-$ curl http://localhost:5000/blockchain
+## 📡 API REST
+
+| Endpoint | Metodo | Descrizione |
+|----------|--------|-------------|
+| `/blockchain` | GET | Restituisce l'intera blockchain |
+| `/mine` | GET | Esegue il mining di un nuovo blocco |
+| `/transactions/new` | POST | Aggiunge una nuova transazione |
+| `/nodes/add_nodes` | POST | Registra nodi peer |
+| `/nodes/sync` | GET | Sincronizza la catena con i nodi registrati |
+
+### Esempi
+
+```bash
+# Visualizzare la blockchain
+curl http://localhost:5000/blockchain
+
+# Minare un nuovo blocco
+curl http://localhost:5000/mine
+
+# Inviare una transazione
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"sender": "Alice", "recipient": "Bob", "amount": 5}' \
+  "http://localhost:5000/transactions/new"
+
+# Registrare un nodo peer
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"nodes": ["http://localhost:5001"]}' \
+  "http://localhost:5000/nodes/add_nodes"
+
+# Sincronizzare con la catena più lunga
+curl http://localhost:5000/nodes/sync
 ```
 
-Per minare
-```
-$ curl http://localhost:5000/mine
+## 🧪 Test
+
+```bash
+# Eseguire i test unitari
+python3 -m unittest test_blockchain -v
+
+# oppure con pytest
+python3 -m pytest test_blockchain.py -v
 ```
 
-Per eseguire una trasazione in post
-```
-#   $ curl -X POST -H "Content-Type: application/json" -d '{"sender": "04d0988bfa799f7d7ef9ab3de97ef481", "recipient":"cd0f75d2367ad456607647edde665d6f", "amount": 5}' "http://localhost:5000/transactions/new"
-```
+## 📚 Concetti implementati
+- **Proof of Work (PoW)**: algoritmo di consenso con target di difficoltà `"0000"`.
+- **Hashing SHA-256**: ogni blocco è identificato dal suo hash.
+- **Catena immutabile**: ogni blocco contiene l'hash del blocco precedente.
+- **Validazione della catena**: verifica dell'integrità tramite hash e nonce.
+- **Consenso multi-nodo**: sincronizzazione con la catena più lunga tra i nodi registrati.
 
 
+## Changelog
+
+| Data | Descrizione |
+|------|-------------|
+| 2022-10-09 | Prima versione blockchain Python con Flask |
+| 2024-06-14 | Cartella rinominata da SolidityExample1Flask, README aggiunto |
+| 2025-09-08 | Aggiornamento licenza nel README |
+| 2026-09-11 | Aggiunti test unitari e requirements, README riscritto |
 
 
 # &lt; AlNao /&gt;
